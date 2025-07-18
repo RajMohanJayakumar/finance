@@ -36,6 +36,25 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   })
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
+  // Initialize from URL parameters on mount
+  useEffect(() => {
+    const urlParams = new URLSearchParams(location.search)
+    const newInputs = { ...inputs }
+    let hasChanges = false
+    
+    Object.keys(inputs).forEach(key => {
+      const value = urlParams.get(key)
+      if (value && value !== inputs[key]) {
+        newInputs[key] = value
+        hasChanges = true
+      }
+    })
+    
+    if (hasChanges) {
+      setInputs(newInputs)
+    }
+  }, []) // Only run on mount
+
   // PWA Install functionality
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
@@ -63,7 +82,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
     const newURL = `${location.pathname}?${params.toString()}`
     navigate(newURL, { replace: true })
-  }, [location.pathname, navigate])
+  }, [navigate])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -81,7 +100,13 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
 
     setInputs(newInputs)
-    updateURL(newInputs)
+    
+    // Debounce URL updates to prevent excessive navigation
+    const timeoutId = setTimeout(() => {
+      updateURL(newInputs)
+    }, 300)
+    
+    return () => clearTimeout(timeoutId)
   }
 
   const calculateSIP = useCallback(() => {
@@ -168,13 +193,29 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
     setResults(calculatedResults)
     setYearlyBreakdown(breakdown)
-  }, [inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.calculationType])
+  }, [
+    inputs.monthlyInvestment, 
+    inputs.maturityAmount, 
+    inputs.annualReturn, 
+    inputs.timePeriodYears, 
+    inputs.timePeriodMonths, 
+    inputs.stepUpPercentage, 
+    inputs.calculationType
+  ])
 
   useEffect(() => {
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
       calculateSIP()
     }
-  }, [calculateSIP])
+  }, [
+    inputs.monthlyInvestment, 
+    inputs.maturityAmount, 
+    inputs.annualReturn, 
+    inputs.timePeriodYears, 
+    inputs.timePeriodMonths, 
+    inputs.stepUpPercentage, 
+    inputs.calculationType
+  ])
 
   const addToCompare = () => {
     if (results) {
