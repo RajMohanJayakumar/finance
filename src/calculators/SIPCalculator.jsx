@@ -179,7 +179,15 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
       calculateSIP()
     }
-  }, [calculateSIP])
+  }, [
+    inputs.monthlyInvestment, 
+    inputs.maturityAmount, 
+    inputs.annualReturn, 
+    inputs.timePeriodYears, 
+    inputs.timePeriodMonths, 
+    inputs.stepUpPercentage, 
+    inputs.calculationType
+  ])
 
   const addToCompare = () => {
     if (results) {
