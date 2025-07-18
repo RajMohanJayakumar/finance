@@ -5,6 +5,7 @@ import './App.css'
 
 // Calculator Components
 import SIPCalculator from './calculators/SIPCalculator'
+import SWPCalculator from './calculators/SWPCalculator'
 import EMICalculator from './calculators/EMICalculator'
 import FDCalculator from './calculators/FDCalculator'
 import TaxCalculator from './calculators/TaxCalculator'
@@ -137,6 +138,8 @@ function CalculatorPage() {
     switch(id) {
       case 'sip':
         return <SIPCalculator />
+      case 'swp':
+        return <SWPCalculator />
       case 'emi':
       case 'mortgage':
       case 'personal-loan':

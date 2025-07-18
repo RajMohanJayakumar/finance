@@ -5,6 +5,7 @@ const urlsToCache = [
   '/src/App.jsx',
   '/src/App.css',
   '/src/calculators/SIPCalculator.jsx',
+  '/src/calculators/SWPCalculator.jsx',
   '/src/calculators/EMICalculator.jsx',
   '/src/calculators/FDCalculator.jsx',
   '/src/calculators/TaxCalculator.jsx',
