@@ -158,14 +158,21 @@ export default function SIPCalculator() {
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
       calculateSIP()
     }
-  }, [calculateSIP])
+  }, [inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.calculationType])
 
   const addToCompare = () => {
     if (results) {
       const comparison = {
         id: Date.now(),
-        ...inputs,
-        ...results,
+        monthlyInvestment: inputs.monthlyInvestment || results.monthlyInvestment,
+        annualReturn: inputs.annualReturn,
+        timePeriodYears: inputs.timePeriodYears,
+        timePeriodMonths: inputs.timePeriodMonths,
+        stepUpPercentage: inputs.stepUpPercentage,
+        country: inputs.country,
+        futureValue: results.futureValue,
+        totalInvested: results.totalInvested,
+        totalGains: results.totalGains,
         timestamp: new Date().toLocaleString()
       }
       setComparisons(prev => [...prev, comparison])

@@ -1,6 +1,5 @@
 
 import React, { useState } from 'react'
-import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom'
 import './App.css'
 
 // Calculator Components
@@ -13,44 +12,69 @@ import CAGRCalculator from './calculators/CAGRCalculator'
 
 const calculators = {
   loans: [
-    { id: 'emi', name: 'EMI Calculator', description: 'Calculate loan EMI and reverse EMI', icon: '🏠' },
-    { id: 'mortgage', name: 'Mortgage Calculator', description: 'Home loan calculator', icon: '🏡' },
-    { id: 'personal-loan', name: 'Personal Loan', description: 'Personal loan calculator', icon: '💳' }
+    { id: 'emi', name: 'EMI Calculator', description: 'Calculate loan EMI and reverse EMI', icon: '🏠', component: EMICalculator },
+    { id: 'mortgage', name: 'Mortgage Calculator', description: 'Home loan calculator', icon: '🏡', component: EMICalculator },
+    { id: 'personal-loan', name: 'Personal Loan', description: 'Personal loan calculator', icon: '💳', component: EMICalculator }
   ],
   savings: [
-    { id: 'fd', name: 'Fixed Deposit', description: 'FD maturity calculator', icon: '🏦' },
-    { id: 'rd', name: 'Recurring Deposit', description: 'RD maturity calculator', icon: '💰' },
-    { id: 'ppf', name: 'PPF Calculator', description: 'Public Provident Fund calculator', icon: '🛡️' }
+    { id: 'fd', name: 'Fixed Deposit', description: 'FD maturity calculator', icon: '🏦', component: FDCalculator },
+    { id: 'rd', name: 'Recurring Deposit', description: 'RD maturity calculator', icon: '💰', component: FDCalculator },
+    { id: 'ppf', name: 'PPF Calculator', description: 'Public Provident Fund calculator', icon: '🛡️', component: FDCalculator }
   ],
   mutual_funds: [
-    { id: 'sip', name: 'SIP Calculator', description: 'Systematic Investment Plan calculator', icon: '📈' },
-    { id: 'swp', name: 'SWP Calculator', description: 'Systematic Withdrawal Plan calculator', icon: '📉' },
-    { id: 'cagr', name: 'CAGR Calculator', description: 'Compound Annual Growth Rate calculator', icon: '📊' }
+    { id: 'sip', name: 'SIP Calculator', description: 'Systematic Investment Plan calculator', icon: '📈', component: SIPCalculator },
+    { id: 'swp', name: 'SWP Calculator', description: 'Systematic Withdrawal Plan calculator', icon: '📉', component: SWPCalculator },
+    { id: 'cagr', name: 'CAGR Calculator', description: 'Compound Annual Growth Rate calculator', icon: '📊', component: CAGRCalculator }
   ],
   tax: [
-    { id: 'income-tax', name: 'Income Tax Calculator', description: 'Calculate income tax liability', icon: '🧾' },
-    { id: 'capital-gains', name: 'Capital Gains Tax', description: 'Calculate capital gains tax', icon: '💹' }
+    { id: 'income-tax', name: 'Income Tax Calculator', description: 'Calculate income tax liability', icon: '🧾', component: TaxCalculator },
+    { id: 'capital-gains', name: 'Capital Gains Tax', description: 'Calculate capital gains tax', icon: '💹', component: TaxCalculator }
   ]
 }
 
 function Header() {
   return (
     <header className="header-gradient text-white p-6 shadow-2xl">
-      <div className="max-w-6xl mx-auto">
-        <Link to="/" className="block">
-          <h1 className="text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
-            💰 Universal Finance Calculator
-          </h1>
-          <p className="text-blue-100 text-lg">Your one-stop solution for all financial calculations</p>
-        </Link>
+      <div className="max-w-6xl mx-auto text-center">
+        <h1 className="text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
+          💰 Universal Finance Calculator
+        </h1>
+        <p className="text-slate-100 text-lg">Your one-stop solution for all financial calculations</p>
       </div>
     </header>
   )
 }
 
-function HomePage() {
+export default function App() {
   const [searchTerm, setSearchTerm] = useState('')
+  const [activeCalculator, setActiveCalculator] = useState(null)
+  const [collapsedCategories, setCollapsedCategories] = useState({
+    loans: false,
+    savings: false,
+    mutual_funds: false,
+    tax: false
+  })
   const [shareUrl, setShareUrl] = useState('')
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
+
+  // PWA Install functionality
+  React.useEffect(() => {
+    const handleBeforeInstallPrompt = (e) => {
+      e.preventDefault()
+      setDeferredPrompt(e)
+    }
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
+  }, [])
+
+  const handlePWAInstall = async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt()
+      const { outcome } = await deferredPrompt.userChoice
+      setDeferredPrompt(null)
+    }
+  }
 
   const generateShareUrl = () => {
     const currentUrl = window.location.origin
@@ -58,14 +82,66 @@ function HomePage() {
     navigator.clipboard.writeText(currentUrl)
   }
 
+  const toggleCategory = (category) => {
+    setCollapsedCategories(prev => ({
+      ...prev,
+      [category]: !prev[category]
+    }))
+  }
+
+  const openCalculator = (calculator) => {
+    setActiveCalculator(calculator)
+  }
+
+  const closeCalculator = () => {
+    setActiveCalculator(null)
+  }
+
+  const shareCalculation = () => {
+    const shareData = {
+      title: 'Universal Finance Calculator',
+      text: 'Check out this comprehensive financial calculator suite!',
+      url: window.location.href
+    }
+
+    if (navigator.share) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(window.location.href)
+      alert('Link copied to clipboard!')
+    }
+  }
+
+  if (activeCalculator) {
+    const CalculatorComponent = activeCalculator.component
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-zinc-50">
+        <Header />
+        <div className="max-w-7xl mx-auto p-4">
+          <div className="mb-6">
+            <button
+              onClick={closeCalculator}
+              className="bg-gradient-to-r from-slate-600 to-stone-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-slate-700 hover:to-stone-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
+            >
+              ← Back to Calculators
+            </button>
+          </div>
+          <CalculatorComponent />
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-zinc-50">
+      <Header />
+      
       <div className="max-w-6xl mx-auto p-6 lg:p-8">
         <div className="text-center mb-12">
-          <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-6">
+          <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-600 to-stone-600 bg-clip-text text-transparent mb-6">
             Choose Your Calculator
           </h2>
-          <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+          <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
             Calculate loans, savings, mutual funds, and taxes with our comprehensive financial tools
           </p>
           
@@ -76,7 +152,7 @@ function HomePage() {
                 placeholder="🔍 Search calculators..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-6 py-4 border-2 border-gray-200 rounded-2xl w-80 text-lg input-focus"
+                className="px-6 py-4 border-2 border-slate-200 rounded-2xl w-80 text-lg input-focus bg-white"
               />
             </div>
             <button
@@ -85,112 +161,76 @@ function HomePage() {
             >
               🔗 Share App
             </button>
+            {deferredPrompt && (
+              <button
+                onClick={handlePWAInstall}
+                className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg"
+              >
+                📱 Install App
+              </button>
+            )}
           </div>
           
           {shareUrl && (
-            <div className="bg-green-100 border-2 border-green-400 text-green-700 px-6 py-4 rounded-2xl mb-8 max-w-2xl mx-auto">
+            <div className="bg-emerald-100 border-2 border-emerald-400 text-emerald-700 px-6 py-4 rounded-2xl mb-8 max-w-2xl mx-auto">
               ✅ URL copied to clipboard: {shareUrl}
             </div>
           )}
         </div>
 
-        <div className="grid gap-8">
+        <div className="grid gap-6">
           {Object.entries(calculators).map(([category, items]) => (
-            <div key={category} className="calculator-card rounded-2xl p-8">
-              <h3 className="text-3xl font-bold mb-6 capitalize text-gray-800">
-                {category.replace('_', ' ')} Calculators
-              </h3>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {items
-                  .filter(item => 
-                    searchTerm === '' || 
-                    item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    item.description.toLowerCase().includes(searchTerm.toLowerCase())
-                  )
-                  .map(item => (
-                  <Link
-                    key={item.id}
-                    to={`/calculator/${category}/${item.id}`}
-                    className="block p-6 border-2 border-gray-200 rounded-2xl hover:border-blue-300 card-hover transition-all bg-white"
-                  >
-                    <div className="text-4xl mb-4">{item.icon}</div>
-                    <h4 className="font-bold text-xl mb-3 text-gray-800">{item.name}</h4>
-                    <p className="text-gray-600">{item.description}</p>
-                  </Link>
-                ))}
-              </div>
+            <div key={category} className="bg-white rounded-2xl shadow-xl overflow-hidden">
+              <button
+                onClick={() => toggleCategory(category)}
+                className="w-full p-6 bg-gradient-to-r from-slate-600 to-stone-600 text-white font-semibold text-left flex justify-between items-center hover:from-slate-700 hover:to-stone-700 transition-all"
+              >
+                <span className="text-2xl capitalize">
+                  {category.replace('_', ' ')} Calculators
+                </span>
+                <span className="text-2xl">
+                  {collapsedCategories[category] ? '▼' : '▲'}
+                </span>
+              </button>
+              
+              {!collapsedCategories[category] && (
+                <div className="p-6">
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {items
+                      .filter(item => 
+                        searchTerm === '' || 
+                        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                      )
+                      .map(item => (
+                      <button
+                        key={item.id}
+                        onClick={() => openCalculator(item)}
+                        className="block p-6 border-2 border-slate-200 rounded-2xl hover:border-slate-300 card-hover transition-all bg-white text-left w-full"
+                      >
+                        <div className="text-4xl mb-4">{item.icon}</div>
+                        <h4 className="font-bold text-xl mb-3 text-slate-800">{item.name}</h4>
+                        <p className="text-slate-600">{item.description}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </div>
-    </div>
-  )
-}
 
-function CalculatorPage() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const pathParts = location.pathname.split('/')
-  const category = pathParts[2]
-  const id = pathParts[3]
-
-  const renderCalculator = () => {
-    switch(id) {
-      case 'sip':
-        return <SIPCalculator />
-      case 'swp':
-        return <SWPCalculator />
-      case 'emi':
-      case 'mortgage':
-      case 'personal-loan':
-        return <EMICalculator />
-      case 'fd':
-      case 'rd':
-      case 'ppf':
-        return <FDCalculator />
-      case 'income-tax':
-      case 'capital-gains':
-        return <TaxCalculator />
-      case 'cagr':
-        return <CAGRCalculator />
-      default:
-        return (
-          <div className="max-w-4xl mx-auto p-8 text-center">
-            <div className="text-8xl mb-6">🚧</div>
-            <h2 className="text-4xl font-bold mb-6 text-gray-800">Calculator Coming Soon</h2>
-            <p className="text-xl text-gray-600 mb-8">This calculator is under development.</p>
-            <Link to="/" className="btn-primary text-white px-8 py-4 rounded-2xl font-semibold">
-              ← Back to Home
-            </Link>
-          </div>
-        )
-    }
-  }
-
-  return (
-    <div className="min-h-screen">
-      <div className="bg-white shadow-md p-4">
-        <div className="max-w-6xl mx-auto">
-          <Link to="/" className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-2 transition-colors">
-            ← Back to Home
-          </Link>
+        {/* Share Section */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 text-center mt-8">
+          <h3 className="text-xl font-bold mb-4 text-slate-800">📤 Share This App</h3>
+          <button
+            onClick={shareCalculation}
+            className="bg-gradient-to-r from-slate-600 to-stone-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-slate-700 hover:to-stone-700 transition-all transform hover:scale-105 shadow-lg"
+          >
+            🔗 Share with Friends
+          </button>
         </div>
       </div>
-      {renderCalculator()}
     </div>
-  )
-}
-
-export default function App() {
-  return (
-    <Router>
-      <div className="min-h-screen">
-        <Header />
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/calculator/:category/:id" element={<CalculatorPage />} />
-        </Routes>
-      </div>
-    </Router>
   )
 }
