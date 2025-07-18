@@ -3,20 +3,27 @@ import React, { useState, useEffect } from 'react'
 
 export default function FDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   
-  const [inputs, setInputs] = useState({
+  const initialInputs = {
     principal: '',
     interestRate: '',
     timePeriod: '',
     compoundingFrequency: '4', // Quarterly
     maturityAmount: '',
     calculationType: 'maturity' // maturity, reverse-maturity
-  })
+  }
+
+  const [inputs, setInputs] = useState(initialInputs)
   
   const [results, setResults] = useState(null)
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
     setInputs(newInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(initialInputs)
+    setResults(null)
   }
 
   const calculateFD = () => {
@@ -141,6 +148,15 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
               <option value="4">Quarterly</option>
               <option value="12">Monthly</option>
             </select>
+          </div>
+
+          <div className="mt-6">
+            <button
+              onClick={handleReset}
+              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+            >
+              🔄 Reset
+            </button>
           </div>
         </div>
 

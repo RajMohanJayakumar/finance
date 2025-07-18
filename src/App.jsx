@@ -16,10 +16,15 @@ import CAGRCalculator from './calculators/CAGRCalculator'
 import Header from './components/Header'
 import ComparisonPanel from './components/ComparisonPanel'
 import PDFExport from './components/PDFExport'
+import FloatingComparisonButton from './components/FloatingComparisonButton'
+
+// Context
+import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
 
 const calculatorData = {
   loans: {
-    title: "💰 Loans",
+    title: "Loans",
+    icon: "💰",
     color: "blue",
     calculators: [
       { id: 'emi', name: 'EMI Calculator', icon: '🏠', component: EMICalculator, description: 'Calculate loan EMI and repayment schedule' },
@@ -28,8 +33,9 @@ const calculatorData = {
     ]
   },
   savings: {
-    title: "🏦 Savings",
-    color: "green", 
+    title: "Savings",
+    icon: "🏦",
+    color: "green",
     calculators: [
       { id: 'fd', name: 'Fixed Deposit', icon: '🏦', component: FDCalculator, description: 'Calculate FD maturity amount and returns' },
       { id: 'rd', name: 'Recurring Deposit', icon: '💰', component: FDCalculator, description: 'RD maturity calculator' },
@@ -37,7 +43,8 @@ const calculatorData = {
     ]
   },
   mutual_funds: {
-    title: "📈 Mutual Funds", 
+    title: "Mutual Funds",
+    icon: "📈",
     color: "purple",
     calculators: [
       { id: 'sip', name: 'SIP Calculator', icon: '📈', component: SIPCalculator, description: 'Systematic Investment Plan calculator' },
@@ -46,7 +53,8 @@ const calculatorData = {
     ]
   },
   tax: {
-    title: "🧾 Tax",
+    title: "Tax",
+    icon: "🧾",
     color: "red",
     calculators: [
       { id: 'income-tax', name: 'Income Tax', icon: '🧾', component: TaxCalculator, description: 'Calculate income tax liability' },
@@ -120,10 +128,17 @@ export default function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
+    <ComparisonProvider>
+      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 relative overflow-hidden">
+        {/* Background Elements */}
+        <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-purple-400 to-pink-400 rounded-full opacity-10 blur-3xl"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-full opacity-10 blur-3xl"></div>
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-br from-emerald-400 to-cyan-400 rounded-full opacity-5 blur-3xl"></div>
+        </div>
       <Header />
       
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Main Tabs */}
         <Tabs 
           selectedIndex={mainTabIndex} 
@@ -131,18 +146,21 @@ export default function App() {
           className="apple-tabs"
         >
           <div className="mb-8">
-            <TabList className="flex justify-center space-x-2 bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-gray-200/50 max-w-2xl mx-auto">
+            <TabList className="flex justify-center space-x-3 bg-white/90 backdrop-blur-xl p-3 rounded-3xl shadow-2xl border border-white/20 max-w-3xl mx-auto">
               {Object.entries(calculatorData).map(([key, category]) => (
-                <Tab 
+                <Tab
                   key={key}
-                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer outline-none ${
-                    category.color === 'blue' ? 'focus:bg-blue-500 focus:text-white react-tabs__tab--selected:bg-blue-500 react-tabs__tab--selected:text-white' :
-                    category.color === 'green' ? 'focus:bg-green-500 focus:text-white react-tabs__tab--selected:bg-green-500 react-tabs__tab--selected:text-white' :
-                    category.color === 'purple' ? 'focus:bg-purple-500 focus:text-white react-tabs__tab--selected:bg-purple-500 react-tabs__tab--selected:text-white' :
-                    'focus:bg-red-500 focus:text-white react-tabs__tab--selected:bg-red-500 react-tabs__tab--selected:text-white'
-                  } hover:bg-gray-100 text-gray-600`}
+                  className={`px-8 py-4 rounded-2xl font-bold transition-all duration-500 cursor-pointer outline-none transform hover:scale-105 ${
+                    category.color === 'blue' ? 'focus:bg-gradient-to-r focus:from-blue-500 focus:to-blue-600 focus:text-white focus:shadow-xl react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-blue-500 react-tabs__tab--selected:to-blue-600 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl' :
+                    category.color === 'green' ? 'focus:bg-gradient-to-r focus:from-emerald-500 focus:to-emerald-600 focus:text-white focus:shadow-xl react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-emerald-500 react-tabs__tab--selected:to-emerald-600 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl' :
+                    category.color === 'purple' ? 'focus:bg-gradient-to-r focus:from-purple-500 focus:to-purple-600 focus:text-white focus:shadow-xl react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-purple-500 react-tabs__tab--selected:to-purple-600 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl' :
+                    'focus:bg-gradient-to-r focus:from-red-500 focus:to-red-600 focus:text-white focus:shadow-xl react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-red-500 react-tabs__tab--selected:to-red-600 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl'
+                  } hover:bg-gradient-to-r hover:from-gray-100 hover:to-gray-200 text-gray-700 hover:text-gray-800 hover:shadow-lg`}
                 >
-                  {category.title}
+                  <span className="flex items-center space-x-2">
+                    <span className="text-xl">{category.icon}</span>
+                    <span>{category.title}</span>
+                  </span>
                 </Tab>
               ))}
             </TabList>
@@ -157,19 +175,22 @@ export default function App() {
                 className="sub-tabs"
               >
                 <div className="mb-6">
-                  <TabList className="flex justify-center flex-wrap gap-3 mb-8">
+                  <TabList className="flex justify-center flex-wrap gap-4 mb-8">
                     {category.calculators.map((calc, index) => (
-                      <Tab 
+                      <Tab
                         key={calc.id}
-                        className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer outline-none border-2 border-transparent ${
-                          category.color === 'blue' ? 'hover:border-blue-200 react-tabs__tab--selected:bg-blue-50 react-tabs__tab--selected:border-blue-500 react-tabs__tab--selected:text-blue-700' :
-                          category.color === 'green' ? 'hover:border-green-200 react-tabs__tab--selected:bg-green-50 react-tabs__tab--selected:border-green-500 react-tabs__tab--selected:text-green-700' :
-                          category.color === 'purple' ? 'hover:border-purple-200 react-tabs__tab--selected:bg-purple-50 react-tabs__tab--selected:border-purple-500 react-tabs__tab--selected:text-purple-700' :
-                          'hover:border-red-200 react-tabs__tab--selected:bg-red-50 react-tabs__tab--selected:border-red-500 react-tabs__tab--selected:text-red-700'
-                        } bg-white shadow-sm hover:shadow-md text-gray-600`}
+                        className={`group flex items-center space-x-3 px-6 py-4 rounded-2xl font-semibold transition-all duration-300 cursor-pointer outline-none border-2 border-transparent transform hover:scale-105 ${
+                          category.color === 'blue' ? 'hover:border-blue-300 hover:shadow-blue-200/50 react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-blue-500 react-tabs__tab--selected:to-blue-600 react-tabs__tab--selected:border-blue-500 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl react-tabs__tab--selected:shadow-blue-500/30' :
+                          category.color === 'green' ? 'hover:border-emerald-300 hover:shadow-emerald-200/50 react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-emerald-500 react-tabs__tab--selected:to-emerald-600 react-tabs__tab--selected:border-emerald-500 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl react-tabs__tab--selected:shadow-emerald-500/30' :
+                          category.color === 'purple' ? 'hover:border-purple-300 hover:shadow-purple-200/50 react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-purple-500 react-tabs__tab--selected:to-purple-600 react-tabs__tab--selected:border-purple-500 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl react-tabs__tab--selected:shadow-purple-500/30' :
+                          'hover:border-red-300 hover:shadow-red-200/50 react-tabs__tab--selected:bg-gradient-to-r react-tabs__tab--selected:from-red-500 react-tabs__tab--selected:to-red-600 react-tabs__tab--selected:border-red-500 react-tabs__tab--selected:text-white react-tabs__tab--selected:shadow-xl react-tabs__tab--selected:shadow-red-500/30'
+                        } bg-white/80 backdrop-blur-sm shadow-lg hover:shadow-xl text-gray-700 hover:bg-white`}
                       >
-                        <span className="text-lg">{calc.icon}</span>
-                        <span>{calc.name}</span>
+                        <span className="text-xl group-hover:scale-110 transition-transform duration-300">{calc.icon}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold">{calc.name}</span>
+                          <span className="text-xs opacity-70 font-normal">{calc.description}</span>
+                        </div>
                       </Tab>
                     ))}
                   </TabList>
@@ -177,25 +198,37 @@ export default function App() {
 
                 {category.calculators.map((calc, calcIndex) => (
                   <TabPanel key={calc.id}>
-                    <div className="bg-white rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
-                      <div className={`p-6 ${
-                        category.color === 'blue' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
-                        category.color === 'green' ? 'bg-gradient-to-r from-green-500 to-green-600' :
-                        category.color === 'purple' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
-                        'bg-gradient-to-r from-red-500 to-red-600'
-                      } text-white`}>
-                        <div className="flex items-center justify-between">
+                    <div className="bg-white/95 backdrop-blur-xl rounded-3xl shadow-2xl border border-white/20 overflow-hidden relative">
+                      {/* Decorative Elements */}
+                      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none"></div>
+                      <div className={`relative p-8 ${
+                        category.color === 'blue' ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700' :
+                        category.color === 'green' ? 'bg-gradient-to-br from-emerald-500 via-emerald-600 to-emerald-700' :
+                        category.color === 'purple' ? 'bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700' :
+                        'bg-gradient-to-br from-red-500 via-red-600 to-red-700'
+                      } text-white overflow-hidden`}>
+                        {/* Background Pattern */}
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full transform translate-x-16 -translate-y-16"></div>
+                          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full transform -translate-x-12 translate-y-12"></div>
+                        </div>
+                        <div className="relative z-10 flex items-center justify-between">
                           <div>
-                            <h2 className="text-2xl font-bold flex items-center space-x-2">
-                              <span>{calc.icon}</span>
-                              <span>{calc.name}</span>
+                            <h2 className="text-3xl font-bold flex items-center space-x-3 mb-2">
+                              <span className="text-4xl">{calc.icon}</span>
+                              <span className="bg-gradient-to-r from-white to-white/90 bg-clip-text text-transparent">{calc.name}</span>
                             </h2>
-                            <p className="text-white/90 mt-1">{calc.description}</p>
+                            <p className="text-white/90 text-lg font-medium">{calc.description}</p>
+                            <div className="mt-3 flex items-center space-x-2">
+                              <div className="w-2 h-2 bg-white/60 rounded-full"></div>
+                              <div className="w-2 h-2 bg-white/40 rounded-full"></div>
+                              <div className="w-2 h-2 bg-white/20 rounded-full"></div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                      
-                      <div className="p-6">
+
+                      <div className="p-8 bg-gradient-to-br from-gray-50/50 to-white/80 backdrop-blur-sm">
                         <calc.component 
                           onAddToComparison={addToComparison}
                           categoryColor={category.color}
@@ -249,6 +282,10 @@ export default function App() {
           onClose={() => setShowComparison(false)}
         />
       )}
-    </div>
+
+      {/* Floating Comparison Button */}
+      <FloatingComparisonButton />
+      </div>
+    </ComparisonProvider>
   )
 }

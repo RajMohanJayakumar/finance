@@ -2,16 +2,50 @@
 {
   "name": "Universal Finance Calculator",
   "short_name": "FinanceCalc",
-  "description": "Complete financial calculator suite for loans, savings, mutual funds, and taxes",
+  "description": "Complete financial calculator suite for loans, savings, mutual funds, and taxes. Professional financial planning made simple.",
   "start_url": "/",
   "display": "standalone",
-  "theme_color": "#2563eb",
-  "background_color": "#ffffff",
+  "theme_color": "#667eea",
+  "background_color": "#f8fafc",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["finance", "productivity", "utilities"],
   "icons": [
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
-  ]
+  ],
+  "shortcuts": [
+    {
+      "name": "SIP Calculator",
+      "short_name": "SIP",
+      "description": "Calculate SIP returns",
+      "url": "/?tab=mutual_funds",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "EMI Calculator",
+      "short_name": "EMI",
+      "description": "Calculate loan EMI",
+      "url": "/?tab=loans",
+      "icons": [
+        {
+          "src": "/favicon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false
 }

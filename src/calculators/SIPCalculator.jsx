@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react'
+import PDFExport from '../components/PDFExport'
+import { useComparison } from '../contexts/ComparisonContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 
 export default function SIPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
+  const { addToComparison } = useComparison()
 
-  const [inputs, setInputs] = useState({
+  const initialInputs = {
     monthlyInvestment: '',
     maturityAmount: '',
     lumpSumAmount: '',
@@ -11,7 +15,17 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     timePeriodUnit: 'years', // 'months' or 'years'
     stepUpPercentage: '0',
     calculationType: 'monthly'
-  })
+  }
+
+  // Use URL state management for inputs
+  const [inputs, setInputs, updateInputKey] = useURLStateObject('sip_')
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(initialInputs)
+    }
+  }, [])
 
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
@@ -50,10 +64,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
-  // Placeholder for future URL functionality
-  const updateURL = useCallback((newInputs) => {
-    // URL update functionality can be added here if needed
-  }, [])
+  // Generate shareable URL
+  const getShareableURL = useCallback(() => {
+    return generateShareableURL('sip', inputs, results)
+  }, [inputs, results])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -67,7 +81,15 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
 
     setInputs(newInputs)
-    updateURL(newInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(initialInputs)
+    setResults(null)
+    setYearlyBreakdown([])
+    setComparisons([])
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname)
   }
 
   const calculateSIP = useCallback(() => {
@@ -211,34 +233,46 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   }
 
   const handleAddToComparison = () => {
-    if (results && onAddToComparison) {
-      onAddToComparison({
+    if (results) {
+      const comparisonData = {
         calculator: 'SIP Calculator',
         inputs: {
-          ...inputs,
-          currency: '₹'
+          'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
+          'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
+          'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
+          'Expected Annual Return': `${inputs.annualReturn}%`,
+          'Step Up Percentage': `${inputs.stepUpPercentage}%`
         },
         results: {
-          'Maturity Amount (₹)': results.maturityAmount?.toLocaleString() || 'N/A',
-          'Total Investment (₹)': results.totalInvestment?.toLocaleString() || 'N/A',
-          'Wealth Gained (₹)': results.wealthGained?.toLocaleString() || 'N/A'
+          'Maturity Amount': `₹${results.maturityAmount?.toLocaleString()}`,
+          'Total Investment': `₹${results.totalInvestment?.toLocaleString()}`,
+          'Wealth Gained': `₹${results.wealthGained?.toLocaleString()}`
         }
-      })
+      }
+
+      // Use new comparison context
+      addToComparison(comparisonData)
+
+      // Also call the legacy prop if provided for backward compatibility
+      if (onAddToComparison) {
+        onAddToComparison(comparisonData)
+      }
     }
   }
 
   const shareCalculation = () => {
+    const shareableURL = getShareableURL()
     const shareData = {
       title: 'SIP Calculator Results',
-      text: `SIP Calculation: Monthly Investment ₹${inputs.monthlyInvestment} for ${inputs.timePeriod} ${inputs.timePeriodUnit}`,
-      url: window.location.href
+      text: `SIP Calculation: Monthly Investment ₹${inputs.monthlyInvestment} for ${inputs.timePeriod} ${inputs.timePeriodUnit}. Maturity Amount: ₹${results?.maturityAmount?.toLocaleString()}`,
+      url: shareableURL
     }
 
     if (navigator.share) {
       navigator.share(shareData)
     } else {
-      navigator.clipboard.writeText(JSON.stringify(results))
-      alert('Results copied to clipboard!')
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
     }
   }
 
@@ -275,104 +309,138 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
         )}
 
         <div className="space-y-6">
-          {/* Basic Inputs */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+          {/* Premium Calculator Inputs */}
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
             <button
               onClick={() => toggleSection('inputs')}
-              className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
+              className="w-full p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300"
             >
-              <h3 className="text-lg font-semibold text-gray-800">📊 Calculator Inputs</h3>
-              <span className="text-2xl">{collapsedSections.inputs ? '▼' : '▲'}</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-lg">📊</span>
+                </div>
+                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  Investment Parameters
+                </h3>
+              </div>
+              <span className="text-2xl text-gray-400">{collapsedSections.inputs ? '▼' : '▲'}</span>
             </button>
 
             {!collapsedSections.inputs && (
-              <div className="p-6 space-y-4">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Expected Annual Return (%)
-                    </label>
+              <div className="p-8 space-y-8">
+                {/* Expected Return - Full Width */}
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-2 text-sm font-bold text-gray-800 mb-3">
+                    <span className="text-lg">📈</span>
+                    <span>Expected Annual Return (%)</span>
+                  </label>
+                  <div className="relative">
                     <input
                       type="number"
                       step="0.1"
                       value={inputs.annualReturn}
                       onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      placeholder="12.0"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Typical mutual fund returns: 10-15%
-                    </p>
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold">
+                      %
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-xl border border-blue-200">
+                    💡 <strong>Tip:</strong> Typical mutual fund returns range from 10-15% annually
+                  </p>
+                </div>
+
+                {/* Investment Amount Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                      <span className="text-lg">💰</span>
+                      <span>Monthly Investment (₹)</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={inputs.monthlyInvestment}
+                        onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
+                        placeholder="10,000"
+                        className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      />
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                        ₹
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                      <span className="text-lg">🎯</span>
+                      <span>OR Target Amount (₹)</span>
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        value={inputs.maturityAmount}
+                        onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
+                        placeholder="1,00,00,000"
+                        className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      />
+                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                        ₹
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Investment (₹)
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.monthlyInvestment}
-                      onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
-                      placeholder="Enter monthly amount"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      OR Target Amount (₹)
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.maturityAmount}
-                      onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
-                      placeholder="Enter target amount"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Lump Sum Amount (₹)
-                    </label>
+                {/* Lump Sum - Full Width */}
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                    <span className="text-lg">💎</span>
+                    <span>Lump Sum Amount (₹) - Optional</span>
+                  </label>
+                  <div className="relative">
                     <input
                       type="number"
                       value={inputs.lumpSumAmount}
                       onChange={(e) => handleInputChange('lumpSumAmount', e.target.value)}
-                      placeholder="Enter lump sum amount (optional)"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="50,000"
+                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                     />
-                    <p className="text-xs text-gray-500 mt-1">
-                      Initial one-time investment amount
-                    </p>
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                      ₹
+                    </div>
                   </div>
+                  <p className="text-sm text-gray-600 bg-amber-50 p-3 rounded-xl border border-amber-200">
+                    💡 <strong>One-time investment:</strong> Add an initial lump sum to boost your returns
+                  </p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Investment Period
+                {/* Time Period Row */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                      <span className="text-lg">⏰</span>
+                      <span>Investment Period</span>
                     </label>
                     <input
                       type="number"
                       value={inputs.timePeriod}
                       onChange={(e) => handleInputChange('timePeriod', e.target.value)}
-                      placeholder="Enter duration"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      placeholder="10"
+                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                     />
                   </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Period Unit
+                  <div className="space-y-3">
+                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                      <span className="text-lg">📅</span>
+                      <span>Period Unit</span>
                     </label>
                     <select
                       value={inputs.timePeriodUnit}
                       onChange={(e) => handleInputChange('timePeriodUnit', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg cursor-pointer"
                     >
                       <option value="years">Years</option>
                       <option value="months">Months</option>
@@ -383,31 +451,45 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             )}
           </div>
 
-          {/* Advanced Options */}
-          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+          {/* Premium Advanced Options */}
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
             <button
               onClick={() => toggleSection('advanced')}
-              className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
+              className="w-full p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-between hover:from-emerald-100 hover:via-teal-100 hover:to-cyan-100 transition-all duration-300"
             >
-              <h3 className="text-lg font-semibold text-gray-800">⚙️ Advanced Options</h3>
-              <span className="text-2xl">{collapsedSections.advanced ? '▼' : '▲'}</span>
+              <div className="flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
+                  <span className="text-white text-lg">⚙️</span>
+                </div>
+                <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  Advanced Options
+                </h3>
+              </div>
+              <span className="text-2xl text-gray-400">{collapsedSections.advanced ? '▼' : '▲'}</span>
             </button>
 
             {!collapsedSections.advanced && (
-              <div className="p-6">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Annual Step-up (%)
+              <div className="p-8">
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
+                    <span className="text-lg">📊</span>
+                    <span>Annual Step-up (%)</span>
                   </label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    value={inputs.stepUpPercentage}
-                    onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Increase investment amount by this percentage every year
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.1"
+                      value={inputs.stepUpPercentage}
+                      onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
+                      placeholder="5.0"
+                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                    />
+                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold">
+                      %
+                    </div>
+                  </div>
+                  <p className="text-sm text-gray-600 bg-emerald-50 p-4 rounded-xl border border-emerald-200">
+                    <span className="font-semibold text-emerald-700">💡 Smart Strategy:</span> Increase your investment amount by this percentage every year to beat inflation and accelerate wealth creation
                   </p>
                 </div>
               </div>
@@ -456,12 +538,65 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                     </div>
                   </div>
 
-                  <button
-                    onClick={handleAddToComparison}
-                    className={`w-full bg-gradient-to-r ${colorClasses[categoryColor]} text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all`}
-                  >
-                    📊 Add to Comparison
-                  </button>
+                  {/* Action Buttons */}
+                  <div className="mt-6 space-y-4">
+                    {/* Primary Actions */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <button
+                        onClick={handleReset}
+                        className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      >
+                        <span className="text-xl">🔄</span>
+                        <span>Reset Calculator</span>
+                      </button>
+
+                      {results && (
+                        <button
+                          onClick={handleAddToComparison}
+                          className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${colorClasses[categoryColor]} text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex-1`}
+                        >
+                          <span className="text-xl">📊</span>
+                          <span>Add to Comparison</span>
+                        </button>
+                      )}
+                    </div>
+
+                    {/* Secondary Actions */}
+                    {results && (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button
+                          onClick={shareCalculation}
+                          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
+                        >
+                          <span className="text-lg">🔗</span>
+                          <span>Share Results</span>
+                        </button>
+
+                        <div className="flex">
+                          <PDFExport
+                            data={[{
+                              calculator: 'SIP Calculator',
+                              timestamp: new Date().toISOString(),
+                              inputs: {
+                                'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
+                                'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
+                                'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
+                                'Expected Annual Return': `${inputs.annualReturn}%`,
+                                'Step Up Percentage': `${inputs.stepUpPercentage}%`
+                              },
+                              results: {
+                                'Maturity Amount': `₹${results.maturityAmount?.toLocaleString()}`,
+                                'Total Investment': `₹${results.totalInvestment?.toLocaleString()}`,
+                                'Wealth Gained': `₹${results.wealthGained?.toLocaleString()}`
+                              }
+                            }]}
+                            title="SIP Calculator Results"
+                            calculatorType="SIP"
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
             </div>

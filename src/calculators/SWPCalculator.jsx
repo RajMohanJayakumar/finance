@@ -10,13 +10,15 @@ const countries = {
 
 export default function SWPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
 
-  const [inputs, setInputs] = useState({
+  const initialInputs = {
     initialInvestment: '',
     monthlyWithdrawal: '',
     annualReturn: '12',
     withdrawalPeriodYears: '20',
     country: 'india'
-  })
+  }
+
+  const [inputs, setInputs] = useState(initialInputs)
 
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
@@ -34,6 +36,12 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     }
 
     setInputs(newInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(initialInputs)
+    setResults(null)
+    setYearlyBreakdown([])
   }
 
   const calculateSWP = useCallback(() => {
@@ -203,6 +211,15 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
                       placeholder="20"
                     />
                   </div>
+                </div>
+
+                <div className="mt-6">
+                  <button
+                    onClick={handleReset}
+                    className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+                  >
+                    🔄 Reset
+                  </button>
                 </div>
               </div>
             )}

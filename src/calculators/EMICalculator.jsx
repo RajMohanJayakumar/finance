@@ -1,15 +1,26 @@
 
 import React, { useState, useEffect } from 'react'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   
-  const [inputs, setInputs] = useState({
+  const initialInputs = {
     principal: '',
     interestRate: '',
     tenure: '',
     emi: '',
     calculationType: 'emi' // emi, reverse-emi
-  })
+  }
+
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('emi_')
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(initialInputs)
+    }
+  }, [])
   
   const [results, setResults] = useState(null)
 
@@ -18,6 +29,27 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
     setInputs(newInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(initialInputs)
+    setResults(null)
+  }
+
+  const shareCalculation = () => {
+    const shareableURL = generateShareableURL('emi', inputs, results)
+    const shareData = {
+      title: 'EMI Calculator Results',
+      text: `EMI Calculation: Loan Amount ₹${inputs.principal}, EMI ₹${results?.emi?.toLocaleString()}`,
+      url: shareableURL
+    }
+
+    if (navigator.share) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard!')
+    }
   }
 
   const calculateEMI = () => {
@@ -91,12 +123,28 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             />
           </div>
 
-          <button
-            onClick={calculateEMI}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Calculate EMI
-          </button>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <button
+              onClick={handleReset}
+              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+            >
+              🔄 Reset
+            </button>
+            <button
+              onClick={calculateEMI}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Calculate EMI
+            </button>
+            {results && (
+              <button
+                onClick={shareCalculation}
+                className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-green-600 hover:to-green-700"
+              >
+                🔗 Share
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">

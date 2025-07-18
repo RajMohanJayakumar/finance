@@ -3,11 +3,13 @@ import React, { useState, useEffect } from 'react'
 
 export default function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   
-  const [inputs, setInputs] = useState({
+  const initialInputs = {
     annualIncome: '',
     country: 'india',
     taxRegime: 'old'
-  })
+  }
+
+  const [inputs, setInputs] = useState(initialInputs)
   
   const [results, setResults] = useState(null)
 
@@ -33,6 +35,11 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
     setInputs(newInputs)
+  }
+
+  const handleReset = () => {
+    setInputs(initialInputs)
+    setResults(null)
   }
 
   const calculateTax = () => {
@@ -120,12 +127,20 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
             </select>
           </div>
 
-          <button
-            onClick={calculateTax}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Calculate Tax
-          </button>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button
+              onClick={handleReset}
+              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+            >
+              🔄 Reset
+            </button>
+            <button
+              onClick={calculateTax}
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+            >
+              Calculate Tax
+            </button>
+          </div>
         </div>
 
         <div className="bg-white p-6 rounded-lg shadow-md">
