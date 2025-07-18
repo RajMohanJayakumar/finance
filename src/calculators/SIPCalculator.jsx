@@ -93,79 +93,88 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     const totalMonths = years * 12 + months
     const stepUp = parseFloat(inputs.stepUpPercentage) / 100
 
-    if (totalMonths <= 0) return
+    if (totalMonths <= 0 || rate < 0) return
 
     let calculatedResults = {}
     let breakdown = []
-   if (inputs.calculationType === 'monthly' && monthly > 0) {
-      // Calculate maturity amount from monthly investment
+
+    if (inputs.calculationType === 'monthly' && monthly > 0) {
+      // Calculate future value from monthly investment
       let futureValue = 0
-      let totalInvested = 0
-      let currentMonthly = monthly
+      let totalInvestment = 0
+      let currentMonthlyInvestment = monthly
 
-      for (let year = 1; year <= Math.ceil(totalMonths / 12); year++) {
-        let yearlyInvested = 0
-        let yearlyValue = 0
+      for (let year = 1; year <= years; year++) {
+        let yearlyInvestment = 0
+        let yearStartValue = futureValue
 
-        for (let month = 1; month <= Math.min(12, totalMonths - (year-1)*12); month++) {
-          if ((year - 1) * 12 + month > totalMonths) break
+        for (let month = 1; month <= 12; month++) {
+          futureValue = (futureValue + currentMonthlyInvestment) * (1 + rate)
+          yearlyInvestment += currentMonthlyInvestment
+          totalInvestment += currentMonthlyInvestment
+        }
 
-          totalInvested += currentMonthly
-          yearlyInvested += currentMonthly
+        // Apply step-up at year end
+        currentMonthlyInvestment = currentMonthlyInvestment * (1 + stepUp)
 
-          const remainingMonths = totalMonths - ((year - 1) * 12 + month) + 1
-          const monthlyGrowth = currentMonthly * Math.pow(1 + rate, remainingMonths -1);
-          futureValue += monthlyGrowth
-          yearlyValue += monthlyGrowth
+        breakdown.push({
+          year,
+          yearlyInvestment: Math.round(yearlyInvestment),
+          yearEndValue: Math.round(futureValue),
+          totalInvestment: Math.round(totalInvestment)
+        })
+      }
+
+      calculatedResults = {
+        monthlyInvestment: monthly,
+        maturityAmount: Math.round(futureValue),
+        totalInvestment: Math.round(totalInvestment),
+        wealthGained: Math.round(futureValue - totalInvestment)
+      }
+    } else if (inputs.calculationType === 'maturity' && targetAmount > 0) {
+      // Calculate required monthly investment for target amount
+      // Simplified calculation without step-up for reverse calculation
+      const monthlyRequired = targetAmount / (((Math.pow(1 + rate, totalMonths) - 1) / rate) * (1 + rate))
+      const totalInvestment = monthlyRequired * totalMonths
+
+      calculatedResults = {
+        monthlyInvestment: Math.round(monthlyRequired),
+        maturityAmount: targetAmount,
+        totalInvestment: Math.round(totalInvestment),
+        wealthGained: Math.round(targetAmount - totalInvestment)
+      }
+
+      // Generate breakdown for required monthly investment
+      let investmentSoFar = 0
+      let valueSoFar = 0
+
+      for (let year = 1; year <= years; year++) {
+        let yearlyInvestment = monthlyRequired * 12
+        investmentSoFar += yearlyInvestment
+
+        // Calculate value at end of year
+        for (let month = 1; month <= 12; month++) {
+          valueSoFar = (valueSoFar + monthlyRequired) * (1 + rate)
         }
 
         breakdown.push({
           year,
-          yearlyInvestment: yearlyInvested,
-          yearEndValue: futureValue,
-          totalInvested
+          yearlyInvestment: Math.round(yearlyInvestment),
+          yearEndValue: Math.round(valueSoFar),
+          totalInvestment: Math.round(investmentSoFar)
         })
-
-        currentMonthly *= (1 + stepUp)
-      }
-
-      calculatedResults = {
-        maturityAmount: futureValue,
-        totalInvestment: totalInvested,
-        wealthGained: futureValue - totalInvested
-      }
-    } else if (inputs.calculationType === 'maturity' && targetAmount > 0) {
-      // Calculate required monthly investment from target amount
-      if (stepUp === 0) {
-        const monthlyRequired = targetAmount / (((Math.pow(1 + rate, totalMonths) - 1) / rate) * (1 + rate))
-        calculatedResults = {
-          monthlyInvestment: monthlyRequired,
-          totalInvestment: monthlyRequired * totalMonths,
-          wealthGained: targetAmount - (monthlyRequired * totalMonths)
-        }
-           setInputs(prev => ({ ...prev, monthlyInvestment: monthlyRequired.toFixed(0) }))
-      } else {
-        let estimatedMonthly = targetAmount / (totalMonths * 1.5)
-        calculatedResults = {
-          monthlyInvestment: estimatedMonthly,
-          totalInvestment: estimatedMonthly * totalMonths,
-          wealthGained: targetAmount - (estimatedMonthly * totalMonths)
-        }
-         setInputs(prev => ({ ...prev, monthlyInvestment: estimatedMonthly.toFixed(0) }))
-
       }
     }
 
-
     setResults(calculatedResults)
     setYearlyBreakdown(breakdown)
-  }, [inputs])
+  }, [inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.calculationType])
 
   useEffect(() => {
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
       calculateSIP()
     }
-  }, [calculateSIP, inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.calculationType])
+  }, [calculateSIP])
 
   const addToCompare = () => {
     if (results) {
@@ -229,6 +238,14 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
   const selectedCountry = countries[inputs.country]
 
+  const currentCountry = countries[inputs.country]
+  const colorClasses = {
+    blue: 'from-blue-500 to-blue-600',
+    green: 'from-green-500 to-green-600',
+    purple: 'from-purple-500 to-purple-600',
+    red: 'from-red-500 to-red-600'
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
@@ -255,227 +272,183 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
         )}
 
         <div className="space-y-6">
-          {/* Calculator Inputs */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+          {/* Basic Inputs */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
             <button
               onClick={() => toggleSection('inputs')}
-              className={`w-full p-6 bg-gradient-to-r ${
-                categoryColor === 'purple' ? 'from-purple-500 to-purple-600' : 
-                categoryColor === 'blue' ? 'from-blue-500 to-blue-600' :
-                'from-gray-500 to-gray-600'
-              } text-white font-semibold text-left flex justify-between items-center hover:from-purple-600 hover:to-purple-700 transition-all`}
+              className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
             >
-              <span className="text-xl">⚙️ Calculator Inputs</span>
+              <h3 className="text-lg font-semibold text-gray-800">📊 Calculator Inputs</h3>
               <span className="text-2xl">{collapsedSections.inputs ? '▼' : '▲'}</span>
             </button>
 
             {!collapsedSections.inputs && (
-              <div className="p-6 space-y-6">
-                {/* Country Selection */}
-                <div>
-                  <label className="block text-sm font-semibold mb-3 text-gray-700">
-                    🌍 Country
-                  </label>
-                  <select 
-                    value={inputs.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 bg-white text-lg transition-all"
-                  >
-                    {Object.entries(countries).map(([key, country]) => (
-                      <option key={key} value={key}>
-                        {country.flag} {country.name} (Typical: {country.typical_return}%)
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Calculation Type */}
-                <div>
-                  <label className="block text-sm font-semibold mb-3 text-gray-700">
-                    🔄 Calculation Type
-                  </label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('calculationType', 'monthly')}
-                      className={`p-4 rounded-xl border-2 font-semibold transition-all ${
-                        inputs.calculationType === 'monthly'
-                          ? 'border-purple-500 bg-purple-50 text-purple-700'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                      }`}
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Country/Region
+                    </label>
+                    <select
+                      value={inputs.country}
+                      onChange={(e) => handleInputChange('country', e.target.value)}
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     >
-                      💰 Calculate Maturity Amount
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('calculationType', 'maturity')}
-                      className={`p-4 rounded-xl border-2 font-semibold transition-all ${
-                        inputs.calculationType === 'maturity'
-                          ? 'border-purple-500 bg-purple-50 text-purple-700'
-                          : 'border-gray-200 bg-white text-gray-600 hover:border-gray-300'
-                      }`}
-                    >
-                      🎯 Calculate Required Investment
-                    </button>
+                      {Object.entries(countries).map(([key, country]) => (
+                        <option key={key} value={key}>
+                          {country.flag} {country.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                </div>
-
-                {/* Input Fields */}
-                <div className="grid md:grid-cols-2 gap-6">
-                  {inputs.calculationType === 'monthly' ? (
-                    <div>
-                      <label className="block text-sm font-semibold mb-3 text-gray-700">
-                        💵 Monthly Investment ({selectedCountry.currency})
-                      </label>
-                      <input
-                        type="number"
-                        value={inputs.monthlyInvestment}
-                        onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
-                        placeholder="Enter monthly investment"
-                        className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
-                      />
-                    </div>
-                  ) : (
-                    <div>
-                      <label className="block text-sm font-semibold mb-3 text-gray-700">
-                        🎯 Target Maturity Amount ({selectedCountry.currency})
-                      </label>
-                      <input
-                        type="number"
-                        value={inputs.maturityAmount}
-                        onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
-                        placeholder="Enter target amount"
-                        className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
-                      />
-                    </div>
-                  )}
 
                   <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📈 Expected Annual Return (%)
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Expected Annual Return (%)
                     </label>
                     <input
                       type="number"
+                      step="0.1"
                       value={inputs.annualReturn}
                       onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                      placeholder="Enter expected return"
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Typical return in {currentCountry.name}: {currentCountry.typical_return}%
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Monthly Investment ({currentCountry.currency})
+                    </label>
+                    <input
+                      type="number"
+                      value={inputs.monthlyInvestment}
+                      onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
+                      placeholder="Enter monthly amount"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📅 Investment Duration (Years)
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      OR Target Amount ({currentCountry.currency})
+                    </label>
+                    <input
+                      type="number"
+                      value={inputs.maturityAmount}
+                      onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
+                      placeholder="Enter target amount"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Investment Period (Years)
                     </label>
                     <input
                       type="number"
                       value={inputs.timePeriodYears}
                       onChange={(e) => handleInputChange('timePeriodYears', e.target.value)}
-                      placeholder="Enter years"
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📅 Additional Months
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Additional Months
                     </label>
                     <input
                       type="number"
+                      min="0"
+                      max="11"
                       value={inputs.timePeriodMonths}
                       onChange={(e) => handleInputChange('timePeriodMonths', e.target.value)}
-                      placeholder="0"
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
-                </div>
-
-                {/* Advanced Options */}
-                <div className="border-t pt-6">
-                  <button
-                    onClick={() => toggleSection('advanced')}
-                    className="flex items-center space-x-2 text-purple-600 hover:text-purple-700 font-semibold mb-4"
-                  >
-                    <span>{collapsedSections.advanced ? '▶' : '▼'}</span>
-                    <span>🎚️ Advanced Options</span>
-                  </button>
-
-                  {!collapsedSections.advanced && (
-                    <div>
-                      <label className="block text-sm font-semibold mb-3 text-gray-700">
-                        📈 Yearly Step-up (%)
-                      </label>
-                      <input
-                        type="number"
-                        value={inputs.stepUpPercentage}
-                        onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
-                        placeholder="0"
-                        className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-purple-500 focus:ring-2 focus:ring-purple-200 text-lg transition-all"
-                      />
-                      <p className="text-sm text-gray-500 mt-2">
-                        💡 Increase your monthly investment by this percentage each year
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             )}
           </div>
 
-          {/* Results Section */}
+          {/* Advanced Options */}
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+            <button
+              onClick={() => toggleSection('advanced')}
+              className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
+            >
+              <h3 className="text-lg font-semibold text-gray-800">⚙️ Advanced Options</h3>
+              <span className="text-2xl">{collapsedSections.advanced ? '▼' : '▲'}</span>
+            </button>
+
+            {!collapsedSections.advanced && (
+              <div className="p-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Annual Step-up (%)
+                  </label>
+                  <input
+                    type="number"
+                    step="0.1"
+                    value={inputs.stepUpPercentage}
+                    onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Increase investment amount by this percentage every year
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Results */}
           {results && (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('results')}
-                className="w-full p-6 bg-gradient-to-r from-green-500 to-green-600 text-white font-semibold text-left flex justify-between items-center hover:from-green-600 hover:to-green-700 transition-all"
+                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
               >
-                <span className="text-xl">💡 Results</span>
+                <h3 className="text-lg font-semibold text-gray-800">💰 Results</h3>
                 <span className="text-2xl">{collapsedSections.results ? '▼' : '▲'}</span>
               </button>
 
               {!collapsedSections.results && (
                 <div className="p-6">
-                  <div className="grid md:grid-cols-3 gap-6 mb-6">
-                    <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-2xl border-l-4 border-blue-500">
-                      <h3 className="text-lg font-semibold text-blue-800 mb-2">💰 Maturity Amount</h3>
-                      <p className="text-3xl font-bold text-blue-900">
-                        {selectedCountry.currency}{results.maturityAmount?.toLocaleString() || 'N/A'}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
+                      <p className="text-sm opacity-90">Monthly Investment</p>
+                      <p className="text-2xl font-bold">
+                        {currentCountry.currency}{results.monthlyInvestment?.toLocaleString()}
                       </p>
                     </div>
-
-                    <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-2xl border-l-4 border-yellow-500">
-                      <h3 className="text-lg font-semibold text-yellow-800 mb-2">💵 Total Investment</h3>
-                      <p className="text-3xl font-bold text-yellow-900">
-                        {selectedCountry.currency}{results.totalInvestment?.toLocaleString() || 'N/A'}
+                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
+                      <p className="text-sm opacity-90">Maturity Amount</p>
+                      <p className="text-2xl font-bold">
+                        {currentCountry.currency}{results.maturityAmount?.toLocaleString()}
                       </p>
                     </div>
-
-                    <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-2xl border-l-4 border-green-500">
-                      <h3 className="text-lg font-semibold text-green-800 mb-2">📈 Wealth Gained</h3>
-                      <p className="text-3xl font-bold text-green-900">
-                        {selectedCountry.currency}{results.wealthGained?.toLocaleString() || 'N/A'}
+                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
+                      <p className="text-sm opacity-90">Wealth Gained</p>
+                      <p className="text-2xl font-bold">
+                        {currentCountry.currency}{results.wealthGained?.toLocaleString()}
                       </p>
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex flex-wrap gap-4 justify-center">
-                    <button
-                      onClick={handleAddToComparison}
-                      className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2"
-                    >
-                      <span>📊</span>
-                      <span>Add to Compare</span>
-                    </button>
-
-                    <button
-                      onClick={shareCalculation}
-                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg flex items-center space-x-2"
-                    >
-                      <span>🔗</span>
-                      <span>Share Results</span>
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleAddToComparison}
+                    className={`w-full bg-gradient-to-r ${colorClasses[categoryColor]} text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all`}
+                  >
+                    📊 Add to Comparison
+                  </button>
                 </div>
               )}
             </div>
@@ -483,39 +456,39 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
           {/* Year-wise Breakdown */}
           {yearlyBreakdown.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-200">
+            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('breakdown')}
-                className="w-full p-6 bg-gradient-to-r from-indigo-500 to-indigo-600 text-white font-semibold text-left flex justify-between items-center hover:from-indigo-600 hover:to-indigo-700 transition-all"
+                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
               >
-                <span className="text-xl">📊 Year-wise Breakdown</span>
+                <h3 className="text-lg font-semibold text-gray-800">📈 Year-wise Breakdown</h3>
                 <span className="text-2xl">{collapsedSections.breakdown ? '▼' : '▲'}</span>
               </button>
 
               {!collapsedSections.breakdown && (
                 <div className="p-6">
                   <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
+                    <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-gray-50">
-                          <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Year</th>
-                          <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Yearly Investment</th>
-                          <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Year End Value</th>
-                          <th className="border border-gray-200 px-4 py-3 text-left font-semibold">Total Invested</th>
+                        <tr className="border-b">
+                          <th className="text-left py-2">Year</th>
+                          <th className="text-right py-2">Yearly Investment</th>
+                          <th className="text-right py-2">Year End Value</th>
+                          <th className="text-right py-2">Total Investment</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {yearlyBreakdown.map((row, index) => (
-                          <tr key={index} className="hover:bg-gray-50">
-                            <td className="border border-gray-200 px-4 py-3">{row.year}</td>
-                            <td className="border border-gray-200 px-4 py-3">
-                              {selectedCountry.currency}{row.yearlyInvestment?.toLocaleString()}
+                        {yearlyBreakdown.map((year, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="py-2">{year.year}</td>
+                            <td className="text-right py-2">
+                              {currentCountry.currency}{year.yearlyInvestment.toLocaleString()}
                             </td>
-                            <td className="border border-gray-200 px-4 py-3 font-semibold text-green-600">
-                              {selectedCountry.currency}{row.yearEndValue?.toLocaleString()}
+                            <td className="text-right py-2">
+                              {currentCountry.currency}{year.yearEndValue.toLocaleString()}
                             </td>
-                            <td className="border border-gray-200 px-4 py-3">
-                              {selectedCountry.currency}{row.totalInvested?.toLocaleString()}
+                            <td className="text-right py-2">
+                              {currentCountry.currency}{year.totalInvestment.toLocaleString()}
                             </td>
                           </tr>
                         ))}
