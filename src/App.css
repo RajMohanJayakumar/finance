@@ -1,40 +1,181 @@
 
 @import "tailwindcss";
-
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 * {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  box-sizing: border-box;
 }
 
-.gradient-bg {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+/* React Tabs Styling */
+.react-tabs {
+  -webkit-tap-highlight-color: transparent;
 }
 
-.card-hover {
+.react-tabs__tab-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.react-tabs__tab {
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+  user-select: none;
   transition: all 0.3s ease;
 }
 
-.card-hover:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+.react-tabs__tab--selected {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
 }
 
-.calculator-card {
-  background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
-  border: 1px solid #e2e8f0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+.react-tabs__tab--disabled {
+  cursor: default;
+  opacity: 0.5;
 }
 
-.input-focus {
+.react-tabs__tab:focus {
+  outline: none;
+}
+
+.react-tabs__tab-panel {
+  display: none;
+}
+
+.react-tabs__tab-panel--selected {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Apple-style Components */
+.apple-tabs .react-tabs__tab {
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
   transition: all 0.2s ease;
+}
+
+.apple-tabs .react-tabs__tab:hover {
+  background: rgba(0, 0, 0, 0.05);
+  transform: translateY(-1px);
+}
+
+.apple-tabs .react-tabs__tab--selected {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.sub-tabs .react-tabs__tab {
+  border-radius: 12px;
+  border: 2px solid transparent;
+  background: white;
+  transition: all 0.2s ease;
+}
+
+.sub-tabs .react-tabs__tab:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sub-tabs .react-tabs__tab--selected {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+/* Modern Card Effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
+}
+
+.card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Glassmorphism Effect */
+.glassmorphism {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+
+/* Gradient Text */
+.gradient-text {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Input Focus Effects */
+.input-focus {
+  transition: all 0.3s ease;
 }
 
 .input-focus:focus {
   transform: scale(1.02);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
 }
 
+/* Button Animations */
+.btn-primary {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 40px -12px rgba(99, 102, 241, 0.4);
+}
+
+/* Floating Elements */
+.floating-button {
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
+}
+
+/* Pulse Effect */
 .pulse-animation {
   animation: pulse 2s infinite;
 }
@@ -42,15 +183,24 @@
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
+    transform: scale(1);
   }
   50% {
-    opacity: .7;
+    opacity: 0.8;
+    transform: scale(1.05);
   }
 }
 
+/* Result Cards */
 .result-card {
   background: linear-gradient(145deg, #f0f9ff 0%, #e0f2fe 100%);
   border-left: 4px solid #0ea5e9;
+  transition: all 0.3s ease;
+}
+
+.result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px rgba(14, 165, 233, 0.1);
 }
 
 .wealth-card {
@@ -59,91 +209,11 @@
 }
 
 .investment-card {
-  background: linear-gradient(145deg, #fef3c7 0%, #fde68a 100%);
+  background: linear-gradient(145deg, #fefbf3 0%, #fef3c7 100%);
   border-left: 4px solid #f59e0b;
 }
 
-.header-gradient {
-  background: linear-gradient(135deg, #64748b 0%, #475569 50%, #334155 100%);
-}
-
-.btn-primary {
-  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-  transition: all 0.3s ease;
-}
-
-.btn-primary:hover {
-  background: linear-gradient(135deg, #475569 0%, #64748b 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px -5px rgba(100, 116, 139, 0.4);
-}
-
-.floating-button {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 1000;
-  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-  animation: float 3s ease-in-out infinite;
-  backdrop-filter: blur(10px);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-}
-
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px) rotate(0deg);
-  }
-  50% {
-    transform: translateY(-15px) rotate(5deg);
-  }
-}
-
-.section-transition {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.glassmorphism {
-  background: rgba(255, 255, 255, 0.25);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.modern-shadow {
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.hover-lift {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.hover-lift:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 35px 60px -12px rgba(102, 126, 234, 0.3);
-}
-
-.tab-active {
-  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-  color: white;
-}
-
-.tab-inactive {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.breakdown-table {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-}
-
+/* Tooltip */
 .tooltip {
   position: relative;
   display: inline-block;
@@ -155,19 +225,101 @@
   background-color: #1f2937;
   color: white;
   text-align: center;
-  border-radius: 6px;
-  padding: 8px;
+  border-radius: 8px;
+  padding: 8px 12px;
   position: absolute;
-  z-index: 1;
+  z-index: 1000;
   bottom: 125%;
   left: 50%;
   margin-left: -100px;
   opacity: 0;
   transition: opacity 0.3s;
   font-size: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
   opacity: 1;
+}
+
+/* Section Transitions */
+.section-transition {
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Modern Shadows */
+.modern-shadow {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Table Styling */
+.breakdown-table {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+  .apple-tabs .react-tabs__tab-list {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .apple-tabs .react-tabs__tab {
+    flex: 1;
+    min-width: 120px;
+    text-align: center;
+    padding: 12px 8px;
+    font-size: 14px;
+  }
+  
+  .sub-tabs .react-tabs__tab-list {
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  
+  .sub-tabs .react-tabs__tab {
+    flex: none;
+    min-width: auto;
+    padding: 8px 12px;
+  }
+}
+
+/* Loading States */
+.loading-skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: loading 1.5s infinite;
+}
+
+@keyframes loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }

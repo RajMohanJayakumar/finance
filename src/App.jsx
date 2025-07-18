@@ -1,5 +1,7 @@
 
 import React, { useState } from 'react'
+import { Tab, Tabs, TabList, TabPanel } from 'react-tabs'
+import 'react-tabs/style/react-tabs.css'
 import './App.css'
 
 // Calculator Components
@@ -10,51 +12,54 @@ import FDCalculator from './calculators/FDCalculator'
 import TaxCalculator from './calculators/TaxCalculator'
 import CAGRCalculator from './calculators/CAGRCalculator'
 
-const calculators = {
-  loans: [
-    { id: 'emi', name: 'EMI Calculator', description: 'Calculate loan EMI and reverse EMI', icon: '🏠', component: EMICalculator },
-    { id: 'mortgage', name: 'Mortgage Calculator', description: 'Home loan calculator', icon: '🏡', component: EMICalculator },
-    { id: 'personal-loan', name: 'Personal Loan', description: 'Personal loan calculator', icon: '💳', component: EMICalculator }
-  ],
-  savings: [
-    { id: 'fd', name: 'Fixed Deposit', description: 'FD maturity calculator', icon: '🏦', component: FDCalculator },
-    { id: 'rd', name: 'Recurring Deposit', description: 'RD maturity calculator', icon: '💰', component: FDCalculator },
-    { id: 'ppf', name: 'PPF Calculator', description: 'Public Provident Fund calculator', icon: '🛡️', component: FDCalculator }
-  ],
-  mutual_funds: [
-    { id: 'sip', name: 'SIP Calculator', description: 'Systematic Investment Plan calculator', icon: '📈', component: SIPCalculator },
-    { id: 'swp', name: 'SWP Calculator', description: 'Systematic Withdrawal Plan calculator', icon: '📉', component: SWPCalculator },
-    { id: 'cagr', name: 'CAGR Calculator', description: 'Compound Annual Growth Rate calculator', icon: '📊', component: CAGRCalculator }
-  ],
-  tax: [
-    { id: 'income-tax', name: 'Income Tax Calculator', description: 'Calculate income tax liability', icon: '🧾', component: TaxCalculator },
-    { id: 'capital-gains', name: 'Capital Gains Tax', description: 'Calculate capital gains tax', icon: '💹', component: TaxCalculator }
-  ]
-}
+// Components
+import Header from './components/Header'
+import ComparisonPanel from './components/ComparisonPanel'
+import PDFExport from './components/PDFExport'
 
-function Header() {
-  return (
-    <header className="header-gradient text-white p-6 shadow-2xl">
-      <div className="max-w-6xl mx-auto text-center">
-        <h1 className="text-3xl lg:text-4xl font-bold mb-2 bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
-          💰 Universal Finance Calculator
-        </h1>
-        <p className="text-slate-100 text-lg">Your one-stop solution for all financial calculations</p>
-      </div>
-    </header>
-  )
+const calculatorData = {
+  loans: {
+    title: "💰 Loans",
+    color: "blue",
+    calculators: [
+      { id: 'emi', name: 'EMI Calculator', icon: '🏠', component: EMICalculator, description: 'Calculate loan EMI and repayment schedule' },
+      { id: 'mortgage', name: 'Mortgage Calculator', icon: '🏡', component: EMICalculator, description: 'Home loan calculator with advanced features' },
+      { id: 'personal-loan', name: 'Personal Loan', icon: '💳', component: EMICalculator, description: 'Personal loan EMI calculator' }
+    ]
+  },
+  savings: {
+    title: "🏦 Savings",
+    color: "green", 
+    calculators: [
+      { id: 'fd', name: 'Fixed Deposit', icon: '🏦', component: FDCalculator, description: 'Calculate FD maturity amount and returns' },
+      { id: 'rd', name: 'Recurring Deposit', icon: '💰', component: FDCalculator, description: 'RD maturity calculator' },
+      { id: 'ppf', name: 'PPF Calculator', icon: '🛡️', component: FDCalculator, description: 'Public Provident Fund calculator' }
+    ]
+  },
+  mutual_funds: {
+    title: "📈 Mutual Funds", 
+    color: "purple",
+    calculators: [
+      { id: 'sip', name: 'SIP Calculator', icon: '📈', component: SIPCalculator, description: 'Systematic Investment Plan calculator' },
+      { id: 'swp', name: 'SWP Calculator', icon: '📉', component: SWPCalculator, description: 'Systematic Withdrawal Plan calculator' },
+      { id: 'cagr', name: 'CAGR Calculator', icon: '📊', component: CAGRCalculator, description: 'Compound Annual Growth Rate calculator' }
+    ]
+  },
+  tax: {
+    title: "🧾 Tax",
+    color: "red",
+    calculators: [
+      { id: 'income-tax', name: 'Income Tax', icon: '🧾', component: TaxCalculator, description: 'Calculate income tax liability' },
+      { id: 'capital-gains', name: 'Capital Gains', icon: '💹', component: TaxCalculator, description: 'Calculate capital gains tax' }
+    ]
+  }
 }
 
 export default function App() {
-  const [searchTerm, setSearchTerm] = useState('')
-  const [activeCalculator, setActiveCalculator] = useState(null)
-  const [collapsedCategories, setCollapsedCategories] = useState({
-    loans: false,
-    savings: false,
-    mutual_funds: false,
-    tax: false
-  })
-  const [shareUrl, setShareUrl] = useState('')
+  const [mainTabIndex, setMainTabIndex] = useState(0)
+  const [subTabIndexes, setSubTabIndexes] = useState({ loans: 0, savings: 0, mutual_funds: 0, tax: 0 })
+  const [comparisonData, setComparisonData] = useState([])
+  const [showComparison, setShowComparison] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   // PWA Install functionality
@@ -76,31 +81,29 @@ export default function App() {
     }
   }
 
-  const generateShareUrl = () => {
-    const currentUrl = window.location.origin
-    setShareUrl(currentUrl)
-    navigator.clipboard.writeText(currentUrl)
+  const addToComparison = (calculatorData) => {
+    const newData = {
+      id: Date.now(),
+      calculator: calculatorData.calculator,
+      inputs: calculatorData.inputs,
+      results: calculatorData.results,
+      timestamp: new Date().toISOString()
+    }
+    setComparisonData(prev => [...prev, newData])
+    setShowComparison(true)
   }
 
-  const toggleCategory = (category) => {
-    setCollapsedCategories(prev => ({
-      ...prev,
-      [category]: !prev[category]
-    }))
+  const removeFromComparison = (id) => {
+    setComparisonData(prev => prev.filter(item => item.id !== id))
+    if (comparisonData.length <= 1) {
+      setShowComparison(false)
+    }
   }
 
-  const openCalculator = (calculator) => {
-    setActiveCalculator(calculator)
-  }
-
-  const closeCalculator = () => {
-    setActiveCalculator(null)
-  }
-
-  const shareCalculation = () => {
+  const shareApp = () => {
     const shareData = {
       title: 'Universal Finance Calculator',
-      text: 'Check out this comprehensive financial calculator suite!',
+      text: 'Complete financial calculator suite for all your financial planning needs!',
       url: window.location.href
     }
 
@@ -108,129 +111,144 @@ export default function App() {
       navigator.share(shareData)
     } else {
       navigator.clipboard.writeText(window.location.href)
-      alert('Link copied to clipboard!')
+      alert('App link copied to clipboard!')
     }
   }
 
-  if (activeCalculator) {
-    const CalculatorComponent = activeCalculator.component
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-zinc-50">
-        <Header />
-        <div className="max-w-7xl mx-auto p-4">
-          <div className="mb-6">
-            <button
-              onClick={closeCalculator}
-              className="bg-gradient-to-r from-slate-600 to-stone-600 text-white px-6 py-3 rounded-xl font-semibold hover:from-slate-700 hover:to-stone-700 transition-all transform hover:scale-105 shadow-lg flex items-center gap-2"
-            >
-              ← Back to Calculators
-            </button>
-          </div>
-          <CalculatorComponent />
-        </div>
-      </div>
-    )
+  const handleSubTabChange = (categoryKey, index) => {
+    setSubTabIndexes(prev => ({ ...prev, [categoryKey]: index }))
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-stone-50 to-zinc-50">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-gray-50">
       <Header />
       
-      <div className="max-w-6xl mx-auto p-6 lg:p-8">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-600 to-stone-600 bg-clip-text text-transparent mb-6">
-            Choose Your Calculator
-          </h2>
-          <p className="text-xl text-slate-600 mb-8 max-w-3xl mx-auto">
-            Calculate loans, savings, mutual funds, and taxes with our comprehensive financial tools
-          </p>
-          
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="🔍 Search calculators..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="px-6 py-4 border-2 border-slate-200 rounded-2xl w-80 text-lg input-focus bg-white"
-              />
-            </div>
-            <button
-              onClick={generateShareUrl}
-              className="btn-primary text-white px-8 py-4 rounded-2xl font-semibold flex items-center gap-2"
-            >
-              🔗 Share App
-            </button>
-            {deferredPrompt && (
-              <button
-                onClick={handlePWAInstall}
-                className="bg-gradient-to-r from-emerald-500 to-green-600 text-white px-6 py-3 rounded-2xl font-semibold hover:from-emerald-600 hover:to-green-700 transition-all transform hover:scale-105 shadow-lg"
-              >
-                📱 Install App
-              </button>
-            )}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Main Tabs */}
+        <Tabs 
+          selectedIndex={mainTabIndex} 
+          onSelect={setMainTabIndex}
+          className="apple-tabs"
+        >
+          <div className="mb-8">
+            <TabList className="flex justify-center space-x-2 bg-white/80 backdrop-blur-md p-2 rounded-2xl shadow-lg border border-gray-200/50 max-w-2xl mx-auto">
+              {Object.entries(calculatorData).map(([key, category]) => (
+                <Tab 
+                  key={key}
+                  className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 cursor-pointer outline-none ${
+                    category.color === 'blue' ? 'focus:bg-blue-500 focus:text-white react-tabs__tab--selected:bg-blue-500 react-tabs__tab--selected:text-white' :
+                    category.color === 'green' ? 'focus:bg-green-500 focus:text-white react-tabs__tab--selected:bg-green-500 react-tabs__tab--selected:text-white' :
+                    category.color === 'purple' ? 'focus:bg-purple-500 focus:text-white react-tabs__tab--selected:bg-purple-500 react-tabs__tab--selected:text-white' :
+                    'focus:bg-red-500 focus:text-white react-tabs__tab--selected:bg-red-500 react-tabs__tab--selected:text-white'
+                  } hover:bg-gray-100 text-gray-600`}
+                >
+                  {category.title}
+                </Tab>
+              ))}
+            </TabList>
           </div>
+
+          {/* Sub Tabs and Calculator Content */}
+          {Object.entries(calculatorData).map(([categoryKey, category], categoryIndex) => (
+            <TabPanel key={categoryKey}>
+              <Tabs 
+                selectedIndex={subTabIndexes[categoryKey]} 
+                onSelect={(index) => handleSubTabChange(categoryKey, index)}
+                className="sub-tabs"
+              >
+                <div className="mb-6">
+                  <TabList className="flex justify-center flex-wrap gap-3 mb-8">
+                    {category.calculators.map((calc, index) => (
+                      <Tab 
+                        key={calc.id}
+                        className={`flex items-center space-x-2 px-4 py-2 rounded-xl font-medium transition-all duration-200 cursor-pointer outline-none border-2 border-transparent ${
+                          category.color === 'blue' ? 'hover:border-blue-200 react-tabs__tab--selected:bg-blue-50 react-tabs__tab--selected:border-blue-500 react-tabs__tab--selected:text-blue-700' :
+                          category.color === 'green' ? 'hover:border-green-200 react-tabs__tab--selected:bg-green-50 react-tabs__tab--selected:border-green-500 react-tabs__tab--selected:text-green-700' :
+                          category.color === 'purple' ? 'hover:border-purple-200 react-tabs__tab--selected:bg-purple-50 react-tabs__tab--selected:border-purple-500 react-tabs__tab--selected:text-purple-700' :
+                          'hover:border-red-200 react-tabs__tab--selected:bg-red-50 react-tabs__tab--selected:border-red-500 react-tabs__tab--selected:text-red-700'
+                        } bg-white shadow-sm hover:shadow-md text-gray-600`}
+                      >
+                        <span className="text-lg">{calc.icon}</span>
+                        <span>{calc.name}</span>
+                      </Tab>
+                    ))}
+                  </TabList>
+                </div>
+
+                {category.calculators.map((calc, calcIndex) => (
+                  <TabPanel key={calc.id}>
+                    <div className="bg-white rounded-3xl shadow-xl border border-gray-200/50 overflow-hidden">
+                      <div className={`p-6 ${
+                        category.color === 'blue' ? 'bg-gradient-to-r from-blue-500 to-blue-600' :
+                        category.color === 'green' ? 'bg-gradient-to-r from-green-500 to-green-600' :
+                        category.color === 'purple' ? 'bg-gradient-to-r from-purple-500 to-purple-600' :
+                        'bg-gradient-to-r from-red-500 to-red-600'
+                      } text-white`}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <h2 className="text-2xl font-bold flex items-center space-x-2">
+                              <span>{calc.icon}</span>
+                              <span>{calc.name}</span>
+                            </h2>
+                            <p className="text-white/90 mt-1">{calc.description}</p>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="p-6">
+                        <calc.component 
+                          onAddToComparison={addToComparison}
+                          categoryColor={category.color}
+                        />
+                      </div>
+                    </div>
+                  </TabPanel>
+                ))}
+              </Tabs>
+            </TabPanel>
+          ))}
+        </Tabs>
+
+        {/* Floating Action Buttons */}
+        <div className="fixed bottom-6 right-6 flex flex-col space-y-3 z-50">
+          {comparisonData.length > 0 && (
+            <button
+              onClick={() => setShowComparison(!showComparison)}
+              className="bg-purple-500 hover:bg-purple-600 text-white p-4 rounded-full shadow-xl transition-all transform hover:scale-110 relative"
+            >
+              📊
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {comparisonData.length}
+              </span>
+            </button>
+          )}
           
-          {shareUrl && (
-            <div className="bg-emerald-100 border-2 border-emerald-400 text-emerald-700 px-6 py-4 rounded-2xl mb-8 max-w-2xl mx-auto">
-              ✅ URL copied to clipboard: {shareUrl}
-            </div>
+          <button
+            onClick={shareApp}
+            className="bg-blue-500 hover:bg-blue-600 text-white p-4 rounded-full shadow-xl transition-all transform hover:scale-110"
+          >
+            🔗
+          </button>
+          
+          {deferredPrompt && (
+            <button
+              onClick={handlePWAInstall}
+              className="bg-green-500 hover:bg-green-600 text-white p-4 rounded-full shadow-xl transition-all transform hover:scale-110"
+            >
+              📱
+            </button>
           )}
         </div>
-
-        <div className="grid gap-6">
-          {Object.entries(calculators).map(([category, items]) => (
-            <div key={category} className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => toggleCategory(category)}
-                className="w-full p-6 bg-gradient-to-r from-slate-600 to-stone-600 text-white font-semibold text-left flex justify-between items-center hover:from-slate-700 hover:to-stone-700 transition-all"
-              >
-                <span className="text-2xl capitalize">
-                  {category.replace('_', ' ')} Calculators
-                </span>
-                <span className="text-2xl">
-                  {collapsedCategories[category] ? '▼' : '▲'}
-                </span>
-              </button>
-              
-              {!collapsedCategories[category] && (
-                <div className="p-6">
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {items
-                      .filter(item => 
-                        searchTerm === '' || 
-                        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        item.description.toLowerCase().includes(searchTerm.toLowerCase())
-                      )
-                      .map(item => (
-                      <button
-                        key={item.id}
-                        onClick={() => openCalculator(item)}
-                        className="block p-6 border-2 border-slate-200 rounded-2xl hover:border-slate-300 card-hover transition-all bg-white text-left w-full"
-                      >
-                        <div className="text-4xl mb-4">{item.icon}</div>
-                        <h4 className="font-bold text-xl mb-3 text-slate-800">{item.name}</h4>
-                        <p className="text-slate-600">{item.description}</p>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-
-        {/* Share Section */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 text-center mt-8">
-          <h3 className="text-xl font-bold mb-4 text-slate-800">📤 Share This App</h3>
-          <button
-            onClick={shareCalculation}
-            className="bg-gradient-to-r from-slate-600 to-stone-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-slate-700 hover:to-stone-700 transition-all transform hover:scale-105 shadow-lg"
-          >
-            🔗 Share with Friends
-          </button>
-        </div>
       </div>
+
+      {/* Comparison Panel */}
+      {showComparison && (
+        <ComparisonPanel
+          data={comparisonData}
+          onRemove={removeFromComparison}
+          onClose={() => setShowComparison(false)}
+        />
+      )}
     </div>
   )
 }
