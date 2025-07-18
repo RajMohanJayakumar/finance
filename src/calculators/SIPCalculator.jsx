@@ -447,32 +447,11 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                     </select>
                   </div>
                 </div>
-              </div>
-            )}
-          </div>
 
-          {/* Premium Advanced Options */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
-            <button
-              onClick={() => toggleSection('advanced')}
-              className="w-full p-6 bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 flex items-center justify-between hover:from-emerald-100 hover:via-teal-100 hover:to-cyan-100 transition-all duration-300"
-            >
-              <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-emerald-500 to-teal-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-lg">⚙️</span>
-                </div>
-                <h3 className="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                  Advanced Options
-                </h3>
-              </div>
-              <span className="text-2xl text-gray-400">{collapsedSections.advanced ? '▼' : '▲'}</span>
-            </button>
-
-            {!collapsedSections.advanced && (
-              <div className="p-8">
+                {/* Annual Step-up - Integrated into main flow */}
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
-                    <span className="text-lg">📊</span>
+                    <span className="text-lg">📈</span>
                     <span>Annual Step-up (%)</span>
                   </label>
                   <div className="relative">
@@ -494,6 +473,74 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 </div>
               </div>
             )}
+          </div>
+
+          {/* Action Buttons - Always Visible */}
+          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
+            <div className="p-6">
+              <div className="flex flex-col sm:flex-row gap-4">
+                <button
+                  onClick={handleReset}
+                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                >
+                  <span className="text-xl">🔄</span>
+                  <span>Reset Calculator</span>
+                </button>
+
+                <button
+                  onClick={handleAddToComparison}
+                  disabled={!results}
+                  className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${
+                    results
+                      ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105`
+                      : 'from-gray-300 to-gray-400 cursor-not-allowed'
+                  } text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg flex-1`}
+                >
+                  <span className="text-xl">📊</span>
+                  <span>Add to Comparison</span>
+                </button>
+
+                {results && (
+                  <>
+                    <button
+                      onClick={shareCalculation}
+                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                    >
+                      <span className="text-xl">🔗</span>
+                      <span>Share</span>
+                    </button>
+
+                    <PDFExport
+                      data={[{
+                        calculator: 'SIP Calculator',
+                        timestamp: new Date().toISOString(),
+                        inputs: {
+                          'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
+                          'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
+                          'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
+                          'Expected Annual Return': `${inputs.annualReturn}%`,
+                          'Step Up Percentage': `${inputs.stepUpPercentage}%`
+                        },
+                        results: {
+                          'Maturity Amount': `₹${results.maturityAmount?.toLocaleString()}`,
+                          'Total Investment': `₹${results.totalInvestment?.toLocaleString()}`,
+                          'Wealth Gained': `₹${results.wealthGained?.toLocaleString()}`
+                        }
+                      }]}
+                      title="SIP Calculator Results"
+                      calculatorType="SIP"
+                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      buttonContent={
+                        <>
+                          <span className="text-xl">📄</span>
+                          <span>PDF</span>
+                        </>
+                      }
+                    />
+                  </>
+                )}
+              </div>
+            </div>
           </div>
 
           {/* Results */}
@@ -550,15 +597,18 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                         <span>Reset Calculator</span>
                       </button>
 
-                      {results && (
-                        <button
-                          onClick={handleAddToComparison}
-                          className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${colorClasses[categoryColor]} text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex-1`}
-                        >
-                          <span className="text-xl">📊</span>
-                          <span>Add to Comparison</span>
-                        </button>
-                      )}
+                      <button
+                        onClick={handleAddToComparison}
+                        disabled={!results}
+                        className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${
+                          results
+                            ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105`
+                            : 'from-gray-300 to-gray-400 cursor-not-allowed'
+                        } text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg flex-1`}
+                      >
+                        <span className="text-xl">📊</span>
+                        <span>Add to Comparison</span>
+                      </button>
                     </div>
 
                     {/* Secondary Actions */}
@@ -572,28 +622,33 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                           <span>Share Results</span>
                         </button>
 
-                        <div className="flex">
-                          <PDFExport
-                            data={[{
-                              calculator: 'SIP Calculator',
-                              timestamp: new Date().toISOString(),
-                              inputs: {
-                                'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
-                                'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
-                                'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
-                                'Expected Annual Return': `${inputs.annualReturn}%`,
-                                'Step Up Percentage': `${inputs.stepUpPercentage}%`
-                              },
-                              results: {
-                                'Maturity Amount': `₹${results.maturityAmount?.toLocaleString()}`,
-                                'Total Investment': `₹${results.totalInvestment?.toLocaleString()}`,
-                                'Wealth Gained': `₹${results.wealthGained?.toLocaleString()}`
-                              }
-                            }]}
-                            title="SIP Calculator Results"
-                            calculatorType="SIP"
-                          />
-                        </div>
+                        <PDFExport
+                          data={[{
+                            calculator: 'SIP Calculator',
+                            timestamp: new Date().toISOString(),
+                            inputs: {
+                              'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
+                              'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
+                              'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
+                              'Expected Annual Return': `${inputs.annualReturn}%`,
+                              'Step Up Percentage': `${inputs.stepUpPercentage}%`
+                            },
+                            results: {
+                              'Maturity Amount': `₹${results.maturityAmount?.toLocaleString()}`,
+                              'Total Investment': `₹${results.totalInvestment?.toLocaleString()}`,
+                              'Wealth Gained': `₹${results.wealthGained?.toLocaleString()}`
+                            }
+                          }]}
+                          title="SIP Calculator Results"
+                          calculatorType="SIP"
+                          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg w-full"
+                          buttonContent={
+                            <>
+                              <span className="text-lg">📄</span>
+                              <span>Export PDF</span>
+                            </>
+                          }
+                        />
                       </div>
                     )}
                   </div>

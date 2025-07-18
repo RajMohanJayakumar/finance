@@ -1,5 +1,6 @@
 
-const CACHE_NAME = 'universal-finance-v3'
+const CACHE_NAME = 'universal-finance-v4'
+const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
 
 self.addEventListener('install', (event) => {
   console.log('✅ Service Worker installing...')
@@ -26,6 +27,14 @@ self.addEventListener('activate', (event) => {
 })
 
 self.addEventListener('fetch', (event) => {
+  // In development mode, be less aggressive with caching
+  if (isDevelopment) {
+    // Only handle navigation requests in development
+    if (event.request.mode !== 'navigate') {
+      return
+    }
+  }
+
   // Only handle same-origin requests
   if (!event.request.url.startsWith(self.location.origin)) {
     return
@@ -42,9 +51,38 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
+  // Skip development server files
+  if (isDevelopment && (
+    url.pathname.includes('/@') ||
+    url.pathname.includes('/src/') ||
+    url.pathname.includes('/node_modules/') ||
+    url.pathname.includes('/__vite') ||
+    url.pathname.endsWith('.jsx') ||
+    url.pathname.endsWith('.ts') ||
+    url.pathname.endsWith('.tsx')
+  )) {
+    return
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then((cachedResponse) => {
+        // In development, always try network first
+        if (isDevelopment) {
+          return fetch(event.request)
+            .then((response) => {
+              return response
+            })
+            .catch((error) => {
+              // Only fall back to cache in development if network fails
+              return cachedResponse || new Response(
+                '<!DOCTYPE html><html><head><title>Development Mode</title></head><body><h1>Development Server Unavailable</h1><p>Please check if your development server is running.</p></body></html>',
+                { headers: { 'Content-Type': 'text/html' } }
+              )
+            })
+        }
+
+        // Production mode: cache first
         if (cachedResponse) {
           return cachedResponse
         }
@@ -62,14 +100,20 @@ self.addEventListener('fetch', (event) => {
                   cache.put(event.request, responseToCache)
                 })
                 .catch((error) => {
-                  console.log('Cache put failed:', error)
+                  // Silently handle cache errors in development
+                  if (!isDevelopment) {
+                    console.log('Cache put failed:', error)
+                  }
                 })
             }
 
             return response
           })
           .catch((error) => {
-            console.log('Network fetch failed:', error)
+            // Only log errors in production
+            if (!isDevelopment) {
+              console.log('Network fetch failed:', error)
+            }
 
             // For navigation requests, try to return cached index
             if (event.request.mode === 'navigate') {
