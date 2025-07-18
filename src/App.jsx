@@ -10,56 +10,34 @@ import FDCalculator from './calculators/FDCalculator'
 import TaxCalculator from './calculators/TaxCalculator'
 import CAGRCalculator from './calculators/CAGRCalculator'
 
-const calculatorCategories = {
-  'mutual-funds': {
-    name: 'Mutual Funds',
-    icon: '📈',
-    calculators: [
-      { id: 'sip', name: 'SIP Calculator', component: SIPCalculator },
-      { id: 'swp', name: 'SWP Calculator', component: SIPCalculator },
-    ]
-  },
-  'loans': {
-    name: 'Loans',
-    icon: '🏠',
-    calculators: [
-      { id: 'emi', name: 'EMI Calculator', component: EMICalculator },
-      { id: 'mortgage', name: 'Mortgage Calculator', component: EMICalculator },
-    ]
-  },
-  'savings': {
-    name: 'Savings',
-    icon: '💰',
-    calculators: [
-      { id: 'fd', name: 'Fixed Deposit', component: FDCalculator },
-      { id: 'rd', name: 'Recurring Deposit', component: FDCalculator },
-    ]
-  },
-  'tax': {
-    name: 'Tax',
-    icon: '🧾',
-    calculators: [
-      { id: 'income-tax', name: 'Income Tax', component: TaxCalculator },
-    ]
-  },
-  'general': {
-    name: 'General Tools',
-    icon: '🔧',
-    calculators: [
-      { id: 'cagr', name: 'CAGR Calculator', component: CAGRCalculator },
-      { id: 'roi', name: 'ROI Calculator', component: CAGRCalculator },
-    ]
-  }
+const calculators = {
+  loans: [
+    { id: 'emi', name: 'EMI Calculator', description: 'Calculate loan EMI and reverse EMI' },
+    { id: 'mortgage', name: 'Mortgage Calculator', description: 'Home loan calculator' },
+    { id: 'personal-loan', name: 'Personal Loan', description: 'Personal loan calculator' }
+  ],
+  savings: [
+    { id: 'fd', name: 'Fixed Deposit', description: 'FD maturity calculator' },
+    { id: 'rd', name: 'Recurring Deposit', description: 'RD maturity calculator' },
+    { id: 'ppf', name: 'PPF Calculator', description: 'Public Provident Fund calculator' }
+  ],
+  mutual_funds: [
+    { id: 'sip', name: 'SIP Calculator', description: 'Systematic Investment Plan calculator' },
+    { id: 'swp', name: 'SWP Calculator', description: 'Systematic Withdrawal Plan calculator' },
+    { id: 'cagr', name: 'CAGR Calculator', description: 'Compound Annual Growth Rate calculator' }
+  ],
+  tax: [
+    { id: 'income-tax', name: 'Income Tax Calculator', description: 'Calculate income tax liability' },
+    { id: 'capital-gains', name: 'Capital Gains Tax', description: 'Calculate capital gains tax' }
+  ]
 }
 
 function Header() {
   return (
-    <header className="bg-blue-600 text-white p-4 shadow-lg">
-      <div className="container mx-auto">
-        <Link to="/" className="text-2xl font-bold">
-          💰 Universal Finance Calculator
-        </Link>
-        <p className="text-blue-100 mt-1">Professional Financial Planning Tools</p>
+    <header className="bg-blue-600 text-white p-4">
+      <div className="max-w-6xl mx-auto">
+        <Link to="/" className="text-2xl font-bold">Universal Finance Calculator</Link>
+        <p className="text-blue-100 mt-1">Your one-stop solution for all financial calculations</p>
       </div>
     </header>
   )
@@ -67,65 +45,66 @@ function Header() {
 
 function HomePage() {
   const [searchTerm, setSearchTerm] = useState('')
-  const [selectedCategory, setSelectedCategory] = useState('all')
+  const [shareUrl, setShareUrl] = useState('')
 
-  const allCalculators = Object.entries(calculatorCategories).flatMap(([categoryId, category]) =>
-    category.calculators.map(calc => ({
-      ...calc,
-      categoryId,
-      categoryName: category.name,
-      categoryIcon: category.icon
-    }))
-  )
-
-  const filteredCalculators = allCalculators.filter(calc => {
-    const matchesSearch = calc.name.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesCategory = selectedCategory === 'all' || calc.categoryId === selectedCategory
-    return matchesSearch && matchesCategory
-  })
+  const generateShareUrl = () => {
+    const currentUrl = window.location.origin
+    setShareUrl(currentUrl)
+    navigator.clipboard.writeText(currentUrl)
+  }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-8">
-        <div className="flex flex-col md:flex-row gap-4 mb-6">
+    <div className="max-w-6xl mx-auto p-6">
+      <div className="text-center mb-8">
+        <h1 className="text-4xl font-bold mb-4">Universal Finance Calculator</h1>
+        <p className="text-gray-600 mb-6">Calculate loans, savings, mutual funds, and taxes with our comprehensive financial tools</p>
+        
+        <div className="flex justify-center gap-4 mb-6">
           <input
             type="text"
             placeholder="Search calculators..."
-            className="flex-1 p-3 border rounded-lg"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            className="px-4 py-2 border rounded-lg w-64"
           />
-          <select
-            className="p-3 border rounded-lg"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
+          <button
+            onClick={generateShareUrl}
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
           >
-            <option value="all">All Categories</option>
-            {Object.entries(calculatorCategories).map(([id, category]) => (
-              <option key={id} value={id}>{category.icon} {category.name}</option>
-            ))}
-          </select>
+            Share App
+          </button>
         </div>
+        
+        {shareUrl && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-6">
+            URL copied to clipboard: {shareUrl}
+          </div>
+        )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredCalculators.map(calc => (
-          <Link
-            key={`${calc.categoryId}-${calc.id}`}
-            to={`/calculator/${calc.categoryId}/${calc.id}`}
-            className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow border"
-          >
-            <div className="flex items-center mb-3">
-              <span className="text-2xl mr-3">{calc.categoryIcon}</span>
-              <div>
-                <h3 className="text-lg font-semibold">{calc.name}</h3>
-                <p className="text-gray-600 text-sm">{calc.categoryName}</p>
-              </div>
+      <div className="grid gap-8">
+        {Object.entries(calculators).map(([category, items]) => (
+          <div key={category} className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-2xl font-bold mb-4 capitalize">{category.replace('_', ' ')}</h2>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {items
+                .filter(item => 
+                  searchTerm === '' || 
+                  item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                  item.description.toLowerCase().includes(searchTerm.toLowerCase())
+                )
+                .map(item => (
+                <Link
+                  key={item.id}
+                  to={`/calculator/${category}/${item.id}`}
+                  className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <h3 className="font-semibold text-lg mb-2">{item.name}</h3>
+                  <p className="text-gray-600 text-sm">{item.description}</p>
+                </Link>
+              ))}
             </div>
-            <p className="text-gray-700 text-sm">
-              Calculate and plan your {calc.name.toLowerCase()} with precision
-            </p>
-          </Link>
+          </div>
         ))}
       </div>
     </div>
@@ -136,42 +115,45 @@ function CalculatorPage() {
   const location = useLocation()
   const navigate = useNavigate()
   const pathParts = location.pathname.split('/')
-  const categoryId = pathParts[2]
-  const calculatorId = pathParts[3]
+  const category = pathParts[2]
+  const id = pathParts[3]
 
-  const category = calculatorCategories[categoryId]
-  const calculator = category?.calculators.find(c => c.id === calculatorId)
-
-  if (!calculator) {
-    return (
-      <div className="container mx-auto p-4">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold mb-4">Calculator Not Found</h2>
-          <Link to="/" className="bg-blue-600 text-white px-4 py-2 rounded">
-            Back to Home
-          </Link>
-        </div>
-      </div>
-    )
+  const renderCalculator = () => {
+    switch(id) {
+      case 'sip':
+        return <SIPCalculator />
+      case 'emi':
+      case 'mortgage':
+      case 'personal-loan':
+        return <EMICalculator />
+      case 'fd':
+      case 'rd':
+      case 'ppf':
+        return <FDCalculator />
+      case 'income-tax':
+      case 'capital-gains':
+        return <TaxCalculator />
+      case 'cagr':
+        return <CAGRCalculator />
+      default:
+        return (
+          <div className="max-w-4xl mx-auto p-6 text-center">
+            <h2 className="text-3xl font-bold mb-4">Calculator Coming Soon</h2>
+            <p className="text-gray-600 mb-6">This calculator is under development.</p>
+            <Link to="/" className="text-blue-600 hover:underline">← Back to Home</Link>
+          </div>
+        )
+    }
   }
 
-  const CalculatorComponent = calculator.component
-
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4">
-        <button
-          onClick={() => navigate('/')}
-          className="text-blue-600 hover:text-blue-800 mb-2"
-        >
-          ← Back to Calculators
-        </button>
-        <h1 className="text-3xl font-bold flex items-center">
-          <span className="mr-3">{category.icon}</span>
-          {calculator.name}
-        </h1>
+    <div>
+      <div className="bg-gray-100 p-4">
+        <div className="max-w-6xl mx-auto">
+          <Link to="/" className="text-blue-600 hover:underline">← Back to Home</Link>
+        </div>
       </div>
-      <CalculatorComponent />
+      {renderCalculator()}
     </div>
   )
 }

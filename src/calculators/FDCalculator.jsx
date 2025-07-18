@@ -9,8 +9,10 @@ export default function FDCalculator() {
   const [inputs, setInputs] = useState({
     principal: '',
     interestRate: '',
-    tenure: '',
-    compoundingFrequency: '4' // Quarterly
+    timePeriod: '',
+    compoundingFrequency: '4', // Quarterly
+    maturityAmount: '',
+    calculationType: 'maturity' // maturity, reverse-maturity
   })
   
   const [results, setResults] = useState(null)
@@ -44,147 +46,153 @@ export default function FDCalculator() {
   }
 
   const calculateFD = () => {
-    const P = parseFloat(inputs.principal) || 0
-    const r = (parseFloat(inputs.interestRate) || 0) / 100
-    const t = parseFloat(inputs.tenure) || 0
-    const n = parseFloat(inputs.compoundingFrequency) || 1
+    if (inputs.calculationType === 'maturity') {
+      const P = parseFloat(inputs.principal) || 0
+      const r = (parseFloat(inputs.interestRate) || 0) / 100
+      const t = parseFloat(inputs.timePeriod) || 0
+      const n = parseFloat(inputs.compoundingFrequency) || 1
 
-    // Compound Interest Formula: A = P(1 + r/n)^(nt)
-    const maturityAmount = P * Math.pow(1 + r/n, n * t)
-    const interestEarned = maturityAmount - P
+      if (P > 0 && r > 0 && t > 0) {
+        const maturityAmount = P * Math.pow((1 + r / n), n * t)
+        const interestEarned = maturityAmount - P
 
-    setResults({
-      maturityAmount: Math.round(maturityAmount),
-      interestEarned: Math.round(interestEarned),
-      principal: P,
-      effectiveRate: ((maturityAmount / P - 1) / t * 100).toFixed(2)
-    })
+        setResults({
+          principal: P.toFixed(2),
+          maturityAmount: maturityAmount.toFixed(2),
+          interestEarned: interestEarned.toFixed(2),
+          timePeriod: t
+        })
+      }
+    } else if (inputs.calculationType === 'reverse-maturity') {
+      const A = parseFloat(inputs.maturityAmount) || 0
+      const r = (parseFloat(inputs.interestRate) || 0) / 100
+      const t = parseFloat(inputs.timePeriod) || 0
+      const n = parseFloat(inputs.compoundingFrequency) || 1
+
+      if (A > 0 && r > 0 && t > 0) {
+        const principal = A / Math.pow((1 + r / n), n * t)
+        const interestEarned = A - principal
+
+        setResults({
+          principal: principal.toFixed(2),
+          maturityAmount: A.toFixed(2),
+          interestEarned: interestEarned.toFixed(2),
+          timePeriod: t
+        })
+      }
+    }
   }
 
-  const shareableLink = `${window.location.origin}${location.pathname}?${new URLSearchParams(inputs).toString()}`
+  useEffect(() => {
+    if (inputs.principal || inputs.maturityAmount) {
+      calculateFD()
+    }
+  }, [inputs])
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Fixed Deposit Details</h2>
+    <div className="max-w-4xl mx-auto p-6">
+      <h2 className="text-3xl font-bold mb-6 text-center">Fixed Deposit Calculator</h2>
+      
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="bg-white p-6 rounded-lg shadow">
+          <h3 className="text-xl font-semibold mb-4">Calculator Inputs</h3>
           
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Principal Amount (₹)
-              <span className="text-blue-600 cursor-help" title="Initial deposit amount">ℹ️</span>
-            </label>
-            <input
-              type="number"
-              className="w-full p-3 border rounded-lg"
-              value={inputs.principal}
-              onChange={(e) => handleInputChange('principal', e.target.value)}
-              placeholder="e.g., 100000"
-            />
+            <label className="block text-sm font-medium mb-2">Calculation Type</label>
+            <select 
+              value={inputs.calculationType}
+              onChange={(e) => handleInputChange('calculationType', e.target.value)}
+              className="w-full p-2 border rounded"
+            >
+              <option value="maturity">Calculate Maturity Amount</option>
+              <option value="reverse-maturity">Calculate Principal Required</option>
+            </select>
           </div>
 
+          {inputs.calculationType === 'maturity' ? (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Principal Amount (₹)</label>
+              <input
+                type="number"
+                value={inputs.principal}
+                onChange={(e) => handleInputChange('principal', e.target.value)}
+                className="w-full p-2 border rounded"
+                placeholder="e.g., 100000"
+              />
+            </div>
+          ) : (
+            <div className="mb-4">
+              <label className="block text-sm font-medium mb-2">Target Maturity Amount (₹)</label>
+              <input
+                type="number"
+                value={inputs.maturityAmount}
+                onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
+                className="w-full p-2 border rounded"
+                placeholder="e.g., 150000"
+              />
+            </div>
+          )}
+
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Interest Rate (% per annum)
-              <span className="text-blue-600 cursor-help" title="Annual interest rate offered">ℹ️</span>
-            </label>
+            <label className="block text-sm font-medium mb-2">Interest Rate (% per annum)</label>
             <input
               type="number"
-              step="0.1"
-              className="w-full p-3 border rounded-lg"
               value={inputs.interestRate}
               onChange={(e) => handleInputChange('interestRate', e.target.value)}
-              placeholder="e.g., 6.5"
+              className="w-full p-2 border rounded"
+              placeholder="e.g., 7.5"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              Tenure (Years)
-              <span className="text-blue-600 cursor-help" title="Fixed deposit period">ℹ️</span>
-            </label>
+            <label className="block text-sm font-medium mb-2">Time Period (Years)</label>
             <input
               type="number"
-              step="0.1"
-              className="w-full p-3 border rounded-lg"
-              value={inputs.tenure}
-              onChange={(e) => handleInputChange('tenure', e.target.value)}
+              value={inputs.timePeriod}
+              onChange={(e) => handleInputChange('timePeriod', e.target.value)}
+              className="w-full p-2 border rounded"
               placeholder="e.g., 5"
             />
           </div>
 
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">
-              Compounding Frequency
-              <span className="text-blue-600 cursor-help" title="How often interest is compounded">ℹ️</span>
-            </label>
-            <select
-              className="w-full p-3 border rounded-lg"
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Compounding Frequency</label>
+            <select 
               value={inputs.compoundingFrequency}
               onChange={(e) => handleInputChange('compoundingFrequency', e.target.value)}
+              className="w-full p-2 border rounded"
             >
               <option value="1">Annually</option>
-              <option value="2">Semi-Annually</option>
+              <option value="2">Semi-annually</option>
               <option value="4">Quarterly</option>
               <option value="12">Monthly</option>
             </select>
           </div>
-
-          <button
-            onClick={calculateFD}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Calculate Maturity
-          </button>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Maturity Details</h2>
-          
-          {results ? (
+        {results && (
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-xl font-semibold mb-4">Results</h3>
             <div className="space-y-4">
-              <div className="p-4 bg-green-50 rounded-lg">
-                <p className="text-sm text-gray-600">Maturity Amount</p>
-                <p className="text-2xl font-bold text-green-600">₹{results.maturityAmount.toLocaleString()}</p>
+              <div className="flex justify-between">
+                <span>Principal Amount:</span>
+                <span className="font-semibold">₹{results.principal}</span>
               </div>
-              
-              <div className="p-4 bg-blue-50 rounded-lg">
-                <p className="text-sm text-gray-600">Principal Amount</p>
-                <p className="text-xl font-semibold text-blue-600">₹{results.principal.toLocaleString()}</p>
+              <div className="flex justify-between">
+                <span>Interest Earned:</span>
+                <span className="font-semibold text-green-600">₹{results.interestEarned}</span>
               </div>
-              
-              <div className="p-4 bg-purple-50 rounded-lg">
-                <p className="text-sm text-gray-600">Interest Earned</p>
-                <p className="text-xl font-semibold text-purple-600">₹{results.interestEarned.toLocaleString()}</p>
+              <div className="flex justify-between">
+                <span>Time Period:</span>
+                <span className="font-semibold">{results.timePeriod} years</span>
               </div>
-
-              <div className="p-4 bg-yellow-50 rounded-lg">
-                <p className="text-sm text-gray-600">Effective Annual Rate</p>
-                <p className="text-xl font-semibold text-yellow-600">{results.effectiveRate}%</p>
-              </div>
-
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium mb-2">Share this calculation:</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={shareableLink}
-                    readOnly
-                    className="flex-1 p-2 text-xs border rounded"
-                  />
-                  <button
-                    onClick={() => navigator.clipboard.writeText(shareableLink)}
-                    className="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
-                  >
-                    Copy
-                  </button>
-                </div>
+              <div className="flex justify-between text-lg border-t pt-2">
+                <span>Maturity Amount:</span>
+                <span className="font-bold text-blue-600">₹{results.maturityAmount}</span>
               </div>
             </div>
-          ) : (
-            <p className="text-gray-500">Enter FD details and click Calculate to see maturity amount</p>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   )

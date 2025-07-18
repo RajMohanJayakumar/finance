@@ -1,0 +1,17 @@
+
+{
+  "name": "Universal Finance Calculator",
+  "short_name": "FinanceCalc",
+  "description": "Complete financial calculator suite for loans, savings, mutual funds, and taxes",
+  "start_url": "/",
+  "display": "standalone",
+  "theme_color": "#2563eb",
+  "background_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
