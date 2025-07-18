@@ -125,13 +125,13 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <button
               onClick={handleReset}
-              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700 cursor-pointer"
             >
               🔄 Reset
             </button>
             <button
               onClick={calculate}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors"
+              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
             >
               Calculate {inputs.calculationType.toUpperCase()}
             </button>
@@ -209,7 +209,7 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
                   />
                   <button
                     onClick={() => navigator.clipboard.writeText(shareableLink)}
-                    className="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700"
+                    className="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 cursor-pointer"
                   >
                     Copy
                   </button>

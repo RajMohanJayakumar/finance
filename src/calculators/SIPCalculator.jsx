@@ -301,7 +301,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
           <div className="text-center mb-6">
             <button
               onClick={handlePWAInstall}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
             >
               📱 Install App
             </button>
@@ -313,7 +313,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
             <button
               onClick={() => toggleSection('inputs')}
-              className="w-full p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300"
+              className="w-full p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300 cursor-pointer"
             >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -481,7 +481,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleReset}
-                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
                 >
                   <span className="text-xl">🔄</span>
                   <span>Reset Calculator</span>
@@ -492,7 +492,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                   disabled={!results}
                   className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${
                     results
-                      ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105`
+                      ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105 cursor-pointer`
                       : 'from-gray-300 to-gray-400 cursor-not-allowed'
                   } text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg flex-1`}
                 >
@@ -504,7 +504,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                   <>
                     <button
                       onClick={shareCalculation}
-                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
+                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
                     >
                       <span className="text-xl">🔗</span>
                       <span>Share</span>
@@ -548,7 +548,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('results')}
-                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
+                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
               >
                 <h3 className="text-lg font-semibold text-gray-800">💰 Results</h3>
                 <span className="text-2xl">{collapsedSections.results ? '▼' : '▲'}</span>
@@ -662,7 +662,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('breakdown')}
-                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all"
+                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
               >
                 <h3 className="text-lg font-semibold text-gray-800">📈 Year-wise Breakdown</h3>
                 <span className="text-2xl">{collapsedSections.breakdown ? '▼' : '▲'}</span>
@@ -708,7 +708,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('compare')}
-                className="w-full p-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-semibold text-left flex justify-between items-center"
+                className="w-full p-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
               >
                 <span className="text-xl">📊 Compare Calculations ({comparisons.length})</span>
                 <span className="text-2xl">{collapsedSections.compare ? '▼' : '▲'}</span>
@@ -722,7 +722,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                           <h4 className="font-bold text-lg text-gray-800">Calculation #{index + 1}</h4>
                           <button
                             onClick={() => removeFromCompare(comp.id)}
-                            className="text-red-500 hover:text-red-700 text-xl"
+                            className="text-red-500 hover:text-red-700 text-xl cursor-pointer"
                           >
                             ✕
                           </button>
@@ -765,7 +765,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             <h3 className="text-xl font-bold mb-4 text-gray-800">📤 Share Your Calculation</h3>
             <button
               onClick={shareCalculation}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
             >
               🔗 Share Results
             </button>

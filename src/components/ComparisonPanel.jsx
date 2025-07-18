@@ -19,7 +19,7 @@ export default function ComparisonPanel({ data, onRemove, onClose }) {
             </div>
             <button
               onClick={onClose}
-              className="text-white hover:bg-white/20 p-2 rounded-full transition-colors"
+              className="text-white hover:bg-white/20 p-2 rounded-full transition-colors cursor-pointer"
             >
               ✕
             </button>
@@ -39,7 +39,7 @@ export default function ComparisonPanel({ data, onRemove, onClose }) {
                 <div key={item.id} className="bg-gray-50 rounded-2xl p-6 relative">
                   <button
                     onClick={() => onRemove(item.id)}
-                    className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1 rounded-full transition-colors"
+                    className="absolute top-4 right-4 text-red-500 hover:bg-red-50 p-1 rounded-full transition-colors cursor-pointer"
                   >
                     ✕
                   </button>

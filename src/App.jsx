@@ -172,7 +172,7 @@ export default function App() {
                     <button
                       key={key}
                       onClick={() => setActiveMainTab(key)}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 ${
+                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 cursor-pointer ${
                         activeMainTab === key
                           ? 'text-white shadow-lg transform scale-105'
                           : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -202,7 +202,7 @@ export default function App() {
                     <button
                       key={calc.id}
                       onClick={() => handleSubTabChange(activeMainTab, calc.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-sm ${
+                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer ${
                         activeSubTabs[activeMainTab] === calc.id
                           ? 'text-white shadow-md'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -271,7 +271,7 @@ export default function App() {
           {comparisonData.length > 0 && (
             <motion.button
               onClick={() => setShowComparison(!showComparison)}
-              className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110 relative"
+              className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110 relative cursor-pointer"
               style={{ backgroundColor: '#6366F1' }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
@@ -285,7 +285,7 @@ export default function App() {
 
           <motion.button
             onClick={shareApp}
-            className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110"
+            className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110 cursor-pointer"
             style={{ backgroundColor: '#10B981' }}
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
@@ -296,7 +296,7 @@ export default function App() {
           {deferredPrompt && (
             <motion.button
               onClick={handlePWAInstall}
-              className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110"
+              className="w-14 h-14 rounded-full shadow-xl transition-all transform hover:scale-110 cursor-pointer"
               style={{ backgroundColor: '#10B981' }}
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}

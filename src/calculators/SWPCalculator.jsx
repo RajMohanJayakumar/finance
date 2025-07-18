@@ -132,7 +132,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <button
               onClick={() => toggleSection('inputs')}
-              className="w-full p-6 bg-gradient-to-r from-rose-600 to-orange-600 text-white font-semibold text-left flex justify-between items-center"
+              className="w-full p-6 bg-gradient-to-r from-rose-600 to-orange-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
             >
               <span className="text-xl">⚙️ Calculator Inputs</span>
               <span className="text-2xl">{collapsedSections.inputs ? '▼' : '▲'}</span>
@@ -216,7 +216,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
                 <div className="mt-6">
                   <button
                     onClick={handleReset}
-                    className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+                    className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700 cursor-pointer"
                   >
                     🔄 Reset
                   </button>
@@ -230,7 +230,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('results')}
-                className="w-full p-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-left flex justify-between items-center"
+                className="w-full p-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
               >
                 <span className="text-xl">📊 Withdrawal Results</span>
                 <span className="text-2xl">{collapsedSections.results ? '▼' : '▲'}</span>
@@ -277,7 +277,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
             <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('breakdown')}
-                className="w-full p-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-left flex justify-between items-center"
+                className="w-full p-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
               >
                 <span className="text-xl">📆 Year-wise Breakdown</span>
                 <span className="text-2xl">{collapsedSections.breakdown ? '▼' : '▲'}</span>

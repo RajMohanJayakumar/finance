@@ -229,7 +229,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             {/* Calculate Button */}
             <motion.button
               onClick={calculateEMI}
-              className="w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
+              className="w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer"
               style={{ backgroundColor: '#6366F1' }}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
@@ -240,7 +240,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             {/* Reset Button */}
             <motion.button
               onClick={handleReset}
-              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50"
+              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50 cursor-pointer"
               style={{
                 borderColor: '#E5E7EB',
                 color: '#6B7280'
@@ -256,7 +256,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-gray-100">
                 <motion.button
                   onClick={handleAddToComparison}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300"
+                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
                   style={{ backgroundColor: '#10B981' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -266,7 +266,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
                 <motion.button
                   onClick={shareCalculation}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300"
+                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
                   style={{ backgroundColor: '#10B981' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}

@@ -153,7 +153,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
           <div className="mt-6">
             <button
               onClick={handleReset}
-              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700"
+              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700 cursor-pointer"
             >
               🔄 Reset
             </button>

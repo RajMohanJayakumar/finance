@@ -20,7 +20,7 @@ export default function FloatingComparisonButton() {
         <div className="relative">
           <button
             onClick={toggleComparisonVisibility}
-            className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white p-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110 flex items-center space-x-3 group backdrop-blur-xl border border-white/20"
+            className="bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 hover:from-indigo-600 hover:via-purple-600 hover:to-pink-600 text-white p-5 rounded-2xl shadow-2xl hover:shadow-3xl transition-all transform hover:scale-110 flex items-center space-x-3 group backdrop-blur-xl border border-white/20 cursor-pointer"
           >
             <span className="text-3xl animate-pulse">📊</span>
             <div className="hidden group-hover:flex flex-col items-start">

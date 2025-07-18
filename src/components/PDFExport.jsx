@@ -107,7 +107,7 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
   return (
     <button
       onClick={exportToPDF}
-      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-emerald-400"
+      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-emerald-400 cursor-pointer"
     >
       <span className="text-lg">📄</span>
       <span>Export to PDF</span>
