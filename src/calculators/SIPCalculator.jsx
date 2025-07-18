@@ -285,13 +285,13 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <div className="max-w-7xl mx-auto p-4 lg:p-8">
+      <div className="max-w-7xl mx-auto p-2 sm:p-4 lg:p-8">
         {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-4">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 sm:mb-4">
             💰 SIP Calculator
           </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
             Plan your systematic investment journey with advanced calculations
           </p>
         </div>
@@ -313,7 +313,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
           <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
             <button
               onClick={() => toggleSection('inputs')}
-              className="w-full p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300 cursor-pointer"
+              className="w-full p-4 sm:p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300 cursor-pointer"
             >
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
@@ -327,7 +327,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             </button>
 
             {!collapsedSections.inputs && (
-              <div className="p-8 space-y-8">
+              <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
                 {/* Expected Return - Full Width */}
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2 text-sm font-bold text-gray-800 mb-3">
@@ -340,10 +340,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                       step="0.1"
                       value={inputs.annualReturn}
                       onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      className="w-full pl-4 pr-8 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                       placeholder="12.0"
                     />
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold">
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold text-sm sm:text-base">
                       %
                     </div>
                   </div>
@@ -353,7 +353,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 </div>
 
                 {/* Investment Amount Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-3">
                     <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
                       <span className="text-lg">💰</span>
@@ -365,9 +365,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                         value={inputs.monthlyInvestment}
                         onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
                         placeholder="10,000"
-                        className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                        className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                       />
-                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-sm sm:text-base">
                         ₹
                       </div>
                     </div>
@@ -384,9 +384,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                         value={inputs.maturityAmount}
                         onChange={(e) => handleInputChange('maturityAmount', e.target.value)}
                         placeholder="1,00,00,000"
-                        className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                        className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-blue-200 focus:border-blue-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                       />
-                      <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                      <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-sm sm:text-base">
                         ₹
                       </div>
                     </div>
@@ -405,9 +405,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                       value={inputs.lumpSumAmount}
                       onChange={(e) => handleInputChange('lumpSumAmount', e.target.value)}
                       placeholder="50,000"
-                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-amber-200 focus:border-amber-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                     />
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">
+                    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-sm sm:text-base">
                       ₹
                     </div>
                   </div>
@@ -417,7 +417,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 </div>
 
                 {/* Time Period Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                   <div className="space-y-3">
                     <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
                       <span className="text-lg">⏰</span>
@@ -428,7 +428,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                       value={inputs.timePeriod}
                       onChange={(e) => handleInputChange('timePeriod', e.target.value)}
                       placeholder="10"
-                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                      className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
                     />
                   </div>
 
@@ -440,7 +440,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                     <select
                       value={inputs.timePeriodUnit}
                       onChange={(e) => handleInputChange('timePeriodUnit', e.target.value)}
-                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg cursor-pointer"
+                      className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg cursor-pointer"
                     >
                       <option value="years">Years</option>
                       <option value="months">Months</option>

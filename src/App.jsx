@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
+import './styles/mobile.css'
 
 // Calculator Components
 import SIPCalculator from './calculators/SIPCalculator'
@@ -10,6 +11,12 @@ import EMICalculator from './calculators/EMICalculator'
 import FDCalculator from './calculators/FDCalculator'
 import TaxCalculator from './calculators/TaxCalculator'
 import CAGRCalculator from './calculators/CAGRCalculator'
+import NPSCalculator from './calculators/NPSCalculator'
+import EPFCalculator from './calculators/EPFCalculator'
+import GratuityCalculator from './calculators/GratuityCalculator'
+import CompoundInterestCalculator from './calculators/CompoundInterestCalculator'
+import SimpleInterestCalculator from './calculators/SimpleInterestCalculator'
+import InflationCalculator from './calculators/InflationCalculator'
 
 // Components
 import Header from './components/Header'
@@ -59,6 +66,26 @@ const calculatorData = {
       { id: 'income-tax', name: 'Income Tax', icon: '🧾', component: TaxCalculator, description: 'Calculate income tax liability' },
       { id: 'capital-gains', name: 'Capital Gains', icon: '💹', component: TaxCalculator, description: 'Calculate capital gains tax' }
     ]
+  },
+  retirement: {
+    title: "Retirement",
+    icon: "🏛️",
+    color: "purple",
+    calculators: [
+      { id: 'nps', name: 'NPS Calculator', icon: '🏛️', component: NPSCalculator, description: 'National Pension Scheme calculator' },
+      { id: 'epf', name: 'EPF Calculator', icon: '🏢', component: EPFCalculator, description: 'Employee Provident Fund calculator' },
+      { id: 'gratuity', name: 'Gratuity Calculator', icon: '🎁', component: GratuityCalculator, description: 'Gratuity calculation for employees' }
+    ]
+  },
+  general: {
+    title: "General",
+    icon: "🧮",
+    color: "gray",
+    calculators: [
+      { id: 'compound-interest', name: 'Compound Interest', icon: '🧮', component: CompoundInterestCalculator, description: 'Calculate compound interest and growth' },
+      { id: 'simple-interest', name: 'Simple Interest', icon: '📊', component: SimpleInterestCalculator, description: 'Calculate simple interest' },
+      { id: 'inflation', name: 'Inflation Calculator', icon: '📈', component: InflationCalculator, description: 'Calculate inflation impact over time' }
+    ]
   }
 }
 
@@ -83,7 +110,9 @@ export default function App() {
     loans: 'emi',
     savings: 'fd',
     mutual_funds: 'sip',
-    tax: 'income-tax'
+    tax: 'income-tax',
+    retirement: 'nps',
+    general: 'compound-interest'
   })
   const [comparisonData, setComparisonData] = useState([])
   const [showComparison, setShowComparison] = useState(false)
@@ -155,24 +184,24 @@ export default function App() {
         <Header />
 
         <motion.div
-          className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8"
+          className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8"
           initial="initial"
           animate="animate"
           variants={staggerContainer}
         >
           {/* Main Category Tabs */}
           <motion.div
-            className="mb-8"
+            className="mb-6 sm:mb-8"
             variants={fadeInUp}
           >
             <div className="flex justify-center">
-              <div className="bg-white rounded-2xl p-2 shadow-lg border border-gray-200">
-                <div className="flex space-x-2">
+              <div className="bg-white rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-lg border border-gray-200 w-full max-w-5xl mx-2 sm:mx-0">
+                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
                   {Object.entries(calculatorData).map(([key, category]) => (
                     <button
                       key={key}
                       onClick={() => setActiveMainTab(key)}
-                      className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 cursor-pointer ${
+                      className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-1 sm:space-x-2 cursor-pointer text-xs sm:text-sm lg:text-base ${
                         activeMainTab === key
                           ? 'text-white shadow-lg transform scale-105'
                           : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -181,8 +210,9 @@ export default function App() {
                         backgroundColor: activeMainTab === key ? '#6366F1' : 'transparent'
                       }}
                     >
-                      <span className="text-lg">{category.icon}</span>
-                      <span>{category.title}</span>
+                      <span className="text-sm sm:text-lg">{category.icon}</span>
+                      <span className="hidden sm:inline">{category.title}</span>
+                      <span className="sm:hidden text-xs">{category.title.split(' ')[0]}</span>
                     </button>
                   ))}
                 </div>
@@ -192,17 +222,17 @@ export default function App() {
 
           {/* Sub Category Tabs */}
           <motion.div
-            className="mb-8"
+            className="mb-6 sm:mb-8"
             variants={fadeInUp}
           >
             <div className="flex justify-center">
-              <div className="bg-white rounded-xl p-1.5 shadow-md border border-gray-100">
-                <div className="flex flex-wrap justify-center gap-2">
+              <div className="bg-white rounded-lg sm:rounded-xl p-1.5 shadow-md border border-gray-100 w-full max-w-4xl mx-2 sm:mx-0">
+                <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
                   {currentCategory?.calculators.map((calc) => (
                     <button
                       key={calc.id}
                       onClick={() => handleSubTabChange(activeMainTab, calc.id)}
-                      className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-sm cursor-pointer ${
+                      className={`px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm cursor-pointer ${
                         activeSubTabs[activeMainTab] === calc.id
                           ? 'text-white shadow-md'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
@@ -211,8 +241,9 @@ export default function App() {
                         backgroundColor: activeSubTabs[activeMainTab] === calc.id ? '#10B981' : 'transparent'
                       }}
                     >
-                      <span>{calc.icon}</span>
-                      <span>{calc.name}</span>
+                      <span className="text-sm">{calc.icon}</span>
+                      <span className="hidden sm:inline">{calc.name}</span>
+                      <span className="sm:hidden text-xs">{calc.name.split(' ')[0]}</span>
                     </button>
                   ))}
                 </div>

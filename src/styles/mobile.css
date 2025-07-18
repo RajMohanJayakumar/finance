@@ -1,0 +1,352 @@
+/* Mobile-first responsive improvements */
+
+/* Base mobile styles */
+@media (max-width: 640px) {
+  /* Ensure proper touch targets */
+  button, input, select, textarea {
+    min-height: 44px;
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+
+  /* Improve text readability */
+  body {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Better spacing for mobile */
+  .container {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  /* Calculator specific improvements */
+  .calculator-container {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  /* Reduce excessive padding in cards */
+  .calculator-card {
+    padding: 1rem;
+  }
+
+  /* Better input spacing */
+  .input-group {
+    margin-bottom: 1rem;
+  }
+
+  /* Improve form inputs */
+  input[type="number"], 
+  input[type="text"], 
+  input[type="email"], 
+  select {
+    font-size: 16px !important; /* Prevents zoom */
+    padding: 12px 16px;
+    border-radius: 8px;
+  }
+
+  /* Better button sizing */
+  .btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    min-height: 44px;
+  }
+
+  /* Improve card layouts */
+  .card {
+    margin-bottom: 1rem;
+    border-radius: 12px;
+  }
+
+  /* Better modal sizing */
+  .modal {
+    margin: 0.5rem;
+    max-height: 95vh;
+  }
+
+  /* Improve table responsiveness */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Better chart containers */
+  .chart-container {
+    height: 250px !important;
+    margin-bottom: 1rem;
+  }
+
+  /* Improve floating elements */
+  .floating-button {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 12px;
+  }
+
+  /* Better grid layouts */
+  .grid-mobile {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  /* Improve text sizing */
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.5rem; }
+  h3 { font-size: 1.25rem; }
+  h4 { font-size: 1.125rem; }
+
+  /* Better spacing */
+  .space-y-mobile > * + * {
+    margin-top: 1rem;
+  }
+
+  /* Improve scrollable areas */
+  .scroll-container {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Tablet styles */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Tablet-specific improvements */
+  .grid-tablet {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .chart-container {
+    height: 300px;
+  }
+
+  /* Better button groups */
+  .button-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+}
+
+/* Desktop styles */
+@media (min-width: 1025px) {
+  .grid-desktop {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .chart-container {
+    height: 350px;
+  }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  /* Crisp borders and shadows */
+  .card, .button, .input {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+  /* Add dark mode styles if needed */
+  .dark-mode {
+    background-color: #1a202c;
+    color: #e2e8f0;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .print-break {
+    page-break-before: always;
+  }
+
+  .print-avoid-break {
+    page-break-inside: avoid;
+  }
+
+  body {
+    font-size: 12pt;
+    line-height: 1.4;
+  }
+
+  .container {
+    max-width: none;
+    padding: 0;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-contrast: high) {
+  /* High contrast mode */
+  .button {
+    border: 2px solid currentColor;
+  }
+
+  .input {
+    border: 2px solid currentColor;
+  }
+}
+
+/* Focus improvements */
+.focus-visible:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+/* Better touch targets */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better text selection */
+::selection {
+  background-color: #3b82f6;
+  color: white;
+}
+
+/* Loading states */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Error states */
+.error {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Success states */
+.success {
+  border-color: #10b981 !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1) !important;
+}
+
+/* Utility classes for mobile */
+.mobile-hidden {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .mobile-hidden {
+    display: block;
+  }
+  
+  .mobile-only {
+    display: none;
+  }
+}
+
+.mobile-only {
+  display: block;
+}
+
+/* Better safe areas for mobile devices */
+@supports (padding: max(0px)) {
+  .safe-area-inset {
+    padding-left: max(1rem, env(safe-area-inset-left));
+    padding-right: max(1rem, env(safe-area-inset-right));
+    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  }
+}
+
+/* Improved scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Better form validation */
+input:invalid {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+input:valid {
+  border-color: #10b981;
+}
+
+/* Improved animations */
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Better card hover effects */
+.card-hover {
+  transition: all 0.2s ease-in-out;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+/* Improved button states */
+.button-primary {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  transition: all 0.2s ease-in-out;
+}
+
+.button-primary:hover {
+  background: linear-gradient(135deg, #1d4ed8, #1e40af);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.button-primary:active {
+  transform: translateY(0);
+}

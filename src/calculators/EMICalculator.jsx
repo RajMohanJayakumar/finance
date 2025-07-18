@@ -28,7 +28,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onBlur={() => setIsFocused(false)}
           step={step}
           min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
+          className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
           style={{
             borderColor: isFocused ? '#6366F1' : '#E5E7EB',
             backgroundColor: '#FFFFFF',

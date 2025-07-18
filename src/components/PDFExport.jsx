@@ -8,11 +8,23 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
     element.innerHTML = generatePDFContent()
 
     const opt = {
-      margin: 0.5,
-      filename: `${calculatorType.toLowerCase().replace(/\s+/g, '-')}-calculator-${Date.now()}.pdf`,
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `financial-calculator-report-${Date.now()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2, useCORS: true },
-      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        allowTaint: false,
+        backgroundColor: '#ffffff'
+      },
+      jsPDF: {
+        unit: 'in',
+        format: 'letter',
+        orientation: 'portrait',
+        compress: true
+      },
+      pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
     }
 
     html2pdf().set(opt).from(element).save()
@@ -23,45 +35,49 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
     const currentTime = new Date().toLocaleTimeString()
 
     return `
-      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; max-width: 800px; margin: 0 auto; padding: 40px; background: #ffffff;">
+      <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 30px; background: #ffffff; line-height: 1.6; color: #1a202c;">
         <!-- Header -->
-        <div style="text-align: center; margin-bottom: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 20px; box-shadow: 0 20px 40px rgba(102, 126, 234, 0.3);">
-          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
-            <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.2); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 20px; backdrop-filter: blur(10px);">
-              <span style="color: white; font-size: 24px; font-weight: bold;">💰</span>
+        <div style="text-align: center; margin-bottom: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; box-shadow: 0 25px 50px rgba(102, 126, 234, 0.25); page-break-inside: avoid;">
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
+            <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 25px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
+              <span style="color: white; font-size: 28px; font-weight: bold;">💰</span>
             </div>
-            <h1 style="margin: 0; font-size: 32px; font-weight: 800; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+            <h1 style="margin: 0; font-size: 36px; font-weight: 900; text-shadow: 0 4px 8px rgba(0,0,0,0.15); letter-spacing: -0.5px;">
               Universal Finance Calculator
             </h1>
           </div>
-          <div style="background: rgba(255,255,255,0.1); border-radius: 12px; padding: 15px; margin-top: 20px; backdrop-filter: blur(10px);">
-            <p style="margin: 0; font-size: 18px; font-weight: 600;">${title}</p>
-            <p style="margin: 8px 0 0 0; font-size: 14px; opacity: 0.9;">Generated on ${currentDate} at ${currentTime}</p>
+          <div style="background: rgba(255,255,255,0.12); border-radius: 16px; padding: 20px; margin-top: 25px; backdrop-filter: blur(15px); border: 1px solid rgba(255,255,255,0.2);">
+            <p style="margin: 0; font-size: 20px; font-weight: 700; letter-spacing: 0.5px;">${title}</p>
+            <p style="margin: 12px 0 0 0; font-size: 15px; opacity: 0.9; font-weight: 500;">Generated on ${currentDate} at ${currentTime}</p>
+            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2);">
+              <p style="margin: 0; font-size: 13px; opacity: 0.8; font-style: italic;">Professional Financial Analysis Report</p>
+            </div>
           </div>
         </div>
 
         <!-- Results -->
-        <div style="margin-bottom: 40px;">
+        <div style="margin-bottom: 50px;">
           ${data.map((item, index) => `
-            <div style="margin-bottom: 30px; border: none; border-radius: 20px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.1); background: white;">
-              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; position: relative;">
-                <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; transform: translate(30px, -30px);"></div>
-                <h2 style="margin: 0; font-size: 24px; font-weight: 700; position: relative; z-index: 1;">${item.calculator}</h2>
-                <p style="margin: 8px 0 0 0; color: rgba(255,255,255,0.9); font-size: 14px; position: relative; z-index: 1;">Calculated on ${new Date(item.timestamp).toLocaleString()}</p>
+            <div style="margin-bottom: 40px; border: none; border-radius: 24px; overflow: hidden; box-shadow: 0 15px 40px rgba(0,0,0,0.08); background: white; page-break-inside: avoid; ${index > 0 ? 'page-break-before: auto;' : ''}">
+              <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -20px; right: -20px; width: 120px; height: 120px; background: rgba(255,255,255,0.08); border-radius: 50%; transform: rotate(45deg);"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 80px; height: 80px; background: rgba(255,255,255,0.05); border-radius: 50%;"></div>
+                <h2 style="margin: 0; font-size: 26px; font-weight: 800; position: relative; z-index: 2; letter-spacing: -0.3px;">${item.calculator}</h2>
+                <p style="margin: 10px 0 0 0; color: rgba(255,255,255,0.9); font-size: 15px; position: relative; z-index: 2; font-weight: 500;">Calculated on ${new Date(item.timestamp).toLocaleDateString()} at ${new Date(item.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
               </div>
               
-              <div style="padding: 30px;">
+              <div style="padding: 35px;">
                 ${item.inputs ? `
-                  <div style="margin-bottom: 25px;">
-                    <h3 style="margin: 0 0 15px 0; font-size: 20px; font-weight: 700; color: #374151; display: flex; align-items: center;">
-                      <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 14px;">📊</span>
+                  <div style="margin-bottom: 30px;">
+                    <h3 style="margin: 0 0 18px 0; font-size: 22px; font-weight: 800; color: #2d3748; display: flex; align-items: center; letter-spacing: -0.2px;">
+                      <span style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);">📊</span>
                       Input Parameters
                     </h3>
-                    <div style="background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 12px; padding: 20px; border-left: 4px solid #667eea;">
-                      ${Object.entries(item.inputs).map(([key, value]) => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding: 8px 0; border-bottom: 1px solid rgba(102, 126, 234, 0.1);">
-                          <span style="color: #475569; font-weight: 600; text-transform: capitalize;">${key.replace(/([A-Z])/g, ' $1').replace(/^\w/, c => c.toUpperCase())}:</span>
-                          <span style="color: #1e293b; font-weight: 700; background: white; padding: 4px 12px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${value}</span>
+                    <div style="background: linear-gradient(135deg, #f7fafc, #edf2f7); border-radius: 16px; padding: 25px; border-left: 5px solid #667eea; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
+                      ${Object.entries(item.inputs).map(([key, value], inputIndex) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${inputIndex === Object.entries(item.inputs).length - 1 ? '0' : '15px'}; padding: 12px 0; ${inputIndex !== Object.entries(item.inputs).length - 1 ? 'border-bottom: 1px solid rgba(102, 126, 234, 0.12);' : ''}">
+                          <span style="color: #4a5568; font-weight: 600; text-transform: capitalize; font-size: 15px;">${key.replace(/([A-Z])/g, ' $1').replace(/^\w/, c => c.toUpperCase())}:</span>
+                          <span style="color: #1a202c; font-weight: 800; background: white; padding: 8px 16px; border-radius: 8px; box-shadow: 0 3px 8px rgba(0,0,0,0.08); font-size: 15px; border: 1px solid #e2e8f0;">${value}</span>
                         </div>
                       `).join('')}
                     </div>
@@ -70,15 +86,15 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
                 
                 ${item.results ? `
                   <div>
-                    <h3 style="margin: 0 0 15px 0; font-size: 20px; font-weight: 700; color: #374151; display: flex; align-items: center;">
-                      <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 10px; font-size: 14px;">💡</span>
+                    <h3 style="margin: 0 0 18px 0; font-size: 22px; font-weight: 800; color: #2d3748; display: flex; align-items: center; letter-spacing: -0.2px;">
+                      <span style="background: linear-gradient(135deg, #10b981, #059669); color: white; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-size: 16px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);">💡</span>
                       Calculation Results
                     </h3>
-                    <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 12px; padding: 20px; border-left: 4px solid #10b981; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.1);">
+                    <div style="background: linear-gradient(135deg, #f0fdf4, #dcfce7); border-radius: 16px; padding: 25px; border-left: 5px solid #10b981; box-shadow: 0 6px 20px rgba(16, 185, 129, 0.12);">
                       ${Object.entries(item.results).map(([key, value], resultIndex) => `
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding: 12px; background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); ${resultIndex === 0 ? 'border: 2px solid #10b981;' : ''}">
-                          <span style="color: #065f46; font-weight: 600; font-size: 16px;">${key.replace(/([A-Z])/g, ' $1')}:</span>
-                          <span style="color: #064e3b; font-weight: 800; font-size: 18px; ${resultIndex === 0 ? 'color: #10b981;' : ''}">${value}</span>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: ${resultIndex === Object.entries(item.results).length - 1 ? '0' : '18px'}; padding: 16px; background: white; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.06); ${resultIndex === 0 ? 'border: 2px solid #10b981; background: linear-gradient(135deg, #f0fdf4, #ffffff);' : 'border: 1px solid #e5e7eb;'}">
+                          <span style="color: #065f46; font-weight: 700; font-size: 16px; ${resultIndex === 0 ? 'color: #059669;' : ''}">${key.replace(/([A-Z])/g, ' $1')}:</span>
+                          <span style="color: #064e3b; font-weight: 900; font-size: 18px; ${resultIndex === 0 ? 'color: #10b981; font-size: 20px;' : ''}">${value}</span>
                         </div>
                       `).join('')}
                     </div>
@@ -90,14 +106,36 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
         </div>
 
         <!-- Footer -->
-        <div style="text-align: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 16px; padding: 25px; margin-top: 30px; border: 1px solid #e2e8f0;">
-          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <span style="font-size: 24px; margin-right: 10px;">🌟</span>
-            <p style="margin: 0; font-size: 16px; font-weight: 600; color: #374151;">Generated by Universal Finance Calculator</p>
+        <div style="text-align: center; background: linear-gradient(135deg, #f8fafc, #e2e8f0); border-radius: 20px; padding: 35px; margin-top: 40px; border: 2px solid #e2e8f0; page-break-inside: avoid;">
+          <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px; flex-wrap: wrap;">
+            <span style="font-size: 28px; margin-right: 15px;">🌟</span>
+            <p style="margin: 0; font-size: 18px; font-weight: 700; color: #2d3748; letter-spacing: -0.2px;">Generated by Universal Finance Calculator</p>
           </div>
-          <p style="margin: 0; font-size: 14px; color: #6b7280;">Professional financial planning made simple • Trusted by thousands</p>
-          <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #d1d5db;">
-            <p style="margin: 0; font-size: 12px; color: #9ca3af;">This report is generated for informational purposes only. Please consult with a financial advisor for personalized advice.</p>
+          <p style="margin: 0; font-size: 15px; color: #4a5568; font-weight: 500; margin-bottom: 20px;">Professional financial planning made simple • Trusted by thousands</p>
+
+          <div style="background: white; border-radius: 12px; padding: 20px; margin: 20px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px;">
+              <div style="text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 5px;">📊</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">ACCURATE</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 5px;">🔒</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">SECURE</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 5px;">⚡</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">INSTANT</div>
+              </div>
+              <div style="text-align: center;">
+                <div style="font-size: 20px; margin-bottom: 5px;">💎</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">PREMIUM</div>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #d1d5db;">
+            <p style="margin: 0; font-size: 13px; color: #9ca3af; font-style: italic; line-height: 1.5;">This report is generated for informational purposes only. Please consult with a qualified financial advisor for personalized advice. All calculations are based on the inputs provided and current market assumptions.</p>
           </div>
         </div>
       </div>
@@ -107,10 +145,11 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
   return (
     <button
       onClick={exportToPDF}
-      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-6 py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-emerald-400 cursor-pointer"
+      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-emerald-400 cursor-pointer text-sm sm:text-base"
     >
-      <span className="text-lg">📄</span>
-      <span>Export to PDF</span>
+      <span className="text-base sm:text-lg">📄</span>
+      <span className="hidden sm:inline">Export to PDF</span>
+      <span className="sm:hidden">PDF</span>
     </button>
   )
 }
