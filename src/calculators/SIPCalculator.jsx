@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 
 const countries = {
   'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
@@ -9,8 +8,6 @@ const countries = {
 }
 
 export default function SIPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
-  const location = useLocation()
-  const navigate = useNavigate()
 
   const [inputs, setInputs] = useState({
     monthlyInvestment: '',
@@ -36,24 +33,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   })
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
-  // Initialize from URL parameters on mount
+  // Component initialization
   useEffect(() => {
-    const urlParams = new URLSearchParams(location.search)
-    const newInputs = { ...inputs }
-    let hasChanges = false
-    
-    Object.keys(inputs).forEach(key => {
-      const value = urlParams.get(key)
-      if (value && value !== inputs[key]) {
-        newInputs[key] = value
-        hasChanges = true
-      }
-    })
-    
-    if (hasChanges) {
-      setInputs(newInputs)
-    }
-  }, []) // Only run on mount
+    // Initialize component
+  }, [])
 
   // PWA Install functionality
   useEffect(() => {
@@ -74,15 +57,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
+  // Placeholder for future URL functionality
   const updateURL = useCallback((newInputs) => {
-    const params = new URLSearchParams()
-    Object.entries(newInputs).forEach(([key, value]) => {
-      if (value) params.set(key, value)
-    })
-
-    const newURL = `${location.pathname}?${params.toString()}`
-    navigate(newURL, { replace: true })
-  }, [navigate])
+    // URL update functionality can be added here if needed
+  }, [])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -100,13 +78,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
 
     setInputs(newInputs)
-    
-    // Debounce URL updates to prevent excessive navigation
-    const timeoutId = setTimeout(() => {
-      updateURL(newInputs)
-    }, 300)
-    
-    return () => clearTimeout(timeoutId)
+    updateURL(newInputs)
   }
 
   const calculateSIP = useCallback(() => {
@@ -207,15 +179,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
       calculateSIP()
     }
-  }, [
-    inputs.monthlyInvestment, 
-    inputs.maturityAmount, 
-    inputs.annualReturn, 
-    inputs.timePeriodYears, 
-    inputs.timePeriodMonths, 
-    inputs.stepUpPercentage, 
-    inputs.calculationType
-  ])
+  }, [calculateSIP])
 
   const addToCompare = () => {
     if (results) {
