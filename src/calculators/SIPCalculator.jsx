@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react'
 
-const countries = {
-  'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
-  'usa': { flag: '🇺🇸', name: 'USA', currency: '$', typical_return: 8 },
-  'uk': { flag: '🇬🇧', name: 'UK', currency: '£', typical_return: 7 },
-  'canada': { flag: '🇨🇦', name: 'Canada', currency: 'C$', typical_return: 7.5 }
-}
-
 export default function SIPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
 
   const [inputs, setInputs] = useState({
     monthlyInvestment: '',
     maturityAmount: '',
+    lumpSumAmount: '',
     annualReturn: '12',
-    timePeriodYears: '10',
-    timePeriodMonths: '0',
+    timePeriod: '10',
+    timePeriodUnit: 'years', // 'months' or 'years'
     stepUpPercentage: '0',
-    country: 'india',
     calculationType: 'monthly'
   })
 
@@ -65,10 +58,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
 
-    if (field === 'country') {
-      newInputs.annualReturn = countries[value].typical_return.toString()
-    }
-
     if (field === 'monthlyInvestment' && value) {
       newInputs.maturityAmount = ''
       newInputs.calculationType = 'monthly'
@@ -84,10 +73,11 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const calculateSIP = useCallback(() => {
     const monthly = parseFloat(inputs.monthlyInvestment) || 0
     const targetAmount = parseFloat(inputs.maturityAmount) || 0
+    const lumpSum = parseFloat(inputs.lumpSumAmount) || 0
     const rate = parseFloat(inputs.annualReturn) / 100 / 12
-    const years = parseInt(inputs.timePeriodYears) || 0
-    const months = parseInt(inputs.timePeriodMonths) || 0
-    const totalMonths = years * 12 + months
+    const timePeriodValue = parseInt(inputs.timePeriod) || 0
+    const totalMonths = inputs.timePeriodUnit === 'years' ? timePeriodValue * 12 : timePeriodValue
+    const years = Math.floor(totalMonths / 12)
     const stepUp = parseFloat(inputs.stepUpPercentage) / 100
 
     if (totalMonths <= 0 || rate < 0) return
@@ -96,9 +86,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     let breakdown = []
 
     if (inputs.calculationType === 'monthly' && monthly > 0) {
-      // Calculate future value from monthly investment
-      let futureValue = 0
-      let totalInvestment = 0
+      // Calculate future value from monthly investment + lump sum
+      let futureValue = lumpSum // Start with lump sum
+      let totalInvestment = lumpSum
       let currentMonthlyInvestment = monthly
 
       for (let year = 1; year <= years; year++) {
@@ -124,6 +114,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
       calculatedResults = {
         monthlyInvestment: monthly,
+        lumpSumAmount: lumpSum,
         maturityAmount: Math.round(futureValue),
         totalInvestment: Math.round(totalInvestment),
         wealthGained: Math.round(futureValue - totalInvestment)
@@ -166,26 +157,28 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     setResults(calculatedResults)
     setYearlyBreakdown(breakdown)
   }, [
-    inputs.monthlyInvestment, 
-    inputs.maturityAmount, 
-    inputs.annualReturn, 
-    inputs.timePeriodYears, 
-    inputs.timePeriodMonths, 
-    inputs.stepUpPercentage, 
+    inputs.monthlyInvestment,
+    inputs.maturityAmount,
+    inputs.lumpSumAmount,
+    inputs.annualReturn,
+    inputs.timePeriod,
+    inputs.timePeriodUnit,
+    inputs.stepUpPercentage,
     inputs.calculationType
   ])
 
   useEffect(() => {
-    if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriodYears) {
+    if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriod) {
       calculateSIP()
     }
   }, [
-    inputs.monthlyInvestment, 
-    inputs.maturityAmount, 
-    inputs.annualReturn, 
-    inputs.timePeriodYears, 
-    inputs.timePeriodMonths, 
-    inputs.stepUpPercentage, 
+    inputs.monthlyInvestment,
+    inputs.maturityAmount,
+    inputs.lumpSumAmount,
+    inputs.annualReturn,
+    inputs.timePeriod,
+    inputs.timePeriodUnit,
+    inputs.stepUpPercentage,
     inputs.calculationType
   ])
 
@@ -194,11 +187,11 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
       const comparison = {
         id: Date.now(),
         monthlyInvestment: inputs.monthlyInvestment || results.monthlyInvestment,
+        lumpSumAmount: inputs.lumpSumAmount,
         annualReturn: inputs.annualReturn,
-        timePeriodYears: inputs.timePeriodYears,
-        timePeriodMonths: inputs.timePeriodMonths,
+        timePeriod: inputs.timePeriod,
+        timePeriodUnit: inputs.timePeriodUnit,
         stepUpPercentage: inputs.stepUpPercentage,
-        country: inputs.country,
         futureValue: results.maturityAmount,
         totalInvested: results.totalInvestment,
         totalGains: results.wealthGained,
@@ -223,12 +216,12 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
         calculator: 'SIP Calculator',
         inputs: {
           ...inputs,
-          currency: countries[inputs.country].currency
+          currency: '₹'
         },
         results: {
-          [`Maturity Amount (${countries[inputs.country].currency})`]: results.maturityAmount?.toLocaleString() || 'N/A',
-          [`Total Investment (${countries[inputs.country].currency})`]: results.totalInvestment?.toLocaleString() || 'N/A',
-          [`Wealth Gained (${countries[inputs.country].currency})`]: results.wealthGained?.toLocaleString() || 'N/A'
+          'Maturity Amount (₹)': results.maturityAmount?.toLocaleString() || 'N/A',
+          'Total Investment (₹)': results.totalInvestment?.toLocaleString() || 'N/A',
+          'Wealth Gained (₹)': results.wealthGained?.toLocaleString() || 'N/A'
         }
       })
     }
@@ -237,7 +230,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const shareCalculation = () => {
     const shareData = {
       title: 'SIP Calculator Results',
-      text: `SIP Calculation: Monthly Investment ${countries[inputs.country].currency}${inputs.monthlyInvestment} for ${inputs.timePeriodYears} years`,
+      text: `SIP Calculation: Monthly Investment ₹${inputs.monthlyInvestment} for ${inputs.timePeriod} ${inputs.timePeriodUnit}`,
       url: window.location.href
     }
 
@@ -249,9 +242,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
-  const selectedCountry = countries[inputs.country]
-
-  const currentCountry = countries[inputs.country]
   const colorClasses = {
     blue: 'from-blue-500 to-blue-600',
     green: 'from-green-500 to-green-600',
@@ -300,23 +290,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Country/Region
-                    </label>
-                    <select
-                      value={inputs.country}
-                      onChange={(e) => handleInputChange('country', e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    >
-                      {Object.entries(countries).map(([key, country]) => (
-                        <option key={key} value={key}>
-                          {country.flag} {country.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
                       Expected Annual Return (%)
                     </label>
                     <input
@@ -327,7 +300,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Typical return in {currentCountry.name}: {currentCountry.typical_return}%
+                      Typical mutual fund returns: 10-15%
                     </p>
                   </div>
                 </div>
@@ -335,7 +308,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Monthly Investment ({currentCountry.currency})
+                      Monthly Investment (₹)
                     </label>
                     <input
                       type="number"
@@ -348,7 +321,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      OR Target Amount ({currentCountry.currency})
+                      OR Target Amount (₹)
                     </label>
                     <input
                       type="number"
@@ -363,28 +336,47 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Investment Period (Years)
+                      Lump Sum Amount (₹)
                     </label>
                     <input
                       type="number"
-                      value={inputs.timePeriodYears}
-                      onChange={(e) => handleInputChange('timePeriodYears', e.target.value)}
+                      value={inputs.lumpSumAmount}
+                      onChange={(e) => handleInputChange('lumpSumAmount', e.target.value)}
+                      placeholder="Enter lump sum amount (optional)"
+                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Initial one-time investment amount
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Investment Period
+                    </label>
+                    <input
+                      type="number"
+                      value={inputs.timePeriod}
+                      onChange={(e) => handleInputChange('timePeriod', e.target.value)}
+                      placeholder="Enter duration"
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Additional Months
+                      Period Unit
                     </label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="11"
-                      value={inputs.timePeriodMonths}
-                      onChange={(e) => handleInputChange('timePeriodMonths', e.target.value)}
+                    <select
+                      value={inputs.timePeriodUnit}
+                      onChange={(e) => handleInputChange('timePeriodUnit', e.target.value)}
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
+                    >
+                      <option value="years">Years</option>
+                      <option value="months">Months</option>
+                    </select>
                   </div>
                 </div>
               </div>
@@ -435,23 +427,31 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
               {!collapsedSections.results && (
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                     <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
                       <p className="text-sm opacity-90">Monthly Investment</p>
                       <p className="text-2xl font-bold">
-                        {currentCountry.currency}{results.monthlyInvestment?.toLocaleString()}
+                        ₹{results.monthlyInvestment?.toLocaleString()}
                       </p>
                     </div>
+                    {results.lumpSumAmount > 0 && (
+                      <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
+                        <p className="text-sm opacity-90">Lump Sum</p>
+                        <p className="text-2xl font-bold">
+                          ₹{results.lumpSumAmount?.toLocaleString()}
+                        </p>
+                      </div>
+                    )}
                     <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
                       <p className="text-sm opacity-90">Maturity Amount</p>
                       <p className="text-2xl font-bold">
-                        {currentCountry.currency}{results.maturityAmount?.toLocaleString()}
+                        ₹{results.maturityAmount?.toLocaleString()}
                       </p>
                     </div>
                     <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
                       <p className="text-sm opacity-90">Wealth Gained</p>
                       <p className="text-2xl font-bold">
-                        {currentCountry.currency}{results.wealthGained?.toLocaleString()}
+                        ₹{results.wealthGained?.toLocaleString()}
                       </p>
                     </div>
                   </div>
@@ -495,13 +495,13 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                           <tr key={index} className="border-b">
                             <td className="py-2">{year.year}</td>
                             <td className="text-right py-2">
-                              {currentCountry.currency}{year.yearlyInvestment.toLocaleString()}
+                              ₹{year.yearlyInvestment.toLocaleString()}
                             </td>
                             <td className="text-right py-2">
-                              {currentCountry.currency}{year.yearEndValue.toLocaleString()}
+                              ₹{year.yearEndValue.toLocaleString()}
                             </td>
                             <td className="text-right py-2">
-                              {currentCountry.currency}{year.totalInvestment.toLocaleString()}
+                              ₹{year.totalInvestment.toLocaleString()}
                             </td>
                           </tr>
                         ))}
@@ -540,11 +540,17 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                         <div className="space-y-3 text-sm">
                           <div className="flex justify-between">
                             <span>Monthly:</span>
-                            <span className="font-semibold">{countries[comp.country].currency}{comp.monthlyInvestment}</span>
+                            <span className="font-semibold">₹{comp.monthlyInvestment}</span>
                           </div>
+                          {comp.lumpSumAmount > 0 && (
+                            <div className="flex justify-between">
+                              <span>Lump Sum:</span>
+                              <span className="font-semibold">₹{comp.lumpSumAmount}</span>
+                            </div>
+                          )}
                           <div className="flex justify-between">
                             <span>Duration:</span>
-                            <span>{comp.timePeriodYears}y {comp.timePeriodMonths}m</span>
+                            <span>{comp.timePeriod} {comp.timePeriodUnit}</span>
                           </div>
                           <div className="flex justify-between">
                             <span>Return:</span>
@@ -552,7 +558,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                           </div>
                           <div className="flex justify-between border-t pt-2">
                             <span>Maturity:</span>
-                            <span className="font-bold text-green-600">{countries[comp.country].currency}{parseInt(comp.futureValue).toLocaleString()}</span>
+                            <span className="font-bold text-green-600">₹{parseInt(comp.futureValue).toLocaleString()}</span>
                           </div>
                           <div className="text-xs text-gray-500">{comp.timestamp}</div>
                         </div>

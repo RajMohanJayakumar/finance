@@ -1,10 +1,7 @@
 
 import React, { useState, useEffect } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 
-export default function EMICalculator() {
-  const location = useLocation()
-  const navigate = useNavigate()
+export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   
   const [inputs, setInputs] = useState({
     principal: '',
@@ -16,32 +13,11 @@ export default function EMICalculator() {
   
   const [results, setResults] = useState(null)
 
-  useEffect(() => {
-    const urlParams = new URLSearchParams(location.search)
-    const newInputs = { ...inputs }
-    
-    Object.keys(inputs).forEach(key => {
-      const value = urlParams.get(key)
-      if (value) newInputs[key] = value
-    })
-    
-    setInputs(newInputs)
-  }, [location.search])
-
-  const updateURL = (newInputs) => {
-    const params = new URLSearchParams()
-    Object.entries(newInputs).forEach(([key, value]) => {
-      if (value) params.set(key, value)
-    })
-    
-    const newURL = `${location.pathname}?${params.toString()}`
-    navigate(newURL, { replace: true })
-  }
+  // Removed URL parameter handling since we're using tabs instead of routes
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
     setInputs(newInputs)
-    updateURL(newInputs)
   }
 
   const calculateEMI = () => {

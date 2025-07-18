@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect, useCallback } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
 
 const countries = {
   'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
@@ -9,9 +8,7 @@ const countries = {
   'canada': { flag: '🇨🇦', name: 'Canada', currency: 'C$', typical_return: 7.5 }
 }
 
-export default function SWPCalculator() {
-  const location = useLocation()
-  const navigate = useNavigate()
+export default function SWPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
 
   const [inputs, setInputs] = useState({
     initialInvestment: '',
@@ -29,25 +26,14 @@ export default function SWPCalculator() {
     breakdown: true
   })
 
-  const updateURL = useCallback((newInputs) => {
-    const params = new URLSearchParams()
-    Object.entries(newInputs).forEach(([key, value]) => {
-      if (value) params.set(key, value)
-    })
-
-    const newURL = `${location.pathname}?${params.toString()}`
-    navigate(newURL, { replace: true })
-  }, [location.pathname, navigate])
-
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
-    
+
     if (field === 'country') {
       newInputs.annualReturn = countries[value].typical_return.toString()
     }
 
     setInputs(newInputs)
-    updateURL(newInputs)
   }
 
   const calculateSWP = useCallback(() => {

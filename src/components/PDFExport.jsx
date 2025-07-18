@@ -30,7 +30,7 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
             <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 15px;">
               <span style="color: white; font-size: 20px; font-weight: bold;">💰</span>
             </div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 800; background: linear-gradient(135deg, #1f2937, #6b7280); -webkit-background-clip: text; color: #1f2937;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #1f2937;">
               Universal Finance Calculator
             </h1>
           </div>
