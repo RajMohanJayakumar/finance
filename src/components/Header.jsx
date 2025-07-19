@@ -3,28 +3,29 @@ import React from 'react'
 
 export default function Header() {
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-white/20 shadow-lg shadow-purple-500/10">
+    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-xl border-b border-gray-200 shadow-sm">
+      <div className="bg-gradient-to-r from-indigo-500 to-emerald-500 h-1"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-6">
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className="w-14 h-14 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-xl shadow-purple-500/30 transform hover:scale-105 transition-transform duration-300">
-                <span className="text-white text-2xl font-bold">💰</span>
+              <div className="w-12 h-12 bg-indigo-500 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25 hover:shadow-xl hover:shadow-indigo-500/30 transition-all duration-300">
+                <span className="text-white text-xl font-bold">💰</span>
               </div>
-              <div className="absolute -top-1 -right-1 w-4 h-4 bg-gradient-to-r from-emerald-400 to-emerald-500 rounded-full animate-pulse"></div>
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-emerald-400 rounded-full"></div>
             </div>
             <div>
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
                 finclamp.com
               </h1>
-              <p className="text-gray-600 font-medium">Your complete financial planning suite • Trusted by thousands</p>
+              <p className="text-gray-600 font-medium text-sm sm:text-base">Your complete financial planning suite • Trusted by thousands</p>
             </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-3">
             <button
               onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold border border-emerald-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-emerald-100 hover:to-emerald-200"
+              className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
             >
               ✨ All calculators free
             </button>
@@ -38,13 +39,13 @@ export default function Header() {
                   alert('PWA installation is supported on mobile devices and modern browsers')
                 }
               }}
-              className="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-xl text-sm font-semibold border border-blue-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-blue-100 hover:to-blue-200"
+              className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-all cursor-pointer"
             >
               📱 Install as PWA
             </button>
             <button
               onClick={() => alert('Your data is processed locally and never sent to external servers. All calculations are performed in your browser.')}
-              className="px-4 py-2 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-xl text-sm font-semibold border border-purple-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-purple-100 hover:to-purple-200"
+              className="px-4 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm font-semibold border border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all cursor-pointer"
             >
               🔒 Secure & Private
             </button>

@@ -7,8 +7,8 @@ export default function ComparisonPanel({ data, onRemove, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4">
-      <div className="bg-white rounded-2xl sm:rounded-3xl shadow-2xl max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden">
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 text-white p-4 sm:p-6">
+      <div className="bg-white rounded-xl shadow-lg max-w-6xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-hidden border border-gray-200">
+        <div className="bg-indigo-500 text-white p-4 sm:p-6 border-b border-indigo-600">
           <div className="flex justify-between items-start sm:items-center">
             <div className="flex-1 min-w-0">
               <h2 className="text-lg sm:text-2xl font-bold flex items-center space-x-2">

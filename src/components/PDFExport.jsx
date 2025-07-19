@@ -37,7 +37,7 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
     return `
       <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 30px; background: #ffffff; line-height: 1.6; color: #1a202c;">
         <!-- Header -->
-        <div style="text-align: center; margin-bottom: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 40px; border-radius: 20px; box-shadow: 0 25px 50px rgba(102, 126, 234, 0.25); page-break-inside: avoid;">
+        <div style="text-align: center; margin-bottom: 50px; background: #6366F1; color: white; padding: 40px; border-radius: 16px; box-shadow: 0 10px 25px rgba(99, 102, 241, 0.25); page-break-inside: avoid;">
           <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 20px; flex-wrap: wrap;">
             <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.15); border-radius: 16px; display: flex; align-items: center; justify-content: center; margin-right: 25px; backdrop-filter: blur(10px); border: 2px solid rgba(255,255,255,0.2);">
               <span style="color: white; font-size: 28px; font-weight: bold;">💰</span>
@@ -145,7 +145,7 @@ export default function PDFExport({ data, title = "Financial Calculator Results"
   return (
     <button
       onClick={exportToPDF}
-      className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center space-x-2 border border-emerald-400 cursor-pointer text-sm sm:text-base"
+      className="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-2.5 sm:px-6 sm:py-3 rounded-lg font-semibold transition-all flex items-center space-x-2 cursor-pointer text-sm sm:text-base"
     >
       <span className="text-base sm:text-lg">📄</span>
       <span className="hidden sm:inline">Export to PDF</span>

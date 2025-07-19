@@ -182,7 +182,7 @@ export default function App() {
 
   return (
     <ComparisonProvider>
-      <div className="min-h-screen" style={{ backgroundColor: '#F9FAFB' }}>
+      <div className="min-h-screen bg-gray-50">
         <Header />
 
         <motion.div
@@ -197,22 +197,19 @@ export default function App() {
             variants={fadeInUp}
           >
             <div className="flex justify-center">
-              <div className="bg-white rounded-xl sm:rounded-2xl p-1.5 sm:p-2 shadow-lg border border-gray-200 w-full max-w-5xl mx-2 sm:mx-0">
+              <div className="bg-white rounded-2xl p-2 shadow-sm border border-gray-200 w-full max-w-5xl mx-2 sm:mx-0">
                 <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
                   {Object.entries(calculatorData).map(([key, category]) => (
                     <button
                       key={key}
                       onClick={() => setActiveMainTab(key)}
-                      className={`px-3 py-2 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-1 sm:space-x-2 cursor-pointer text-xs sm:text-sm lg:text-base ${
+                      className={`px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 cursor-pointer text-sm ${
                         activeMainTab === key
-                          ? 'text-white shadow-lg transform scale-105'
-                          : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
+                          ? 'bg-indigo-500 text-white shadow-md'
+                          : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                       }`}
-                      style={{
-                        backgroundColor: activeMainTab === key ? '#6366F1' : 'transparent'
-                      }}
                     >
-                      <span className="text-sm sm:text-lg">{category.icon}</span>
+                      <span className="text-lg">{category.icon}</span>
                       <span className="hidden sm:inline">{category.title}</span>
                       <span className="sm:hidden text-xs">{category.title.split(' ')[0]}</span>
                     </button>
@@ -228,20 +225,17 @@ export default function App() {
             variants={fadeInUp}
           >
             <div className="flex justify-center">
-              <div className="bg-white rounded-lg sm:rounded-xl p-1.5 shadow-md border border-gray-100 w-full max-w-4xl mx-2 sm:mx-0">
+              <div className="bg-white rounded-xl p-1.5 shadow-sm border border-gray-200 w-full max-w-4xl mx-2 sm:mx-0">
                 <div className="flex flex-wrap justify-center gap-1 sm:gap-2">
                   {currentCategory?.calculators.map((calc) => (
                     <button
                       key={calc.id}
                       onClick={() => handleSubTabChange(activeMainTab, calc.id)}
-                      className={`px-2 py-1.5 sm:px-4 sm:py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-1 sm:space-x-2 text-xs sm:text-sm cursor-pointer ${
+                      className={`px-3 py-2 sm:px-4 sm:py-2 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 text-xs sm:text-sm cursor-pointer ${
                         activeSubTabs[activeMainTab] === calc.id
-                          ? 'text-white shadow-md'
+                          ? 'bg-emerald-500 text-white shadow-md'
                           : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                       }`}
-                      style={{
-                        backgroundColor: activeSubTabs[activeMainTab] === calc.id ? '#10B981' : 'transparent'
-                      }}
                     >
                       <span className="text-sm">{calc.icon}</span>
                       <span className="hidden sm:inline">{calc.name}</span>
@@ -263,30 +257,23 @@ export default function App() {
                 animate="animate"
                 exit="exit"
                 transition={{ duration: 0.3 }}
-                className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden"
-                style={{ boxShadow: 'rgba(0, 0, 0, 0.05) 0px 25px 50px -12px' }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden"
               >
                 {/* Calculator Header */}
-                <div
-                  className="px-8 py-6 text-white relative overflow-hidden"
-                  style={{ backgroundColor: '#6366F1' }}
-                >
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/10 to-transparent"></div>
-                  <div className="relative z-10">
-                    <div className="flex items-center space-x-4">
-                      <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                        <span className="text-2xl">{currentCalculator.icon}</span>
-                      </div>
-                      <div>
-                        <h1 className="text-2xl font-bold">{currentCalculator.name}</h1>
-                        <p className="text-white/80 text-sm">{currentCalculator.description}</p>
-                      </div>
+                <div className="px-6 py-4 bg-indigo-500 text-white border-b border-indigo-600">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                      <span className="text-xl">{currentCalculator.icon}</span>
+                    </div>
+                    <div>
+                      <h1 className="text-xl font-bold text-white">{currentCalculator.name}</h1>
+                      <p className="text-indigo-100 text-sm">{currentCalculator.description}</p>
                     </div>
                   </div>
                 </div>
 
                 {/* Calculator Component */}
-                <div className="p-8">
+                <div className="p-6">
                   <currentCalculator.component
                     onAddToComparison={addToComparison}
                     categoryColor={currentCategory.color}

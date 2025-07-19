@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import PDFExport from '../components/PDFExport'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
@@ -18,7 +18,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   }
 
   // Use URL state management for inputs
-  const [inputs, setInputs, updateInputKey] = useURLStateObject('sip_')
+  const [inputs, setInputs] = useURLStateObject('sip_')
 
   // Initialize inputs with defaults if empty
   useEffect(() => {
@@ -29,7 +29,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
-  const [activeTab, setActiveTab] = useState('calculator')
   const [comparisons, setComparisons] = useState([])
   const [collapsedSections, setCollapsedSections] = useState({
     inputs: false,
@@ -59,7 +58,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const handlePWAInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
+      await deferredPrompt.userChoice
       setDeferredPrompt(null)
     }
   }
@@ -115,7 +114,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
       for (let year = 1; year <= years; year++) {
         let yearlyInvestment = 0
-        let yearStartValue = futureValue
 
         for (let month = 1; month <= 12; month++) {
           futureValue = (futureValue + currentMonthlyInvestment) * (1 + rate)
@@ -204,29 +202,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     inputs.calculationType
   ])
 
-  const addToCompare = () => {
-    if (results) {
-      const comparison = {
-        id: Date.now(),
-        monthlyInvestment: inputs.monthlyInvestment || results.monthlyInvestment,
-        lumpSumAmount: inputs.lumpSumAmount,
-        annualReturn: inputs.annualReturn,
-        timePeriod: inputs.timePeriod,
-        timePeriodUnit: inputs.timePeriodUnit,
-        stepUpPercentage: inputs.stepUpPercentage,
-        futureValue: results.maturityAmount,
-        totalInvested: results.totalInvestment,
-        totalGains: results.wealthGained,
-        timestamp: new Date().toLocaleString()
-      }
-      setComparisons(prev => [...prev, comparison])
-      setCollapsedSections(prev => ({ ...prev, compare: false }))
-    }
-  }
 
-  const removeFromCompare = (id) => {
-    setComparisons(prev => prev.filter(comp => comp.id !== id))
-  }
 
   const toggleSection = (section) => {
     setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
@@ -284,50 +260,38 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-      <div className="max-w-7xl mx-auto p-2 sm:p-4 lg:p-8">
-        {/* Header */}
-        <div className="text-center mb-6 sm:mb-8">
-          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 sm:mb-4">
-            💰 SIP Calculator
-          </h1>
-          <p className="text-sm sm:text-lg text-gray-600 max-w-2xl mx-auto px-4">
-            Plan your systematic investment journey with advanced calculations
-          </p>
+    <div className="space-y-6">
+      {/* PWA Install Button */}
+      {deferredPrompt && (
+        <div className="text-center">
+          <button
+            onClick={handlePWAInstall}
+            className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold transition-all cursor-pointer"
+          >
+            📱 Install App
+          </button>
         </div>
+      )}
 
-        {/* PWA Install Button */}
-        {deferredPrompt && (
-          <div className="text-center mb-6">
-            <button
-              onClick={handlePWAInstall}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-full font-semibold hover:from-green-600 hover:to-emerald-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
-            >
-              📱 Install App
-            </button>
-          </div>
-        )}
-
-        <div className="space-y-6">
-          {/* Premium Calculator Inputs */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
+      {/* Calculator Inputs */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
             <button
               onClick={() => toggleSection('inputs')}
-              className="w-full p-4 sm:p-6 bg-gradient-to-r from-indigo-50 via-purple-50 to-pink-50 flex items-center justify-between hover:from-indigo-100 hover:via-purple-100 hover:to-pink-100 transition-all duration-300 cursor-pointer"
+              className="w-full p-4 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-all duration-200 cursor-pointer border-b border-gray-200"
             >
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center">
-                  <span className="text-white text-lg">📊</span>
+                <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
+                  <span className="text-white text-sm">📊</span>
                 </div>
-                <h3 className="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                <h3 className="text-lg font-semibold text-gray-900">
                   Investment Parameters
                 </h3>
               </div>
-              <span className="text-2xl text-gray-400">{collapsedSections.inputs ? '▼' : '▲'}</span>
+              <span className="text-xl text-gray-400">{collapsedSections.inputs ? '▼' : '▲'}</span>
             </button>
 
             {!collapsedSections.inputs && (
-              <div className="p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
+              <div className="p-6 space-y-6">
                 {/* Expected Return - Full Width */}
                 <div className="space-y-3">
                   <label className="flex items-center space-x-2 text-sm font-bold text-gray-800 mb-3">
@@ -365,7 +329,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                         value={inputs.monthlyInvestment}
                         onChange={(e) => handleInputChange('monthlyInvestment', e.target.value)}
                         placeholder="10,000"
-                        className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-green-200 focus:border-green-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
+                        className="w-full pl-8 pr-4 py-3 text-base font-medium border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200 bg-white"
                       />
                       <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold text-sm sm:text-base">
                         ₹
@@ -475,13 +439,13 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             )}
           </div>
 
-          {/* Action Buttons - Always Visible */}
-          <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
+      {/* Action Buttons - Always Visible */}
+      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
             <div className="p-6">
               <div className="flex flex-col sm:flex-row gap-4">
                 <button
                   onClick={handleReset}
-                  className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                  className="flex items-center justify-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer"
                 >
                   <span className="text-xl">🔄</span>
                   <span>Reset Calculator</span>
@@ -504,7 +468,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                   <>
                     <button
                       onClick={shareCalculation}
-                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl cursor-pointer"
+                      className="flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer"
                     >
                       <span className="text-xl">🔗</span>
                       <span>Share</span>
@@ -543,9 +507,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             </div>
           </div>
 
-          {/* Results */}
-          {results && (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+      {/* Results */}
+      {results && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('results')}
                 className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
@@ -657,9 +621,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             </div>
           )}
 
-          {/* Year-wise Breakdown */}
-          {yearlyBreakdown.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
+      {/* Year-wise Breakdown */}
+      {yearlyBreakdown.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
               <button
                 onClick={() => toggleSection('breakdown')}
                 className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
@@ -703,9 +667,9 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             </div>
           )}
 
-          {/* Compare Section */}
-          {comparisons.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+      {/* Compare Section */}
+      {comparisons.length > 0 && (
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
               <button
                 onClick={() => toggleSection('compare')}
                 className="w-full p-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
@@ -760,8 +724,8 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             </div>
           )}
 
-          {/* Share Section */}
-          <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
+      {/* Share Section */}
+      <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
             <h3 className="text-xl font-bold mb-4 text-gray-800">📤 Share Your Calculation</h3>
             <button
               onClick={shareCalculation}
@@ -769,8 +733,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
             >
               🔗 Share Results
             </button>
-          </div>
-        </div>
       </div>
     </div>
   )
