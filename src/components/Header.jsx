@@ -15,7 +15,7 @@ export default function Header() {
             </div>
             <div>
               <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
-                Universal Finance Calculator
+                finclamp.com
               </h1>
               <p className="text-gray-600 font-medium">Your complete financial planning suite • Trusted by thousands</p>
             </div>

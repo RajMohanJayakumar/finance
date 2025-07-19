@@ -158,7 +158,7 @@ export default function App() {
 
   const shareApp = () => {
     const shareData = {
-      title: 'Universal Finance Calculator',
+      title: 'finclamp.com - Financial Calculator Suite',
       text: 'Complete financial calculator suite for all your financial planning needs!',
       url: window.location.href
     }

@@ -103,7 +103,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
   const shareCalculation = () => {
     const shareableURL = generateShareableURL('emi', inputs, results)
     const shareData = {
-      title: 'EMI Calculator Results',
+      title: 'finclamp.com - EMI Calculator Results',
       text: `EMI Calculation: Loan Amount ₹${inputs.principal}, EMI ₹${results?.emi?.toLocaleString()}`,
       url: shareableURL
     }

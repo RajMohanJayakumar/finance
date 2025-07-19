@@ -120,7 +120,7 @@ export default function NPSCalculator({ onAddToComparison, categoryColor = 'purp
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'NPS Calculator Results',
+      title: 'finclamp.com - NPS Calculator Results',
       text: `NPS Calculation: Monthly ₹${inputs.monthlyContribution}, Maturity ₹${results?.maturityAmount?.toLocaleString()}`,
       url: window.location.href
     }

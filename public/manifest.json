@@ -1,7 +1,7 @@
 
 {
-  "name": "Universal Finance Calculator",
-  "short_name": "FinanceCalc",
+  "name": "finclamp.com - Financial Calculator Suite",
+  "short_name": "finclamp",
   "description": "Complete financial calculator suite for loans, savings, mutual funds, and taxes. Professional financial planning made simple.",
   "start_url": "/",
   "display": "standalone",

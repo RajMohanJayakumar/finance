@@ -135,7 +135,7 @@ export default function EPFCalculator({ onAddToComparison, categoryColor = 'gree
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'EPF Calculator Results',
+      title: 'finclamp.com - EPF Calculator Results',
       text: `EPF Calculation: Salary ₹${inputs.basicSalary}, Maturity ₹${results?.maturityAmount?.toLocaleString()}`,
       url: window.location.href
     }

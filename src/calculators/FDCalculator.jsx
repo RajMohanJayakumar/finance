@@ -92,7 +92,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'FD Calculator Results',
+      title: 'finclamp.com - FD Calculator Results',
       text: `FD Calculation: Principal ₹${inputs.principal}, Maturity ₹${results?.maturityAmount}`,
       url: window.location.href
     }

@@ -125,7 +125,7 @@ export default function CompoundInterestCalculator({ onAddToComparison, category
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'Compound Interest Calculator Results',
+      title: 'finclamp.com - Compound Interest Calculator Results',
       text: `Compound Interest: Principal ₹${inputs.principal}, Final Amount ₹${results?.amount?.toLocaleString()}`,
       url: window.location.href
     }

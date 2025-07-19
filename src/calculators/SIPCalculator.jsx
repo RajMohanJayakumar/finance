@@ -263,7 +263,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const shareCalculation = () => {
     const shareableURL = getShareableURL()
     const shareData = {
-      title: 'SIP Calculator Results',
+      title: 'finclamp.com - SIP Calculator Results',
       text: `SIP Calculation: Monthly Investment ₹${inputs.monthlyInvestment} for ${inputs.timePeriod} ${inputs.timePeriodUnit}. Maturity Amount: ₹${results?.maturityAmount?.toLocaleString()}`,
       url: shareableURL
     }

@@ -13,7 +13,7 @@ export default function ComparisonPanel({ data, onRemove, onClose }) {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg sm:text-2xl font-bold flex items-center space-x-2">
                 <span className="text-xl sm:text-2xl">📊</span>
-                <span className="truncate">Calculator Comparison</span>
+                <span className="truncate">finclamp.com - Calculator Comparison</span>
               </h2>
               <p className="text-white/90 mt-1 text-sm sm:text-base hidden sm:block">Compare your financial calculations side by side</p>
               <p className="text-white/90 mt-1 text-xs sm:hidden">Compare calculations</p>

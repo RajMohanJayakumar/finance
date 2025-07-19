@@ -140,7 +140,7 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'Inflation Calculator Results',
+      title: 'finclamp.com - Inflation Calculator Results',
       text: `Inflation Impact: ₹${inputs.currentAmount} today = ₹${results?.futureValue?.toLocaleString()} in ${inputs.timePeriod} years`,
       url: window.location.href
     }

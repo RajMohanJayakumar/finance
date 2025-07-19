@@ -121,7 +121,7 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'Simple Interest Calculator Results',
+      title: 'finclamp.com - Simple Interest Calculator Results',
       text: `Simple Interest: Principal ₹${inputs.principal}, Interest ₹${results?.simpleInterest?.toLocaleString()}`,
       url: window.location.href
     }

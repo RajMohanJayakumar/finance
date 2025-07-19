@@ -105,7 +105,7 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'Tax Calculator Results',
+      title: 'finclamp.com - Tax Calculator Results',
       text: `Tax Calculation: Income ₹${inputs.annualIncome}, Tax ₹${results?.taxPayable?.toLocaleString()}`,
       url: window.location.href
     }

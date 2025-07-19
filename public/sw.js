@@ -1,5 +1,5 @@
 
-const CACHE_NAME = 'universal-finance-v4'
+const CACHE_NAME = 'finclamp-v1'
 const isDevelopment = location.hostname === 'localhost' || location.hostname === '127.0.0.1'
 
 self.addEventListener('install', (event) => {

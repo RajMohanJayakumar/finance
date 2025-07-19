@@ -138,7 +138,7 @@ export default function GratuityCalculator({ onAddToComparison, categoryColor = 
 
   const shareCalculation = () => {
     const shareData = {
-      title: 'Gratuity Calculator Results',
+      title: 'finclamp.com - Gratuity Calculator Results',
       text: `Gratuity Calculation: Salary ₹${inputs.lastDrawnSalary}, Gratuity ₹${results?.gratuityAmount?.toLocaleString()}`,
       url: window.location.href
     }
