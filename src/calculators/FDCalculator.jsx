@@ -27,7 +27,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onBlur={() => setIsFocused(false)}
           step={step}
           min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
+          className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
           style={{
             borderColor: isFocused ? '#10B981' : '#E5E7EB',
             backgroundColor: '#FFFFFF',
@@ -198,7 +198,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
               <select
                 value={inputs.calculationType}
                 onChange={(e) => handleInputChange('calculationType', e.target.value)}
-                className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 cursor-pointer"
               >
                 <option value="maturity">Calculate Maturity Amount</option>
                 <option value="reverse-maturity">Calculate Principal Required</option>
@@ -254,7 +254,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
               <select
                 value={inputs.compoundingFrequency}
                 onChange={(e) => handleInputChange('compoundingFrequency', e.target.value)}
-                className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 cursor-pointer"
               >
                 <option value="1">Annually</option>
                 <option value="2">Semi-annually</option>

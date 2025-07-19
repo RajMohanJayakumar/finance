@@ -22,15 +22,32 @@ export default function Header() {
           </div>
 
           <div className="hidden md:flex items-center space-x-3">
-            <div className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold border border-emerald-200 shadow-sm">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="px-4 py-2 bg-gradient-to-r from-emerald-50 to-emerald-100 text-emerald-700 rounded-xl text-sm font-semibold border border-emerald-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-emerald-100 hover:to-emerald-200"
+            >
               ✨ All calculators free
-            </div>
-            <div className="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-xl text-sm font-semibold border border-blue-200 shadow-sm">
+            </button>
+            <button
+              onClick={() => {
+                if ('serviceWorker' in navigator) {
+                  window.addEventListener('beforeinstallprompt', (e) => {
+                    e.prompt()
+                  })
+                } else {
+                  alert('PWA installation is supported on mobile devices and modern browsers')
+                }
+              }}
+              className="px-4 py-2 bg-gradient-to-r from-blue-50 to-blue-100 text-blue-700 rounded-xl text-sm font-semibold border border-blue-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-blue-100 hover:to-blue-200"
+            >
               📱 Install as PWA
-            </div>
-            <div className="px-4 py-2 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-xl text-sm font-semibold border border-purple-200 shadow-sm">
+            </button>
+            <button
+              onClick={() => alert('Your data is processed locally and never sent to external servers. All calculations are performed in your browser.')}
+              className="px-4 py-2 bg-gradient-to-r from-purple-50 to-purple-100 text-purple-700 rounded-xl text-sm font-semibold border border-purple-200 shadow-sm hover:shadow-md transition-all cursor-pointer hover:from-purple-100 hover:to-purple-200"
+            >
               🔒 Secure & Private
-            </div>
+            </button>
           </div>
         </div>
       </div>

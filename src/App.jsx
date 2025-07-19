@@ -9,6 +9,8 @@ import SIPCalculator from './calculators/SIPCalculator'
 import SWPCalculator from './calculators/SWPCalculator'
 import EMICalculator from './calculators/EMICalculator'
 import FDCalculator from './calculators/FDCalculator'
+import RDCalculator from './calculators/RDCalculator'
+import PPFCalculator from './calculators/PPFCalculator'
 import TaxCalculator from './calculators/TaxCalculator'
 import CAGRCalculator from './calculators/CAGRCalculator'
 import NPSCalculator from './calculators/NPSCalculator'
@@ -44,8 +46,8 @@ const calculatorData = {
     color: "green",
     calculators: [
       { id: 'fd', name: 'Fixed Deposit', icon: '🏦', component: FDCalculator, description: 'Calculate FD maturity amount and returns' },
-      { id: 'rd', name: 'Recurring Deposit', icon: '💰', component: FDCalculator, description: 'RD maturity calculator' },
-      { id: 'ppf', name: 'PPF Calculator', icon: '🛡️', component: FDCalculator, description: 'Public Provident Fund calculator' }
+      { id: 'rd', name: 'Recurring Deposit', icon: '💰', component: RDCalculator, description: 'RD maturity calculator' },
+      { id: 'ppf', name: 'PPF Calculator', icon: '🛡️', component: PPFCalculator, description: 'Public Provident Fund calculator' }
     ]
   },
   mutual_funds: {
