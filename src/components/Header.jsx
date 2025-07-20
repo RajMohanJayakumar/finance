@@ -16,19 +16,13 @@ export default function Header() {
             </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-                finclamp.com
+                FinClamp
               </h1>
               <p className="text-gray-600 font-medium text-sm sm:text-base">Your complete financial planning suite • Trusted by thousands</p>
             </div>
           </div>
 
           <div className="hidden md:flex items-center space-x-3">
-            <button
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="px-4 py-2 bg-emerald-50 text-emerald-700 rounded-lg text-sm font-semibold border border-emerald-200 hover:bg-emerald-100 hover:border-emerald-300 transition-all cursor-pointer"
-            >
-              ✨ All calculators free
-            </button>
             <button
               onClick={() => {
                 if ('serviceWorker' in navigator) {
@@ -42,12 +36,6 @@ export default function Header() {
               className="px-4 py-2 bg-indigo-50 text-indigo-700 rounded-lg text-sm font-semibold border border-indigo-200 hover:bg-indigo-100 hover:border-indigo-300 transition-all cursor-pointer"
             >
               📱 Install as PWA
-            </button>
-            <button
-              onClick={() => alert('Your data is processed locally and never sent to external servers. All calculations are performed in your browser.')}
-              className="px-4 py-2 bg-gray-50 text-gray-700 rounded-lg text-sm font-semibold border border-gray-200 hover:bg-gray-100 hover:border-gray-300 transition-all cursor-pointer"
-            >
-              🔒 Secure & Private
             </button>
           </div>
         </div>
