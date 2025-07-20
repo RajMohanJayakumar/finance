@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -49,6 +51,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function NPSCalculator({ onAddToComparison, categoryColor = 'purple' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     monthlyContribution: '',
@@ -189,13 +192,15 @@ export default function NPSCalculator({ onAddToComparison, categoryColor = 'purp
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Monthly Contribution"
               value={inputs.monthlyContribution}
               onChange={(value) => handleInputChange('monthlyContribution', value)}
+              fieldName="monthlyContribution"
               icon="₹"
               placeholder="Enter monthly contribution"
               min="500"
+              focusColor="#8B5CF6"
             />
 
             <FloatingLabelInput

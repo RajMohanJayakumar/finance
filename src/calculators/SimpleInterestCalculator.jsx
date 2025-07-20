@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -49,6 +51,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function SimpleInterestCalculator({ onAddToComparison, categoryColor = 'yellow' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     principal: '',
@@ -190,13 +193,15 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Principal Amount"
               value={inputs.principal}
               onChange={(value) => handleInputChange('principal', value)}
+              fieldName="principal"
               icon="₹"
               placeholder="Enter principal amount"
               min="0"
+              focusColor="#F59E0B"
             />
 
             <FloatingLabelInput
@@ -422,7 +427,7 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Principal Amount</span>
-                    <span className="font-semibold">₹{results.principal?.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(results.principal)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Interest Rate</span>

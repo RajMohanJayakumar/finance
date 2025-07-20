@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -49,6 +51,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function GratuityCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     lastDrawnSalary: '',
@@ -207,13 +210,15 @@ export default function GratuityCalculator({ onAddToComparison, categoryColor = 
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Last Drawn Salary (Monthly)"
               value={inputs.lastDrawnSalary}
               onChange={(value) => handleInputChange('lastDrawnSalary', value)}
+              fieldName="salary"
               icon="₹"
               placeholder="Enter last drawn salary"
               min="0"
+              focusColor="#DC2626"
             />
 
             <div className="grid grid-cols-2 gap-4">

@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -51,6 +53,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function RDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
   
   const initialInputs = {
     monthlyDeposit: '',
@@ -228,20 +231,24 @@ export default function RDCalculator({ onAddToComparison, categoryColor = 'green
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {inputs.calculationType === 'maturity' ? (
-                  <FloatingLabelInput
-                    label="Monthly Deposit Amount (₹)"
+                  <CurrencyInput
+                    label="Monthly Deposit Amount"
                     value={inputs.monthlyDeposit}
                     onChange={(value) => handleInputChange('monthlyDeposit', value)}
+                    fieldName="monthlyDeposit"
                     icon="💰"
                     placeholder="5,000"
+                    focusColor="#10B981"
                   />
                 ) : (
-                  <FloatingLabelInput
-                    label="Target Maturity Amount (₹)"
+                  <CurrencyInput
+                    label="Target Maturity Amount"
                     value={inputs.maturityAmount}
                     onChange={(value) => handleInputChange('maturityAmount', value)}
+                    fieldName="maturityAmount"
                     icon="🎯"
                     placeholder="5,00,000"
+                    focusColor="#10B981"
                   />
                 )}
 
@@ -297,19 +304,19 @@ export default function RDCalculator({ onAddToComparison, categoryColor = 'green
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Monthly Deposit</p>
-                    <p className="text-2xl font-bold">₹{results.monthlyDeposit?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.monthlyDeposit)}</p>
                   </div>
                   <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Maturity Amount</p>
-                    <p className="text-2xl font-bold">₹{results.maturityAmount?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.maturityAmount)}</p>
                   </div>
                   <div className="bg-gradient-to-r from-purple-500 to-purple-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Total Investment</p>
-                    <p className="text-2xl font-bold">₹{results.totalInvestment?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.totalInvestment)}</p>
                   </div>
                   <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Total Interest</p>
-                    <p className="text-2xl font-bold">₹{results.totalInterest?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.totalInterest)}</p>
                   </div>
                 </div>
 

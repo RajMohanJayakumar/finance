@@ -188,7 +188,8 @@ export const CurrencyProvider = ({ children }) => {
       'bonus',
       'otherIncome',
       'basicSalary',
-      'annualDeposit'
+      'annualDeposit',
+      'lastDrawnSalary'
     ]
 
     return currencyFields.includes(fieldName)

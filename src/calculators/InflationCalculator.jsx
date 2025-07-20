@@ -2,7 +2,9 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -39,6 +41,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     currentAmount: '',
@@ -193,13 +196,15 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Current Amount"
               value={inputs.currentAmount}
               onChange={(value) => handleInputChange('currentAmount', value)}
+              fieldName="currentAmount"
               icon="₹"
               placeholder="Enter current amount"
               min="0"
+              focusColor="#EF4444"
             />
 
             <FloatingLabelInput
@@ -427,7 +432,7 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Current Amount</span>
-                    <span className="font-semibold">₹{results.currentAmount?.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(results.currentAmount)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Inflation Rate</span>

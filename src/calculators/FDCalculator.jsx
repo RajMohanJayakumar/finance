@@ -5,6 +5,7 @@ import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Toolti
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
@@ -219,22 +220,26 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
 
             {/* Dynamic Input Field */}
             {inputs.calculationType === 'maturity' ? (
-              <FloatingLabelInput
+              <CurrencyInput
                 label="Principal Amount"
                 value={inputs.principal}
                 onChange={(value) => handleInputChange('principal', value)}
+                fieldName="principal"
                 icon="₹"
                 placeholder="Enter principal amount"
                 min="0"
+                focusColor="#10B981"
               />
             ) : (
-              <FloatingLabelInput
+              <CurrencyInput
                 label="Target Maturity Amount"
                 value={inputs.maturityAmount}
                 onChange={(value) => handleInputChange('maturityAmount', value)}
+                fieldName="maturityAmount"
                 icon="🎯"
                 placeholder="Enter target maturity amount"
                 min="0"
+                focusColor="#10B981"
               />
             )}
 
