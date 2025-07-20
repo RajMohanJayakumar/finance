@@ -16,31 +16,44 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Clear npm cache
-        run: npm cache clean --force
-
-      - name: Remove package-lock.json temporarily
-        run: rm -f package-lock.json
-
-      - name: Install dependencies with npm install
-        run: npm install --registry https://registry.npmjs.org/
-        env:
-          NODE_ENV: production
-
-      - name: Verify installations
+      - name: Install dependencies step by step
         run: |
-          echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
-          echo "Checking if vite is installed..."
-          ls -la node_modules/.bin/ | grep vite || echo "Vite not found in .bin"
-          echo "Checking vite package..."
-          ls -la node_modules/vite/ || echo "Vite package not found"
+          echo "Installing core dependencies..."
+          npm install --no-package-lock --registry https://registry.npmjs.org/ \
+            vite@^5.0.0 \
+            @vitejs/plugin-react@^4.2.0 \
+            react@^18.2.0 \
+            react-dom@^18.2.0 \
+            typescript@^5.2.2
 
-      - name: Build with direct path
-        run: ./node_modules/.bin/vite build
+      - name: Install remaining dependencies
+        run: |
+          echo "Installing remaining dependencies..."
+          npm install --no-package-lock --registry https://registry.npmjs.org/
+
+      - name: Verify Vite installation
+        run: |
+          echo "Checking Vite installation..."
+          if [ -f "./node_modules/.bin/vite" ]; then
+            echo "✅ Vite binary found"
+            ./node_modules/.bin/vite --version
+          else
+            echo "❌ Vite binary not found, trying npx..."
+            npx vite@5.4.19 --version
+          fi
+
+      - name: Build project
+        run: |
+          if [ -f "./node_modules/.bin/vite" ]; then
+            echo "Building with local Vite..."
+            ./node_modules/.bin/vite build
+          else
+            echo "Building with npx Vite 5.4.19..."
+            npx vite@5.4.19 build
+          fi
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
