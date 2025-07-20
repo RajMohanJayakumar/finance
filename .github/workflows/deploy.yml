@@ -19,11 +19,14 @@ jobs:
           node-version: "18"
           cache: "npm"
 
-      - name: Clean npm cache
-        run: npm cache clean --force
+      - name: Create .npmrc
+        run: echo "registry=https://registry.npmjs.org/" > .npmrc
 
       - name: Install dependencies
-        run: npm install --registry https://registry.npmjs.org/
+        run: npm ci --prefer-offline --no-audit
+
+      - name: Verify Vite installation
+        run: npx vite --version
 
       - name: Build
         run: npm run build

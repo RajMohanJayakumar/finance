@@ -4,11 +4,11 @@
   "type": "module",
   "description": "finclamp.com - Complete financial calculator suite for loans, savings, mutual funds, and taxes",
   "scripts": {
-    "dev": "npx vite",
-    "build": "npx vite build",
-    "preview": "npx vite preview",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "npx gh-pages -d dist"
+    "deploy": "gh-pages -d dist"
   },
   "keywords": [],
   "author": "",
