@@ -32,18 +32,11 @@ export const CURRENCY_FORMATS = {
     separator: '.',
     pattern: 'european',
     locale: 'de-DE'
-  },
-  'minimal': {
-    name: 'Minimal (1,000,000)',
-    symbol: '',
-    separator: ',',
-    pattern: 'international',
-    locale: 'en-US'
   }
 }
 
 export const CurrencyProvider = ({ children }) => {
-  const [currencyFormat, setCurrencyFormat] = useState('minimal')
+  const [currencyFormat, setCurrencyFormat] = useState('indian')
 
   // Load saved format from localStorage
   useEffect(() => {

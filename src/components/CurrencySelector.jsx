@@ -15,7 +15,7 @@ const CurrencySelector = () => {
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm hover:bg-white/80 transition-all duration-200 text-sm font-medium text-gray-700"
+        className="flex items-center space-x-2 px-4 py-2 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm hover:bg-white/80 transition-all duration-200 text-sm font-medium text-gray-700 cursor-pointer"
       >
         <span className="text-base">🌍</span>
         <span className="hidden sm:inline">{currentFormat.name.split('(')[0].trim()}</span>
