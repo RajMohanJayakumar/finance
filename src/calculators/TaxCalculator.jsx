@@ -3,12 +3,23 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
   const [isFocused, setIsFocused] = useState(false)
   const hasValue = value && value.toString().length > 0
+
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
 
   return (
     <div className="relative">
@@ -25,6 +36,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
@@ -42,6 +54,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
   
   const initialInputs = {
     annualIncome: '',
@@ -205,13 +218,15 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Annual Gross Income"
               value={inputs.annualIncome}
               onChange={(value) => handleInputChange('annualIncome', value)}
+              fieldName="annualIncome"
               icon="₹"
               placeholder="Enter your annual income"
               min="0"
+              focusColor="#EF4444"
             />
 
             {/* Country Selection */}
@@ -334,7 +349,7 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Tax</h4>
                 </div>
                 <p className="text-3xl font-bold" style={{ color: '#EF4444' }}>
-                  ₹{results.totalTaxWithCess?.toLocaleString()}
+                  {formatCurrency(results.totalTaxWithCess)}
                 </p>
               </motion.div>
 
@@ -350,7 +365,7 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Net Income</h4>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: '#10B981' }}>
-                  ₹{results.netIncome?.toLocaleString()}
+                  {formatCurrency(results.netIncome)}
                 </p>
               </motion.div>
 
@@ -415,15 +430,15 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                 <div className="space-y-4">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Gross Income</span>
-                    <span className="font-semibold">₹{results.grossIncome?.toLocaleString()}</span>
+                    <span className="font-semibold">{formatCurrency(results.grossIncome)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Income Tax</span>
-                    <span className="font-semibold text-red-600">₹{results.totalTax?.toLocaleString()}</span>
+                    <span className="font-semibold text-red-600">{formatCurrency(results.totalTax)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Health & Education Cess (4%)</span>
-                    <span className="font-semibold text-orange-600">₹{results.cess?.toLocaleString()}</span>
+                    <span className="font-semibold text-orange-600">{formatCurrency(results.cess)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600">Tax Regime</span>

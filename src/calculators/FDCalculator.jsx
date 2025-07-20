@@ -3,12 +3,22 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
   const [isFocused, setIsFocused] = useState(false)
   const hasValue = value && value.toString().length > 0
+
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
 
   return (
     <div className="relative">
@@ -25,6 +35,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
@@ -42,6 +53,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function FDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
   
   const initialInputs = {
     principal: '',
@@ -73,7 +85,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
         calculator: 'Fixed Deposit Calculator',
         timestamp: new Date().toISOString(),
         inputs: {
-          'Principal Amount': `₹${inputs.principal}`,
+          'Principal Amount': formatCurrency(inputs.principal),
           'Interest Rate': `${inputs.interestRate}%`,
           'Time Period': `${inputs.timePeriod} years`,
           'Compounding': inputs.compoundingFrequency === '1' ? 'Annually' :
@@ -81,8 +93,8 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                         inputs.compoundingFrequency === '4' ? 'Quarterly' : 'Monthly'
         },
         results: {
-          'Maturity Amount': `₹${results.maturityAmount}`,
-          'Interest Earned': `₹${results.interestEarned}`,
+          'Maturity Amount': formatCurrency(results.maturityAmount),
+          'Interest Earned': formatCurrency(results.interestEarned),
           'Total Return': `${((results.maturityAmount - results.principal) / results.principal * 100).toFixed(2)}%`
         }
       }
@@ -93,7 +105,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
   const shareCalculation = () => {
     const shareData = {
       title: 'finclamp.com - FD Calculator Results',
-      text: `FD Calculation: Principal ₹${inputs.principal}, Maturity ₹${results?.maturityAmount}`,
+      text: `FD Calculation: Principal ${formatCurrency(inputs.principal)}, Maturity ${formatCurrency(results?.maturityAmount)}`,
       url: window.location.href
     }
 
@@ -341,7 +353,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Maturity Amount</h4>
                 </div>
                 <p className="text-3xl font-bold" style={{ color: '#10B981' }}>
-                  ₹{parseFloat(results.maturityAmount).toLocaleString()}
+                  {formatCurrency(parseFloat(results.maturityAmount))}
                 </p>
               </motion.div>
 
@@ -357,7 +369,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Interest Earned</h4>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: '#3B82F6' }}>
-                  ₹{parseFloat(results.interestEarned).toLocaleString()}
+                  {formatCurrency(parseFloat(results.interestEarned))}
                 </p>
               </motion.div>
 
@@ -373,7 +385,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Principal</h4>
                 </div>
                 <p className="text-2xl font-bold" style={{ color: '#6B7280' }}>
-                  ₹{parseFloat(results.principal).toLocaleString()}
+                  {formatCurrency(parseFloat(results.principal))}
                 </p>
               </motion.div>
             </div>
@@ -404,7 +416,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -458,7 +470,7 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                   calculator: 'Fixed Deposit Calculator',
                   timestamp: new Date().toISOString(),
                   inputs: {
-                    'Principal Amount': `₹${inputs.principal}`,
+                    'Principal Amount': formatCurrency(inputs.principal),
                     'Interest Rate': `${inputs.interestRate}%`,
                     'Time Period': `${inputs.timePeriod} years`,
                     'Compounding': inputs.compoundingFrequency === '1' ? 'Annually' :
@@ -466,8 +478,8 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
                                   inputs.compoundingFrequency === '4' ? 'Quarterly' : 'Monthly'
                   },
                   results: {
-                    'Maturity Amount': `₹${results.maturityAmount}`,
-                    'Interest Earned': `₹${results.interestEarned}`,
+                    'Maturity Amount': formatCurrency(results.maturityAmount),
+                    'Interest Earned': formatCurrency(results.interestEarned),
                     'Total Return': `${((parseFloat(results.maturityAmount) - parseFloat(results.principal)) / parseFloat(results.principal) * 100).toFixed(2)}%`
                   }
                 }]}

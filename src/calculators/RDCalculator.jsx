@@ -9,6 +9,15 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
   const [isFocused, setIsFocused] = useState(false)
   const hasValue = value && value.toString().length > 0
 
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
+
   return (
     <div className="relative">
       {/* Label positioned above the input */}
@@ -24,6 +33,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"

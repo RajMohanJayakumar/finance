@@ -57,6 +57,13 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
     }
   }
 
+  // Auto-calculate when inputs change
+  useEffect(() => {
+    if (inputs.beginningValue && inputs.endingValue && inputs.numberOfYears) {
+      calculate()
+    }
+  }, [inputs.beginningValue, inputs.endingValue, inputs.numberOfYears, inputs.calculationType])
+
   const shareableLink = `${window.location.origin}${location.pathname}?${new URLSearchParams(inputs).toString()}`
 
   return (

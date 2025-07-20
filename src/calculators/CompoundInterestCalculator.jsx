@@ -2,40 +2,10 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import CurrencyInput from '../components/CurrencyInput'
 import PDFExport from '../components/PDFExport'
 
-// Input component with floating label
-const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
-  const [isFocused, setIsFocused] = useState(false)
 
-  return (
-    <div className="relative">
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
-      
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          step={step}
-          min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-          style={{
-            borderColor: isFocused ? '#3B82F6' : '#E5E7EB',
-            backgroundColor: '#FFFFFF',
-            boxShadow: isFocused ? 'rgba(59, 130, 246, 0.1) 0px 0px 0px 4px' : 'none'
-          }}
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
-  )
-}
 
 export default function CompoundInterestCalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
@@ -195,33 +165,39 @@ export default function CompoundInterestCalculator({ onAddToComparison, category
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Principal Amount"
               value={inputs.principal}
               onChange={(value) => handleInputChange('principal', value)}
-              icon="₹"
+              fieldName="principal"
+              icon="💰"
               placeholder="Enter principal amount"
               min="0"
+              focusColor="#3B82F6"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Annual Interest Rate (%)"
               value={inputs.interestRate}
               onChange={(value) => handleInputChange('interestRate', value)}
+              fieldName="interestRate"
               icon="📈"
               placeholder="Enter interest rate"
               step="0.1"
               min="0"
+              focusColor="#3B82F6"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Time Period (Years)"
               value={inputs.timePeriod}
               onChange={(value) => handleInputChange('timePeriod', value)}
+              fieldName="timePeriod"
               icon="📅"
               placeholder="Enter time period"
               step="0.1"
               min="0"
+              focusColor="#3B82F6"
             />
 
             {/* Compounding Frequency */}

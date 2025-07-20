@@ -8,13 +8,22 @@ import PDFExport from '../components/PDFExport'
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
   const [isFocused, setIsFocused] = useState(false)
 
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
+
   return (
     <div className="relative">
       <label className="block text-sm font-semibold mb-2 text-gray-700">
         <span className="mr-2">{icon}</span>
         {label}
       </label>
-      
+
       <div className="relative">
         <input
           type={type}
@@ -22,6 +31,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"

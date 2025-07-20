@@ -2,12 +2,23 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min, max }) => {
   const [isFocused, setIsFocused] = useState(false)
   const hasValue = value && value.toString().length > 0
+
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
 
   return (
     <div className="relative">
@@ -24,6 +35,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           max={max}
@@ -42,6 +54,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
   
   const initialInputs = {
     annualDeposit: '',
@@ -209,14 +222,15 @@ export default function PPFCalculator({ onAddToComparison, categoryColor = 'gree
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FloatingLabelInput
-                  label="Annual Deposit Amount (₹)"
+                <CurrencyInput
+                  label="Annual Deposit Amount"
                   value={inputs.annualDeposit}
                   onChange={(value) => handleInputChange('annualDeposit', value)}
+                  fieldName="annualDeposit"
                   icon="💰"
                   placeholder="1,50,000"
                   min="500"
-                  max="150000"
+                  focusColor="#7C3AED"
                 />
 
                 <FloatingLabelInput
@@ -278,11 +292,11 @@ export default function PPFCalculator({ onAddToComparison, categoryColor = 'gree
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                   <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Annual Deposit</p>
-                    <p className="text-2xl font-bold">₹{results.annualDeposit?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.annualDeposit)}</p>
                   </div>
                   <div className="bg-gradient-to-r from-green-500 to-emerald-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Maturity Amount</p>
-                    <p className="text-2xl font-bold">₹{results.maturityAmount?.toLocaleString()}</p>
+                    <p className="text-2xl font-bold">{formatCurrency(results.maturityAmount)}</p>
                   </div>
                   <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white p-6 rounded-xl">
                     <p className="text-sm opacity-90">Total Investment</p>

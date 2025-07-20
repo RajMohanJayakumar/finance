@@ -2,11 +2,22 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
 // Input component with floating label
 const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
   const [isFocused, setIsFocused] = useState(false)
+
+  const handleKeyDown = (e) => {
+    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
+    if (type === 'number') {
+      if (['e', 'E', '+', '-'].includes(e.key)) {
+        e.preventDefault()
+      }
+    }
+  }
 
   return (
     <div className="relative">
@@ -14,7 +25,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
         <span className="mr-2">{icon}</span>
         {label}
       </label>
-      
+
       <div className="relative">
         <input
           type={type}
@@ -22,6 +33,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
           onChange={(e) => onChange(e.target.value)}
           onFocus={() => setIsFocused(true)}
           onBlur={() => setIsFocused(false)}
+          onKeyDown={handleKeyDown}
           step={step}
           min={min}
           className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
@@ -39,6 +51,7 @@ const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, pla
 
 export default function EPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     basicSalary: '',
@@ -195,13 +208,15 @@ export default function EPFCalculator({ onAddToComparison, categoryColor = 'gree
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Basic Salary (Monthly)"
               value={inputs.basicSalary}
               onChange={(value) => handleInputChange('basicSalary', value)}
+              fieldName="basicSalary"
               icon="₹"
               placeholder="Enter basic salary"
               min="0"
+              focusColor="#059669"
             />
 
             <FloatingLabelInput

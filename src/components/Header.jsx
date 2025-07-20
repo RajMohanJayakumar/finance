@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import CurrencySelector from './CurrencySelector'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -65,6 +66,9 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
+            {/* Currency Selector */}
+            <CurrencySelector />
+
             {/* Calculator Count */}
             <div className="hidden lg:flex items-center px-4 py-2 bg-white/60 backdrop-blur-sm rounded-xl border border-gray-200/50 shadow-sm">
               <div className="text-center">

@@ -28,6 +28,7 @@ import FloatingComparisonButton from './components/FloatingComparisonButton'
 
 // Context
 import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
+import { CurrencyProvider } from './contexts/CurrencyContext'
 
 const calculatorData = {
   loans: {
@@ -181,9 +182,10 @@ export default function App() {
   const currentCalculator = currentCategory?.calculators.find(calc => calc.id === activeSubTabs[activeMainTab])
 
   return (
-    <ComparisonProvider>
-      <div className="min-h-screen bg-gray-50">
-        <Header />
+    <CurrencyProvider>
+      <ComparisonProvider>
+        <div className="min-h-screen bg-gray-50">
+          <Header />
 
         <motion.div
           className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8"
@@ -338,8 +340,9 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Floating Comparison Button */}
-      <FloatingComparisonButton />
-    </ComparisonProvider>
+        {/* Floating Comparison Button */}
+        <FloatingComparisonButton />
+      </ComparisonProvider>
+    </CurrencyProvider>
   )
 }

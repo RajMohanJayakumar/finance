@@ -4,45 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
+import CurrencyInput from '../components/CurrencyInput'
 
-// Input component with floating label
-const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
-  const [isFocused, setIsFocused] = useState(false)
-  const hasValue = value && value.toString().length > 0
 
-  return (
-    <div className="relative">
-      {/* Label positioned above the input */}
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
-
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          step={step}
-          min={min}
-          className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-          style={{
-            borderColor: isFocused ? '#6366F1' : '#E5E7EB',
-            backgroundColor: '#FFFFFF',
-            boxShadow: isFocused ? 'rgba(99, 102, 241, 0.1) 0px 0px 0px 4px' : 'none'
-          }}
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
-  )
-}
 
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     principal: '',
@@ -57,10 +27,10 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
   // Initialize inputs with defaults if empty
   useEffect(() => {
-    if (Object.keys(inputs).length === 0) {
-      setInputs(initialInputs)
+    if (Object.keys(inputs).length === 0 || !inputs.principal) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
     }
-  }, [])
+  }, [inputs])
 
   const [results, setResults] = useState(null)
 
@@ -81,14 +51,14 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
       const comparisonData = {
         calculator: 'EMI Calculator',
         inputs: {
-          'Loan Amount': `₹${inputs.principal}`,
+          'Loan Amount': formatCurrency(inputs.principal),
           'Interest Rate': `${inputs.interestRate}%`,
           'Tenure': `${inputs.tenure} years`
         },
         results: {
-          'EMI': `₹${results.emi?.toLocaleString()}`,
-          'Total Amount': `₹${results.totalAmount?.toLocaleString()}`,
-          'Total Interest': `₹${results.totalInterest?.toLocaleString()}`
+          'EMI': formatCurrency(results.emi),
+          'Total Amount': formatCurrency(results.totalAmount),
+          'Total Interest': formatCurrency(results.totalInterest)
         }
       }
 
@@ -104,7 +74,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
     const shareableURL = generateShareableURL('emi', inputs, results)
     const shareData = {
       title: 'finclamp.com - EMI Calculator Results',
-      text: `EMI Calculation: Loan Amount ₹${inputs.principal}, EMI ₹${results?.emi?.toLocaleString()}`,
+      text: `EMI Calculation: Loan Amount ${formatCurrency(inputs.principal)}, EMI ${formatCurrency(results?.emi)}`,
       url: shareableURL
     }
 
@@ -118,9 +88,17 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
   const calculateEMI = () => {
     if (inputs.calculationType === 'emi') {
-      const P = parseFloat(inputs.principal) || 0
+      // Clean and parse inputs, handling large numbers
+      const principalStr = inputs.principal.toString().replace(/[^\d.]/g, '')
+      const P = parseFloat(principalStr) || 0
       const r = (parseFloat(inputs.interestRate) || 0) / 100 / 12 // Monthly rate
       const n = (parseFloat(inputs.tenure) || 0) * 12 // Total months
+
+      // Check for very large numbers that might cause precision issues
+      if (P > Number.MAX_SAFE_INTEGER) {
+        alert('Principal amount is too large. Please enter a smaller value.')
+        return
+      }
 
       // EMI = P × R × (1+R)^N / [(1+R)^N – 1]
       const emi = r > 0 ? (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1) : P / n
@@ -131,7 +109,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
         emi: Math.round(emi),
         totalAmount: Math.round(totalAmount),
         totalInterest: Math.round(totalInterest),
-        principal: P
+        principal: Math.round(P)
       })
     }
   }
@@ -147,6 +125,13 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
     { name: 'Interest', amount: results.totalInterest },
     { name: 'Total', amount: results.totalAmount }
   ] : []
+
+  // Auto-calculate when inputs change
+  useEffect(() => {
+    if (inputs.principal && inputs.interestRate && inputs.tenure) {
+      calculateEMI()
+    }
+  }, [inputs.principal, inputs.interestRate, inputs.tenure, inputs.calculationType])
 
   return (
     <motion.div
@@ -183,32 +168,38 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
           </h3>
 
           <div className="space-y-6">
-            <FloatingLabelInput
+            <CurrencyInput
               label="Loan Amount"
               value={inputs.principal}
               onChange={(value) => handleInputChange('principal', value)}
-              icon="₹"
+              fieldName="principal"
+              icon="💰"
               placeholder="Enter loan amount"
               min="0"
+              focusColor="#6366F1"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Interest Rate (% per annum)"
               value={inputs.interestRate}
               onChange={(value) => handleInputChange('interestRate', value)}
+              fieldName="interestRate"
               icon="📈"
               placeholder="Enter interest rate"
               step="0.1"
               min="0"
+              focusColor="#6366F1"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Loan Tenure (Years)"
               value={inputs.tenure}
               onChange={(value) => handleInputChange('tenure', value)}
+              fieldName="tenure"
               icon="📅"
               placeholder="Enter tenure in years"
               min="1"
+              focusColor="#6366F1"
             />
           </div>
         </motion.div>
@@ -290,9 +281,9 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             className="space-y-8"
           >
             {/* EMI Results Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
@@ -302,13 +293,13 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                   </div>
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Monthly EMI</h4>
                 </div>
-                <p className="text-3xl font-bold" style={{ color: '#6366F1' }}>
-                  ₹{results.emi.toLocaleString()}
+                <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold break-words overflow-hidden" style={{ color: '#6366F1' }}>
+                  {formatCurrency(results.emi)}
                 </p>
               </motion.div>
 
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
@@ -318,40 +309,40 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                   </div>
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Principal</h4>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: '#10B981' }}>
-                  ₹{results.principal.toLocaleString()}
+                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#10B981' }}>
+                  {formatCurrency(results.principal)}
                 </p>
               </motion.div>
 
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#E0F2FE' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEF3C7' }}>
                     <span className="text-xl">📈</span>
                   </div>
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Interest</h4>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: '#F59E0B' }}>
-                  ₹{results.totalInterest.toLocaleString()}
+                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#F59E0B' }}>
+                  {formatCurrency(results.totalInterest)}
                 </p>
               </motion.div>
 
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#E0F2FE' }}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F3E8FF' }}>
                     <span className="text-xl">💎</span>
                   </div>
                   <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Amount</h4>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: '#8B5CF6' }}>
-                  ₹{results.totalAmount.toLocaleString()}
+                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#8B5CF6' }}>
+                  {formatCurrency(results.totalAmount)}
                 </p>
               </motion.div>
             </div>
@@ -382,7 +373,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
                   </PieChart>
                 </ResponsiveContainer>
               </motion.div>
@@ -401,8 +392,8 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                   <BarChart data={barChartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
                     <XAxis dataKey="name" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
+                    <YAxis stroke="#6B7280" tickFormatter={(value) => formatCurrency(value / 100000) + 'L'} />
+                    <Tooltip formatter={(value) => formatCurrency(value)} />
                     <Bar dataKey="amount" fill="#6366F1" radius={[8, 8, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
@@ -421,14 +412,14 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                   calculator: 'EMI Calculator',
                   timestamp: new Date().toISOString(),
                   inputs: {
-                    'Loan Amount': `₹${inputs.principal}`,
+                    'Loan Amount': formatCurrency(inputs.principal),
                     'Interest Rate': `${inputs.interestRate}%`,
                     'Tenure': `${inputs.tenure} years`
                   },
                   results: {
-                    'Monthly EMI': `₹${results.emi?.toLocaleString()}`,
-                    'Total Amount': `₹${results.totalAmount?.toLocaleString()}`,
-                    'Total Interest': `₹${results.totalInterest?.toLocaleString()}`
+                    'Monthly EMI': formatCurrency(results.emi),
+                    'Total Amount': formatCurrency(results.totalAmount),
+                    'Total Interest': formatCurrency(results.totalInterest)
                   }
                 }]}
                 title="EMI Calculator Results"
