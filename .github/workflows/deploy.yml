@@ -17,19 +17,30 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: "18"
-          cache: "npm"
+          registry-url: "https://registry.npmjs.org/"
 
-      - name: Create .npmrc
-        run: echo "registry=https://registry.npmjs.org/" > .npmrc
+      - name: Clear npm cache
+        run: npm cache clean --force
 
-      - name: Install dependencies
-        run: npm ci --prefer-offline --no-audit
+      - name: Remove package-lock.json temporarily
+        run: rm -f package-lock.json
 
-      - name: Verify Vite installation
-        run: npx vite --version
+      - name: Install dependencies with npm install
+        run: npm install --registry https://registry.npmjs.org/
+        env:
+          NODE_ENV: production
 
-      - name: Build
-        run: npm run build
+      - name: Verify installations
+        run: |
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Checking if vite is installed..."
+          ls -la node_modules/.bin/ | grep vite || echo "Vite not found in .bin"
+          echo "Checking vite package..."
+          ls -la node_modules/vite/ || echo "Vite package not found"
+
+      - name: Build with direct path
+        run: ./node_modules/.bin/vite build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

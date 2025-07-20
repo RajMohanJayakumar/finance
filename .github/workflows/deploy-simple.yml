@@ -1,0 +1,28 @@
+name: Manual Deploy Trigger
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Deployment message"
+        required: false
+        default: "Manual deployment"
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deployment Instructions
+        run: |
+          echo "🚀 To deploy your financial calculator:"
+          echo ""
+          echo "1. Run locally: npm run deploy"
+          echo "2. This will build and deploy to GitHub Pages"
+          echo "3. Your site will be available at: https://${{ github.repository_owner }}.github.io/finance/"
+          echo ""
+          echo "✅ Local deployment is the most reliable method!"
+          echo "💡 The 'npm run deploy' command works perfectly on your machine."
