@@ -177,20 +177,23 @@ function SimpleInterestCalculator({ onAddToComparison, categoryColor = 'yellow' 
               focusColor="#F59E0B"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Annual Interest Rate (%)"
               value={inputs.interestRate}
               onChange={(value) => handleInputChange('interestRate', value)}
+              fieldName="interestRate"
               icon="📈"
               placeholder="Enter interest rate"
               step="0.1"
               min="0"
+              focusColor="#F59E0B"
             />
 
-            <FloatingLabelInput
+            <CurrencyInput
               label="Time Period (Years)"
               value={inputs.timePeriod}
               onChange={(value) => handleInputChange('timePeriod', value)}
+              fieldName="timePeriod"
               icon="📅"
               placeholder="Enter time period"
               step="0.1"

@@ -1,201 +1,166 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useCallback, useState } from 'react'
 
 const CurrencyContext = createContext()
 
-export const useCurrency = () => {
-  const context = useContext(CurrencyContext)
-  if (!context) {
-    throw new Error('useCurrency must be used within a CurrencyProvider')
-  }
-  return context
-}
-
 // Currency format configurations
 export const CURRENCY_FORMATS = {
-  'indian': {
-    name: 'Indian (₹1,00,000)',
+  indian: {
+    name: 'Indian (₹1,23,456)',
     symbol: '₹',
+    locale: 'en-IN',
     separator: ',',
-    pattern: 'indian', // Special Indian numbering system
-    locale: 'en-IN'
+    decimal: '.',
+    precision: 0
   },
-  'international': {
-    name: 'International ($1,000,000)',
+  us: {
+    name: 'US Dollar ($123,456)',
     symbol: '$',
+    locale: 'en-US',
     separator: ',',
-    pattern: 'international',
-    locale: 'en-US'
+    decimal: '.',
+    precision: 0
   },
-  'european': {
-    name: 'European (€1.000.000)',
+  european: {
+    name: 'European (€123.456)',
     symbol: '€',
+    locale: 'de-DE',
     separator: '.',
-    pattern: 'european',
-    locale: 'de-DE'
+    decimal: ',',
+    precision: 0
+  },
+  compact: {
+    name: 'Compact (₹1.2L)',
+    symbol: '₹',
+    locale: 'en-IN',
+    separator: ',',
+    decimal: '.',
+    precision: 1,
+    compact: true
   }
+}
+
+// List of fields that should be formatted as currency
+const currencyFields = [
+  'loanAmount', 'monthlyPayment', 'totalInterest', 'totalPayment',
+  'monthlyInvestment', 'totalInvestment', 'maturityAmount', 'totalReturns',
+  'principal', 'interest', 'amount', 'finalAmount',
+  'initialInvestment', 'monthlyWithdrawal', 'remainingBalance', 'totalWithdrawn',
+  'beginningValue', 'endingValue', 'netProfit', 'totalReturns',
+  'currentValue', 'futureValue', 'presentValue',
+  'salary', 'bonus', 'deductions', 'netSalary',
+  'income', 'expenses', 'savings', 'investment',
+  'annualIncome', 'basicSalary', 'lastDrawnSalary', 'monthlyContribution'
+]
+
+// Helper function to format numbers in Indian style (lakhs/crores)
+const formatIndianNumber = (num) => {
+  if (num >= 10000000) { // 1 crore
+    return (num / 10000000).toFixed(2) + ' Cr'
+  } else if (num >= 100000) { // 1 lakh
+    return (num / 100000).toFixed(2) + ' L'
+  } else if (num >= 1000) { // 1 thousand
+    return (num / 1000).toFixed(2) + ' K'
+  }
+  return num.toLocaleString('en-IN')
+}
+
+// Helper function to format large numbers
+const formatLargeNumber = (num) => {
+  if (num >= 1000000000) { // 1 billion
+    return (num / 1000000000).toFixed(2) + 'B'
+  } else if (num >= 1000000) { // 1 million
+    return (num / 1000000).toFixed(2) + 'M'
+  } else if (num >= 1000) { // 1 thousand
+    return (num / 1000).toFixed(2) + 'K'
+  }
+  return num.toLocaleString()
+}
+
+// Helper function to format large numbers in Indian style
+const formatLargeIndianNumber = (num) => {
+  if (num >= 10000000) { // 1 crore
+    return (num / 10000000).toFixed(1) + ' Cr'
+  } else if (num >= 100000) { // 1 lakh
+    return (num / 100000).toFixed(1) + ' L'
+  } else if (num >= 1000) { // 1 thousand
+    return (num / 1000).toFixed(1) + 'K'
+  }
+  return num.toLocaleString('en-IN')
 }
 
 export const CurrencyProvider = ({ children }) => {
+  // Currency format state
   const [currencyFormat, setCurrencyFormat] = useState('indian')
 
-  // Load saved format from localStorage
-  useEffect(() => {
-    const savedFormat = localStorage.getItem('finclamp-currency-format')
-    if (savedFormat && CURRENCY_FORMATS[savedFormat]) {
-      setCurrencyFormat(savedFormat)
+  // Get current format configuration
+  const currentFormat = CURRENCY_FORMATS[currencyFormat] || CURRENCY_FORMATS.indian
+
+  // Update currency format
+  const updateCurrencyFormat = useCallback((format) => {
+    if (CURRENCY_FORMATS[format]) {
+      setCurrencyFormat(format)
     }
   }, [])
 
-  // Save format to localStorage
-  const updateCurrencyFormat = (format) => {
-    setCurrencyFormat(format)
-    localStorage.setItem('finclamp-currency-format', format)
-  }
+  // Format currency with current format
+  const formatCurrency = useCallback((value, options = {}) => {
+    const {
+      noSymbol = false,
+      compact = false,
+      decimals = currentFormat.precision
+    } = options
 
-  // Format number according to selected format
-  const formatCurrency = (value, options = {}) => {
-    if (!value && value !== 0) return ''
+    if (!value || isNaN(value)) return noSymbol ? '0' : `${currentFormat.symbol}0`
 
-    const format = CURRENCY_FORMATS[currencyFormat]
+    const numValue = parseFloat(value)
 
-    // Handle string values that might contain formatting
-    let cleanValue = value.toString().replace(/[^\d.]/g, '')
-
-    if (!cleanValue) return ''
-
-    // For very large numbers, avoid parseFloat precision issues
-    let number
-    if (cleanValue.length > 15) {
-      // For very large numbers, work with string manipulation
-      number = cleanValue
-    } else {
-      number = parseFloat(cleanValue)
-      if (isNaN(number)) return ''
+    if (compact || currentFormat.compact) {
+      const formatted = formatLargeIndianNumber(numValue)
+      return noSymbol ? formatted : `${currentFormat.symbol}${formatted}`
     }
 
-    let formattedValue = ''
+    const formatted = numValue.toLocaleString(currentFormat.locale, {
+      maximumFractionDigits: decimals
+    })
 
-    if (format.pattern === 'indian') {
-      // Indian numbering system (lakhs, crores)
-      formattedValue = typeof number === 'string' ? formatLargeIndianNumber(number) : formatIndianNumber(number)
-    } else if (format.pattern === 'european') {
-      // European format with dots as thousand separators
-      formattedValue = typeof number === 'string' ? formatLargeNumber(number, '.') : number.toLocaleString('de-DE')
-    } else {
-      // International format
-      formattedValue = typeof number === 'string' ? formatLargeNumber(number, ',') : number.toLocaleString('en-US')
-    }
+    return noSymbol ? formatted : `${currentFormat.symbol}${formatted}`
+  }, [currentFormat])
 
-    // Add symbol if not minimal format and not disabled
-    if (format.symbol && !options.noSymbol) {
-      return `${format.symbol}${formattedValue}`
-    }
+  // Remove currency formatting and return number
+  const unformatCurrency = useCallback((value) => {
+    if (!value) return ''
 
-    return formattedValue
-  }
+    // Remove currency symbol, commas, and other formatting
+    const cleaned = value.toString()
+      .replace(/₹/g, '')
+      .replace(/,/g, '')
+      .replace(/\s/g, '')
+      .replace(/[^\d.-]/g, '')
 
-  // Remove formatting to get clean number
-  const unformatCurrency = (formattedValue) => {
-    if (!formattedValue) return ''
-    
-    // Remove all non-numeric characters except decimal point
-    return formattedValue.toString().replace(/[^\d.]/g, '')
-  }
+    return cleaned
+  }, [])
 
-  // Format number in Indian style (lakhs, crores)
-  const formatIndianNumber = (number) => {
-    const numStr = number.toString()
-    const parts = numStr.split('.')
-    let integerPart = parts[0]
-    const decimalPart = parts[1] ? `.${parts[1]}` : ''
-
-    // Indian numbering: first 3 digits, then groups of 2
-    if (integerPart.length <= 3) {
-      return number.toLocaleString('en-IN')
-    }
-
-    const lastThree = integerPart.slice(-3)
-    const remaining = integerPart.slice(0, -3)
-
-    const formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
-
-    return formatted + decimalPart
-  }
-
-  // Format large numbers as strings to avoid precision issues
-  const formatLargeNumber = (numberStr, separator = ',') => {
-    const parts = numberStr.split('.')
-    let integerPart = parts[0]
-    const decimalPart = parts[1] ? `.${parts[1]}` : ''
-
-    // Add separators every 3 digits from right
-    const formatted = integerPart.replace(/\B(?=(\d{3})+(?!\d))/g, separator)
-
-    return formatted + decimalPart
-  }
-
-  // Format large numbers in Indian style as strings
-  const formatLargeIndianNumber = (numberStr) => {
-    const parts = numberStr.split('.')
-    let integerPart = parts[0]
-    const decimalPart = parts[1] ? `.${parts[1]}` : ''
-
-    if (integerPart.length <= 3) {
-      return numberStr
-    }
-
-    const lastThree = integerPart.slice(-3)
-    const remaining = integerPart.slice(0, -3)
-
-    const formatted = remaining.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThree
-
-    return formatted + decimalPart
-  }
+  // Check if field should be formatted as currency
+  const shouldFormatAsCurrency = useCallback((fieldName) => {
+    return currencyFields.includes(fieldName)
+  }, [])
 
   // Get display value for inputs
-  const getDisplayValue = (value, fieldName) => {
+  const getDisplayValue = useCallback((value, fieldName) => {
     if (shouldFormatAsCurrency(fieldName) && value) {
       return formatCurrency(value, { noSymbol: true })
     }
     return value || ''
-  }
-
-  // Check if field should be formatted as currency
-  const shouldFormatAsCurrency = (fieldName) => {
-    const currencyFields = [
-      'principal',
-      'monthlyInvestment',
-      'lumpSumAmount',
-      'maturityAmount',
-      'emi',
-      'currentAmount',
-      'beginningValue',
-      'endingValue',
-      'monthlyContribution',
-      'annualIncome',
-      'targetAmount',
-      'monthlyDeposit',
-      'monthlyWithdrawal',
-      'investmentAmount',
-      'salary',
-      'bonus',
-      'otherIncome',
-      'basicSalary',
-      'annualDeposit',
-      'lastDrawnSalary'
-    ]
-
-    return currencyFields.includes(fieldName)
-  }
+  }, [formatCurrency, shouldFormatAsCurrency])
 
   const value = {
-    currencyFormat,
-    updateCurrencyFormat,
     formatCurrency,
     unformatCurrency,
-    getDisplayValue,
     shouldFormatAsCurrency,
-    currentFormat: CURRENCY_FORMATS[currencyFormat]
+    getDisplayValue,
+    currencyFormat,
+    updateCurrencyFormat,
+    currentFormat
   }
 
   return (
@@ -203,4 +168,12 @@ export const CurrencyProvider = ({ children }) => {
       {children}
     </CurrencyContext.Provider>
   )
+}
+
+export const useCurrency = () => {
+  const context = useContext(CurrencyContext)
+  if (!context) {
+    throw new Error('useCurrency must be used within a CurrencyProvider')
+  }
+  return context
 }

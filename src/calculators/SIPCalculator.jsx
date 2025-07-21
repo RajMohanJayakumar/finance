@@ -29,9 +29,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     if (Object.keys(inputs).length === 0 || (!inputs.monthlyInvestment && !inputs.maturityAmount)) {
       setInputs(prev => ({ ...initialInputs, ...prev }))
     }
-  }, [inputs])
+  }, []) // Remove inputs dependency to prevent infinite loop
 
   const [results, setResults] = useState(null)
+  const [yearlyBreakdown, setYearlyBreakdown] = useState([])
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   // Component initialization
@@ -184,16 +185,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     if ((inputs.monthlyInvestment || inputs.maturityAmount) && inputs.annualReturn && inputs.timePeriod) {
       calculateSIP()
     }
-  }, [
-    inputs.monthlyInvestment,
-    inputs.maturityAmount,
-    inputs.lumpSumAmount,
-    inputs.annualReturn,
-    inputs.timePeriod,
-    inputs.timePeriodUnit,
-    inputs.stepUpPercentage,
-    inputs.calculationType
-  ])
+  }, [calculateSIP, inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriod])
 
 
 

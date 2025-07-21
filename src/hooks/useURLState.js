@@ -48,23 +48,25 @@ export const useURLStateObject = (prefix = '') => {
   const getURLParams = useCallback(() => {
     const urlParams = new URLSearchParams(window.location.search)
     const params = {}
-    
+
     for (const [key, value] of urlParams.entries()) {
       if (!prefix || key.startsWith(prefix)) {
         const cleanKey = prefix ? key.replace(prefix, '') : key
         params[cleanKey] = value
       }
     }
-    
+
     return params
   }, [prefix])
 
-  const [state, setState] = useState(getURLParams)
+  const [state, setState] = useState(() => getURLParams())
 
   // Update URL with object state
   const updateURL = useCallback((newState) => {
+    if (!newState || typeof newState !== 'object') return
+
     const url = new URL(window.location)
-    
+
     // Remove existing parameters with prefix
     const keysToRemove = []
     for (const key of url.searchParams.keys()) {
@@ -73,7 +75,7 @@ export const useURLStateObject = (prefix = '') => {
       }
     }
     keysToRemove.forEach(key => url.searchParams.delete(key))
-    
+
     // Add new parameters
     Object.entries(newState).forEach(([key, value]) => {
       if (value && value !== '') {
@@ -81,12 +83,13 @@ export const useURLStateObject = (prefix = '') => {
         url.searchParams.set(paramKey, value)
       }
     })
-    
+
     window.history.replaceState({}, '', url.toString())
   }, [prefix])
 
   // Update state and URL
   const setStateAndURL = useCallback((newState) => {
+    if (!newState || typeof newState !== 'object') return
     setState(newState)
     updateURL(newState)
   }, [updateURL])
@@ -118,11 +121,13 @@ export const generateShareableURL = (calculatorType, inputs, results) => {
   url.searchParams.set('calc', calculatorType)
   
   // Add inputs with prefix
-  Object.entries(inputs).forEach(([key, value]) => {
-    if (value && value !== '') {
-      url.searchParams.set(`i_${key}`, value)
-    }
-  })
+  if (inputs && typeof inputs === 'object') {
+    Object.entries(inputs).forEach(([key, value]) => {
+      if (value && value !== '') {
+        url.searchParams.set(`i_${key}`, value)
+      }
+    })
+  }
   
   // Add timestamp for tracking
   url.searchParams.set('shared', Date.now().toString())

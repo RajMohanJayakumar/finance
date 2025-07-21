@@ -1,8 +1,15 @@
-
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import PDFExport from '../components/PDFExport'
+import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
+import CurrencyInput from '../components/CurrencyInput'
 
 export default function CAGRCalculator({ onAddToComparison, categoryColor = 'purple' }) {
-  
+  const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
+
   const initialInputs = {
     beginningValue: '',
     endingValue: '',
@@ -10,8 +17,17 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
     calculationType: 'cagr'
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
-  
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('cagr_')
+  const { getShareableURL } = generateShareableURL('cagr_')
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0 || (!inputs.beginningValue && !inputs.endingValue)) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
+
   const [results, setResults] = useState(null)
 
   const handleInputChange = (field, value) => {
@@ -24,10 +40,12 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
     setResults(null)
   }
 
-  const calculate = () => {
+  const calculate = useCallback(() => {
     const beginningValue = parseFloat(inputs.beginningValue) || 0
     const endingValue = parseFloat(inputs.endingValue) || 0
     const numberOfYears = parseFloat(inputs.numberOfYears) || 0
+
+    if (beginningValue === 0 || endingValue === 0 || numberOfYears === 0) return
 
     if (inputs.calculationType === 'cagr') {
       // CAGR = (Ending Value / Beginning Value)^(1/n) – 1
@@ -55,179 +73,311 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
         finalValue: endingValue
       })
     }
-  }
+  }, [inputs])
 
   // Auto-calculate when inputs change
   useEffect(() => {
     if (inputs.beginningValue && inputs.endingValue && inputs.numberOfYears) {
       calculate()
     }
-  }, [inputs.beginningValue, inputs.endingValue, inputs.numberOfYears, inputs.calculationType])
+  }, [calculate])
 
-  const shareableLink = `${window.location.origin}${location.pathname}?${new URLSearchParams(inputs).toString()}`
+  const handleAddToComparison = () => {
+    if (results) {
+      const comparisonData = {
+        type: inputs.calculationType === 'cagr' ? 'CAGR' : 'ROI',
+        name: `${inputs.calculationType.toUpperCase()} - ${formatCurrency(inputs.beginningValue)} to ${formatCurrency(inputs.endingValue)}`,
+        inputs: {
+          'Beginning Value': formatCurrency(inputs.beginningValue),
+          'Ending Value': formatCurrency(inputs.endingValue),
+          'Number of Years': `${inputs.numberOfYears} years`,
+          'Calculation Type': inputs.calculationType.toUpperCase()
+        },
+        results: inputs.calculationType === 'cagr' ? {
+          'CAGR': `${results.cagr}%`,
+          'Total Returns': formatCurrency(results.totalReturns),
+          'Total Return %': `${results.totalReturnPercentage}%`
+        } : {
+          'ROI': `${results.roi}%`,
+          'Net Profit': formatCurrency(results.netProfit),
+          'Final Value': formatCurrency(results.finalValue)
+        }
+      }
+
+      // Use new comparison context
+      addToComparison(comparisonData)
+
+      // Also call the legacy prop if provided for backward compatibility
+      if (onAddToComparison) {
+        onAddToComparison(comparisonData)
+      }
+    }
+  }
+
+  const shareCalculation = () => {
+    const shareableURL = getShareableURL()
+    const shareData = {
+      title: `finclamp.com - ${inputs.calculationType.toUpperCase()} Calculator Results`,
+      text: `${inputs.calculationType.toUpperCase()} Calculation: ${formatCurrency(inputs.beginningValue)} to ${formatCurrency(inputs.endingValue)} over ${inputs.numberOfYears} years. ${inputs.calculationType === 'cagr' ? `CAGR: ${results?.cagr}%` : `ROI: ${results?.roi}%`}`,
+      url: shareableURL
+    }
+
+    if (navigator.share) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
+    }
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">Investment Details</h2>
-          
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">Calculation Type</label>
-            <select
-              className="w-full p-3 border rounded-lg"
-              value={inputs.calculationType}
-              onChange={(e) => handleInputChange('calculationType', e.target.value)}
-            >
-              <option value="cagr">CAGR (Compound Annual Growth Rate)</option>
-              <option value="roi">ROI (Return on Investment)</option>
-            </select>
-          </div>
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              {inputs.calculationType === 'cagr' ? 'Beginning Value' : 'Initial Investment'} (₹)
-              <span className="text-blue-600 cursor-help" title="Initial investment amount">ℹ️</span>
-            </label>
-            <input
-              type="number"
-              className="w-full p-3 border rounded-lg"
-              value={inputs.beginningValue}
-              onChange={(e) => handleInputChange('beginningValue', e.target.value)}
-              placeholder="e.g., 100000"
-            />
-          </div>
-
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-2">
-              {inputs.calculationType === 'cagr' ? 'Ending Value' : 'Final Value'} (₹)
-              <span className="text-blue-600 cursor-help" title="Final investment value">ℹ️</span>
-            </label>
-            <input
-              type="number"
-              className="w-full p-3 border rounded-lg"
-              value={inputs.endingValue}
-              onChange={(e) => handleInputChange('endingValue', e.target.value)}
-              placeholder="e.g., 200000"
-            />
-          </div>
-
-          {inputs.calculationType === 'cagr' && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2">
-                Number of Years
-                <span className="text-blue-600 cursor-help" title="Investment duration in years">ℹ️</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                className="w-full p-3 border rounded-lg"
-                value={inputs.numberOfYears}
-                onChange={(e) => handleInputChange('numberOfYears', e.target.value)}
-                placeholder="e.g., 5"
-              />
-            </div>
-          )}
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <button
+        {/* Left Column - Investment Details */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              📈 {inputs.calculationType === 'cagr' ? 'CAGR' : 'ROI'} Details
+            </h3>
+            <motion.button
               onClick={handleReset}
-              className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700 cursor-pointer"
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
             >
-              🔄 Reset
-            </button>
-            <button
-              onClick={calculate}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition-colors cursor-pointer"
-            >
-              Calculate {inputs.calculationType.toUpperCase()}
-            </button>
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
           </div>
-        </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold mb-4">
-            {inputs.calculationType === 'cagr' ? 'CAGR Analysis' : 'ROI Analysis'}
-          </h2>
-          
+          <div className="space-y-5">
+            {/* Calculation Type */}
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <span className="mr-2">🔢</span>
+                Calculation Type
+              </label>
+              <select
+                value={inputs.calculationType}
+                onChange={(e) => handleInputChange('calculationType', e.target.value)}
+                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
+                style={{
+                  borderColor: '#E5E7EB',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: 'none'
+                }}
+              >
+                <option value="cagr">CAGR (Compound Annual Growth Rate)</option>
+                <option value="roi">ROI (Return on Investment)</option>
+              </select>
+            </div>
+
+            <CurrencyInput
+              label={inputs.calculationType === 'cagr' ? 'Beginning Value' : 'Initial Investment'}
+              value={inputs.beginningValue}
+              onChange={(value) => handleInputChange('beginningValue', value)}
+              fieldName="beginningValue"
+              icon="💰"
+              placeholder="Enter beginning value"
+              min="0"
+              focusColor="#8B5CF6"
+            />
+
+            <CurrencyInput
+              label={inputs.calculationType === 'cagr' ? 'Ending Value' : 'Final Value'}
+              value={inputs.endingValue}
+              onChange={(value) => handleInputChange('endingValue', value)}
+              fieldName="endingValue"
+              icon="🎯"
+              placeholder="Enter ending value"
+              min="0"
+              focusColor="#8B5CF6"
+            />
+
+            {inputs.calculationType === 'cagr' && (
+              <CurrencyInput
+                label="Number of Years"
+                value={inputs.numberOfYears}
+                onChange={(value) => handleInputChange('numberOfYears', value)}
+                fieldName="numberOfYears"
+                icon="📅"
+                placeholder="Enter number of years"
+                min="1"
+                focusColor="#8B5CF6"
+              />
+            )}
+
+            {/* Quick Actions */}
+            {results && (
+              <div className="pt-4 border-t border-gray-100 space-y-3">
+                <motion.button
+                  onClick={handleAddToComparison}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#10B981' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  📊 Compare
+                </motion.button>
+
+                <motion.button
+                  onClick={shareCalculation}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#8B5CF6' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🔗 Share
+                </motion.button>
+              </div>
+            )}
+          </div>
+        </motion.div>
+
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 {inputs.calculationType === 'cagr' ? 'CAGR' : 'ROI'} Results
+          </h3>
+
           {results ? (
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 gap-6">
               {inputs.calculationType === 'cagr' && (
                 <>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <p className="text-sm text-gray-600">CAGR</p>
-                    <p className="text-2xl font-bold text-green-600">{results.cagr}% per annum</p>
-                  </div>
-                  
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Beginning Value</p>
-                    <p className="text-xl font-semibold text-blue-600">₹{results.beginningValue.toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Ending Value</p>
-                    <p className="text-xl font-semibold text-purple-600">₹{results.endingValue.toLocaleString()}</p>
-                  </div>
+                  <motion.div
+                    className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">📈</span>
+                      <h4 className="font-semibold text-base text-gray-700">CAGR</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-green-600 leading-tight">
+                      {results.cagr}% per annum
+                    </p>
+                  </motion.div>
 
-                  <div className="p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Total Returns</p>
-                    <p className="text-xl font-semibold text-yellow-600">₹{results.totalReturns.toLocaleString()} ({results.totalReturnPercentage}%)</p>
-                  </div>
+                  <motion.div
+                    className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">💰</span>
+                      <h4 className="font-semibold text-base text-gray-700">Total Returns</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 leading-tight">
+                      {formatCurrency(results.totalReturns)}
+                    </p>
+                  </motion.div>
 
-                  <div className="p-4 bg-gray-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Investment Period</p>
-                    <p className="text-lg font-semibold text-gray-600">{results.numberOfYears} years</p>
-                  </div>
+                  <motion.div
+                    className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">📊</span>
+                      <h4 className="font-semibold text-base text-gray-700">Total Return %</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-purple-600 leading-tight">
+                      {results.totalReturnPercentage}%
+                    </p>
+                  </motion.div>
                 </>
               )}
 
               {inputs.calculationType === 'roi' && (
                 <>
-                  <div className="p-4 bg-green-50 rounded-lg">
-                    <p className="text-sm text-gray-600">ROI</p>
-                    <p className="text-2xl font-bold text-green-600">{results.roi}%</p>
-                  </div>
-                  
-                  <div className="p-4 bg-blue-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Initial Investment</p>
-                    <p className="text-xl font-semibold text-blue-600">₹{results.investment.toLocaleString()}</p>
-                  </div>
-                  
-                  <div className="p-4 bg-purple-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Final Value</p>
-                    <p className="text-xl font-semibold text-purple-600">₹{results.finalValue.toLocaleString()}</p>
-                  </div>
+                  <motion.div
+                    className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">📈</span>
+                      <h4 className="font-semibold text-base text-gray-700">ROI</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-green-600 leading-tight">
+                      {results.roi}%
+                    </p>
+                  </motion.div>
 
-                  <div className="p-4 bg-yellow-50 rounded-lg">
-                    <p className="text-sm text-gray-600">Net Profit</p>
-                    <p className="text-xl font-semibold text-yellow-600">₹{results.netProfit.toLocaleString()}</p>
-                  </div>
+                  <motion.div
+                    className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center space-x-3 mb-3">
+                      <span className="text-2xl">💰</span>
+                      <h4 className="font-semibold text-base text-gray-700">Net Profit</h4>
+                    </div>
+                    <p className="text-2xl font-bold text-blue-600 leading-tight">
+                      {formatCurrency(results.netProfit)}
+                    </p>
+                  </motion.div>
                 </>
               )}
-
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <p className="text-sm font-medium mb-2">Share this calculation:</p>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={shareableLink}
-                    readOnly
-                    className="flex-1 p-2 text-xs border rounded"
-                  />
-                  <button
-                    onClick={() => navigator.clipboard.writeText(shareableLink)}
-                    className="px-3 py-2 bg-blue-600 text-white text-xs rounded hover:bg-blue-700 cursor-pointer"
-                  >
-                    Copy
-                  </button>
-                </div>
-              </div>
             </div>
           ) : (
-            <p className="text-gray-500">Enter investment details and click Calculate to see results</p>
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📈</div>
+              <h4 className="text-xl font-semibold text-gray-700 mb-2">
+                {inputs.calculationType === 'cagr' ? 'CAGR Calculator' : 'ROI Calculator'}
+              </h4>
+              <p className="text-gray-500">Enter your investment details to see the analysis</p>
+            </div>
           )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+
+      {/* PDF Export */}
+      {results && (
+        <motion.div
+          className="mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <PDFExport
+            calculatorName={`${inputs.calculationType.toUpperCase()} Calculator`}
+            inputs={{
+              'Beginning Value': formatCurrency(inputs.beginningValue),
+              'Ending Value': formatCurrency(inputs.endingValue),
+              ...(inputs.calculationType === 'cagr' && { 'Number of Years': `${inputs.numberOfYears} years` }),
+              'Calculation Type': inputs.calculationType.toUpperCase()
+            }}
+            results={inputs.calculationType === 'cagr' ? {
+              'CAGR': `${results.cagr}% per annum`,
+              'Total Returns': formatCurrency(results.totalReturns),
+              'Total Return Percentage': `${results.totalReturnPercentage}%`
+            } : {
+              'ROI': `${results.roi}%`,
+              'Net Profit': formatCurrency(results.netProfit),
+              'Final Value': formatCurrency(results.finalValue)
+            }}
+          />
+        </motion.div>
+      )}
+    </motion.div>
   )
 }

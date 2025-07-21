@@ -1,5 +1,11 @@
 
-import React, { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import PDFExport from '../components/PDFExport'
+import { useComparison } from '../contexts/ComparisonContext'
+import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
+import CurrencyInput from '../components/CurrencyInput'
 
 const countries = {
   'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
@@ -9,6 +15,8 @@ const countries = {
 }
 
 export default function SWPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
+  const { addToComparison } = useComparison()
+  const { formatCurrency } = useCurrency()
 
   const initialInputs = {
     initialInvestment: '',
@@ -18,15 +26,20 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     country: 'india'
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('swp_')
+  const { getShareableURL } = generateShareableURL('swp_')
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0 || (!inputs.initialInvestment && !inputs.monthlyWithdrawal)) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
 
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
-  const [collapsedSections, setCollapsedSections] = useState({
-    inputs: false,
-    results: false,
-    breakdown: true
-  })
+  const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -108,212 +121,320 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }, [calculateSWP])
 
-  const toggleSection = (section) => {
-    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
+  const handleAddToComparison = () => {
+    if (results) {
+      const comparisonData = {
+        type: 'SWP',
+        name: `SWP - ${formatCurrency(inputs.initialInvestment)} Initial`,
+        inputs: {
+          'Initial Investment': formatCurrency(inputs.initialInvestment),
+          'Monthly Withdrawal': formatCurrency(inputs.monthlyWithdrawal),
+          'Withdrawal Period': `${inputs.withdrawalPeriodYears} years`,
+          'Expected Annual Return': `${inputs.annualReturn}%`,
+          'Country': `${selectedCountry.flag} ${selectedCountry.name}`
+        },
+        results: {
+          'Total Withdrawn': formatCurrency(results.totalWithdrawn),
+          'Remaining Balance': formatCurrency(results.remainingBalance),
+          'Balance Exhausted': results.balanceExhaustedYear ? `Year ${results.balanceExhaustedYear}` : 'Never'
+        }
+      }
+
+      // Use new comparison context
+      addToComparison(comparisonData)
+
+      // Also call the legacy prop if provided for backward compatibility
+      if (onAddToComparison) {
+        onAddToComparison(comparisonData)
+      }
+    }
   }
 
-  const selectedCountry = countries[inputs.country]
+  const shareCalculation = () => {
+    const shareableURL = getShareableURL()
+    const shareData = {
+      title: 'finclamp.com - SWP Calculator Results',
+      text: `SWP Calculation: Initial Investment ${formatCurrency(inputs.initialInvestment)}, Monthly Withdrawal ${formatCurrency(inputs.monthlyWithdrawal)} for ${inputs.withdrawalPeriodYears} years. Remaining Balance: ${formatCurrency(results?.remainingBalance)}`,
+      url: shareableURL
+    }
+
+    if (navigator.share) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
+    }
+  }
+
+  const selectedCountry = countries[inputs.country] || countries['india']
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50 via-orange-50 to-yellow-50">
-      <div className="max-w-7xl mx-auto p-4 lg:p-8">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl lg:text-5xl font-bold bg-gradient-to-r from-rose-600 via-orange-600 to-yellow-600 bg-clip-text text-transparent mb-4">
-            📉 SWP Calculator
-          </h1>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-            Plan your systematic withdrawal strategy and see how long your investment will last
-          </p>
-        </div>
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
 
-        <div className="space-y-6">
-          {/* Calculator Inputs */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-            <button
-              onClick={() => toggleSection('inputs')}
-              className="w-full p-6 bg-gradient-to-r from-rose-600 to-orange-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
+        {/* Left Column - Investment Details */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              📉 SWP Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
             >
-              <span className="text-xl">⚙️ Calculator Inputs</span>
-              <span className="text-2xl">{collapsedSections.inputs ? '▼' : '▲'}</span>
-            </button>
-            {!collapsedSections.inputs && (
-              <div className="p-6">
-                {/* Country Selection */}
-                <div className="mb-6">
-                  <label className="block text-sm font-semibold mb-3 text-gray-700">
-                    🌍 Country
-                  </label>
-                  <select 
-                    value={inputs.country}
-                    onChange={(e) => handleInputChange('country', e.target.value)}
-                    className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 bg-white text-lg transition-all"
-                  >
-                    {Object.entries(countries).map(([key, country]) => (
-                      <option key={key} value={key}>
-                        {country.flag} {country.name} (Typical: {country.typical_return}%)
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
 
-                {/* Investment Inputs */}
-                <div className="grid md:grid-cols-2 gap-6 mb-6">
-                  <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      💰 Initial Investment ({selectedCountry.currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.initialInvestment}
-                      onChange={(e) => handleInputChange('initialInvestment', e.target.value)}
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-lg transition-all"
-                      placeholder="e.g., 1000000"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📤 Monthly Withdrawal ({selectedCountry.currency})
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.monthlyWithdrawal}
-                      onChange={(e) => handleInputChange('monthlyWithdrawal', e.target.value)}
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-lg transition-all"
-                      placeholder="e.g., 10000"
-                    />
-                  </div>
-                </div>
+          <div className="space-y-5">
+            {/* Country Selection */}
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                <span className="mr-2">🌍</span>
+                Country
+              </label>
+              <select
+                value={inputs.country}
+                onChange={(e) => handleInputChange('country', e.target.value)}
+                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
+                style={{
+                  borderColor: '#E5E7EB',
+                  backgroundColor: '#FFFFFF',
+                  boxShadow: 'none'
+                }}
+              >
+                {Object.entries(countries).map(([key, country]) => (
+                  <option key={key} value={key}>
+                    {country.flag} {country.name} (Typical: {country.typical_return}%)
+                  </option>
+                ))}
+              </select>
+            </div>
 
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📈 Expected Annual Return (%)
-                    </label>
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={inputs.annualReturn}
-                      onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-lg transition-all"
-                      placeholder="12"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold mb-3 text-gray-700">
-                      📅 Withdrawal Period (Years)
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.withdrawalPeriodYears}
-                      onChange={(e) => handleInputChange('withdrawalPeriodYears', e.target.value)}
-                      className="w-full p-4 border-2 border-gray-200 rounded-xl focus:border-rose-500 focus:ring-2 focus:ring-rose-200 text-lg transition-all"
-                      placeholder="20"
-                    />
-                  </div>
-                </div>
+            <CurrencyInput
+              label="Initial Investment"
+              value={inputs.initialInvestment}
+              onChange={(value) => handleInputChange('initialInvestment', value)}
+              fieldName="initialInvestment"
+              icon="💰"
+              placeholder="Enter initial investment"
+              min="0"
+              focusColor="#EC4899"
+            />
 
-                <div className="mt-6">
-                  <button
-                    onClick={handleReset}
-                    className="w-full bg-gradient-to-r from-gray-500 to-gray-600 text-white py-3 rounded-xl font-semibold hover:shadow-lg transition-all hover:from-gray-600 hover:to-gray-700 cursor-pointer"
-                  >
-                    🔄 Reset
-                  </button>
-                </div>
+            <CurrencyInput
+              label="Monthly Withdrawal"
+              value={inputs.monthlyWithdrawal}
+              onChange={(value) => handleInputChange('monthlyWithdrawal', value)}
+              fieldName="monthlyWithdrawal"
+              icon="📤"
+              placeholder="Enter monthly withdrawal"
+              min="0"
+              focusColor="#EC4899"
+            />
+
+            <CurrencyInput
+              label="Expected Annual Return (%)"
+              value={inputs.annualReturn}
+              onChange={(value) => handleInputChange('annualReturn', value)}
+              fieldName="annualReturn"
+              icon="📈"
+              placeholder="Enter expected return"
+              step="0.1"
+              min="0"
+              focusColor="#EC4899"
+            />
+
+            <CurrencyInput
+              label="Withdrawal Period (Years)"
+              value={inputs.withdrawalPeriodYears}
+              onChange={(value) => handleInputChange('withdrawalPeriodYears', value)}
+              fieldName="withdrawalPeriodYears"
+              icon="📅"
+              placeholder="Enter withdrawal period"
+              min="1"
+              focusColor="#EC4899"
+            />
+
+            {/* Quick Actions */}
+            {results && (
+              <div className="pt-4 border-t border-gray-100 space-y-3">
+                <motion.button
+                  onClick={handleAddToComparison}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#10B981' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  📊 Compare
+                </motion.button>
+
+                <motion.button
+                  onClick={shareCalculation}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#EC4899' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🔗 Share
+                </motion.button>
               </div>
             )}
           </div>
+        </motion.div>
 
-          {/* Results Section */}
-          {results && (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => toggleSection('results')}
-                className="w-full p-6 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Results
+          </h3>
+
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
+              <motion.div
+                className="bg-gradient-to-br from-pink-50 to-rose-50 rounded-xl p-6 border border-pink-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
               >
-                <span className="text-xl">📊 Withdrawal Results</span>
-                <span className="text-2xl">{collapsedSections.results ? '▼' : '▲'}</span>
-              </button>
-              {!collapsedSections.results && (
-                <div className="p-6">
-                  <div className="grid gap-4 mb-6">
-                    <div className="bg-gradient-to-r from-blue-100 to-cyan-100 rounded-xl p-6 border-l-4 border-blue-500">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-700 font-medium">💰 Total Withdrawn</span>
-                        <span className="text-2xl font-bold text-blue-600">
-                          {selectedCountry.currency}{parseInt(results.totalWithdrawn).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-xl p-6 border-l-4 border-green-500">
-                      <div className="flex justify-between items-center">
-                        <span className="text-gray-700 font-medium">💼 Remaining Balance</span>
-                        <span className="text-2xl font-bold text-green-600">
-                          {selectedCountry.currency}{parseInt(results.remainingBalance).toLocaleString()}
-                        </span>
-                      </div>
-                    </div>
-                    
-                    {results.balanceExhaustedYear && (
-                      <div className="bg-gradient-to-r from-red-100 to-pink-100 rounded-xl p-6 border-l-4 border-red-500">
-                        <div className="flex justify-between items-center">
-                          <span className="text-gray-700 font-medium">⚠️ Balance Exhausted</span>
-                          <span className="text-2xl font-bold text-red-600">
-                            Year {results.balanceExhaustedYear}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Withdrawn</h4>
                 </div>
-              )}
+                <p className="text-2xl font-bold text-pink-600 leading-tight">
+                  {formatCurrency(results.totalWithdrawn)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💼</span>
+                  <h4 className="font-semibold text-base text-gray-700">Remaining Balance</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                  {formatCurrency(results.remainingBalance)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100 col-span-2"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">⏰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Balance Status</h4>
+                </div>
+                <p className="text-lg font-bold text-orange-600 leading-tight">
+                  {results.balanceExhaustedYear
+                    ? `Balance exhausted in Year ${results.balanceExhaustedYear}`
+                    : 'Balance lasts beyond withdrawal period'}
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📉</div>
+              <h4 className="text-xl font-semibold text-gray-700 mb-2">SWP Calculator</h4>
+              <p className="text-gray-500">Enter your investment details to see withdrawal projections</p>
             </div>
           )}
-
-          {/* Year-wise Breakdown */}
-          {results && yearlyBreakdown.length > 0 && (
-            <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => toggleSection('breakdown')}
-                className="w-full p-6 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
-              >
-                <span className="text-xl">📆 Year-wise Breakdown</span>
-                <span className="text-2xl">{collapsedSections.breakdown ? '▼' : '▲'}</span>
-              </button>
-              {!collapsedSections.breakdown && (
-                <div className="p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full rounded-xl overflow-hidden">
-                      <thead className="bg-gradient-to-r from-purple-500 to-pink-600 text-white">
-                        <tr>
-                          <th className="p-4 text-left">Year</th>
-                          <th className="p-4 text-left">Start Balance</th>
-                          <th className="p-4 text-left">Year Withdrawn</th>
-                          <th className="p-4 text-left">End Balance</th>
-                          <th className="p-4 text-left">Total Withdrawn</th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white">
-                        {yearlyBreakdown.map((year, index) => (
-                          <tr key={index} className="border-b hover:bg-purple-50 transition-colors">
-                            <td className="p-4 font-semibold">{year.year}</td>
-                            <td className="p-4">{selectedCountry.currency}{year.startBalance?.toLocaleString()}</td>
-                            <td className="p-4">{selectedCountry.currency}{year.yearWithdrawn?.toLocaleString()}</td>
-                            <td className="p-4 font-semibold text-blue-600">{selectedCountry.currency}{year.endBalance?.toLocaleString()}</td>
-                            <td className="p-4 font-semibold text-green-600">{selectedCountry.currency}{year.totalWithdrawn?.toLocaleString()}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-        </div>
+        </motion.div>
       </div>
-    </div>
+
+      {/* Yearly Breakdown Table */}
+      {yearlyBreakdown.length > 0 && (
+        <motion.div
+          className="mt-6 bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📈 Yearly Breakdown
+          </h3>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-3 px-2 font-semibold text-gray-700">Year</th>
+                  <th className="text-right py-3 px-2 font-semibold text-gray-700">Start Balance</th>
+                  <th className="text-right py-3 px-2 font-semibold text-gray-700">Withdrawn</th>
+                  <th className="text-right py-3 px-2 font-semibold text-gray-700">End Balance</th>
+                </tr>
+              </thead>
+              <tbody>
+                {yearlyBreakdown.map((year, index) => (
+                  <motion.tr
+                    key={index}
+                    className={`border-b border-gray-100 ${year.endBalance === 0 ? 'bg-red-50' : ''}`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <td className="py-3 px-2 font-medium">{year.year}</td>
+                    <td className="py-3 px-2 text-right">{formatCurrency(year.startBalance)}</td>
+                    <td className="py-3 px-2 text-right text-red-600">{formatCurrency(year.yearWithdrawn)}</td>
+                    <td className="py-3 px-2 text-right font-semibold">{formatCurrency(year.endBalance)}</td>
+                  </motion.tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+      )}
+
+      {/* PDF Export */}
+      {results && (
+        <motion.div
+          className="mt-6"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.4 }}
+        >
+          <PDFExport
+            calculatorName="SWP Calculator"
+            inputs={{
+              'Initial Investment': formatCurrency(inputs.initialInvestment),
+              'Monthly Withdrawal': formatCurrency(inputs.monthlyWithdrawal),
+              'Withdrawal Period': `${inputs.withdrawalPeriodYears} years`,
+              'Expected Annual Return': `${inputs.annualReturn}%`,
+              'Country': `${selectedCountry.flag} ${selectedCountry.name}`
+            }}
+            results={{
+              'Total Withdrawn': formatCurrency(results.totalWithdrawn),
+              'Remaining Balance': formatCurrency(results.remainingBalance),
+              'Balance Status': results.balanceExhaustedYear
+                ? `Exhausted in Year ${results.balanceExhaustedYear}`
+                : 'Lasts beyond withdrawal period'
+            }}
+          />
+        </motion.div>
+      )}
+    </motion.div>
   )
 }
