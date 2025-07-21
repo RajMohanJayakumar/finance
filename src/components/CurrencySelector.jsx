@@ -46,7 +46,7 @@ const CurrencySelector = () => {
                 <button
                   key={key}
                   onClick={() => handleFormatChange(key)}
-                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 ${
+                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 transition-colors duration-150 cursor-pointer ${
                     currencyFormat === key ? 'bg-indigo-50 border-r-2 border-indigo-500' : ''
                   }`}
                 >

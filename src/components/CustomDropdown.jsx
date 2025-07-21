@@ -92,8 +92,8 @@ const CustomDropdown = ({
           disabled
             ? 'bg-gray-50 text-gray-400 cursor-not-allowed border-gray-200'
             : isFocused || isOpen
-            ? `border-2 ring-4`
-            : 'border border-gray-200 hover:border-gray-300'
+            ? `border-2 ring-4 cursor-pointer`
+            : 'border border-gray-200 hover:border-gray-300 cursor-pointer'
         } ${error ? 'border-red-300' : ''}`}
         style={{
           borderColor: error ? '#FCA5A5' : (isFocused || isOpen ? focusColor : undefined),
@@ -139,9 +139,9 @@ const CustomDropdown = ({
                 <motion.button
                   key={option.value}
                   type="button"
-                  className={`w-full px-4 py-3 text-left text-base font-medium transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 ${
-                    value === option.value 
-                      ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500' 
+                  className={`w-full px-4 py-3 text-left text-base font-medium transition-all duration-200 hover:bg-gray-50 focus:outline-none focus:bg-gray-50 cursor-pointer ${
+                    value === option.value
+                      ? 'bg-blue-50 text-blue-700 border-r-4 border-blue-500'
                       : 'text-gray-700'
                   }`}
                   onClick={() => handleSelect(option.value)}

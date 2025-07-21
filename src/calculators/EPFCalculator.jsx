@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 
@@ -19,8 +20,16 @@ export default function EPFCalculator({ onAddToComparison, categoryColor = 'gree
     interestRate: '8.5'
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('epf_')
   const [results, setResults] = useState(null)
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -30,6 +39,8 @@ export default function EPFCalculator({ onAddToComparison, categoryColor = 'gree
   const handleReset = () => {
     setInputs(initialInputs)
     setResults(null)
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname + '?calculator=epf')
   }
 
   const calculateEPF = () => {

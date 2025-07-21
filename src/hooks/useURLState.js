@@ -67,6 +67,9 @@ export const useURLStateObject = (prefix = '') => {
 
     const url = new URL(window.location)
 
+    // Preserve calculator parameter
+    const calculatorParam = url.searchParams.get('calculator')
+
     // Remove existing parameters with prefix
     const keysToRemove = []
     for (const key of url.searchParams.keys()) {
@@ -75,6 +78,11 @@ export const useURLStateObject = (prefix = '') => {
       }
     }
     keysToRemove.forEach(key => url.searchParams.delete(key))
+
+    // Restore calculator parameter if it existed
+    if (calculatorParam) {
+      url.searchParams.set('calculator', calculatorParam)
+    }
 
     // Add new parameters
     Object.entries(newState).forEach(([key, value]) => {
@@ -116,21 +124,21 @@ export const useURLStateObject = (prefix = '') => {
 // Utility function to generate shareable URL
 export const generateShareableURL = (calculatorType, inputs, results) => {
   const url = new URL(window.location.origin + window.location.pathname)
-  
-  // Add calculator type
-  url.searchParams.set('calc', calculatorType)
-  
-  // Add inputs with prefix
+
+  // Add calculator type parameter - this is essential for shared links to work
+  url.searchParams.set('calculator', calculatorType)
+
+  // Add inputs with calculator-specific prefix
   if (inputs && typeof inputs === 'object') {
     Object.entries(inputs).forEach(([key, value]) => {
       if (value && value !== '') {
-        url.searchParams.set(`i_${key}`, value)
+        url.searchParams.set(`${calculatorType}_${key}`, value)
       }
     })
   }
-  
+
   // Add timestamp for tracking
   url.searchParams.set('shared', Date.now().toString())
-  
+
   return url.toString()
 }

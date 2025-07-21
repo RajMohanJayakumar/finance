@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 
@@ -16,9 +17,17 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
     calculationType: 'maturity'
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('ppf_')
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -29,6 +38,8 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
     setInputs(initialInputs)
     setResults(null)
     setYearlyBreakdown([])
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname)
   }
 
   const calculatePPF = () => {
@@ -73,17 +84,18 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
   }
 
   const shareCalculation = () => {
+    const shareableURL = generateShareableURL('ppf', inputs, results)
     const shareData = {
       title: 'finclamp.com - PPF Calculator Results',
-      text: `PPF Calculation: Annual Deposit ₹${inputs.annualDeposit}, Maturity ₹${results?.maturityAmount?.toLocaleString()}`,
-      url: window.location.href
+      text: `PPF Calculation: Annual Deposit ${formatCurrency(inputs.annualDeposit)}, Maturity ${formatCurrency(results?.maturityAmount)}`,
+      url: shareableURL
     }
 
     if (navigator.share) {
       navigator.share(shareData)
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Calculation link copied to clipboard!')
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
     }
   }
 

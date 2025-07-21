@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 import CalculatorDropdown from '../components/CalculatorDropdown'
@@ -22,9 +23,16 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
     pfFrequency: 'monthly'
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
-  
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('tax_')
   const [results, setResults] = useState(null)
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
 
   const taxSlabs = {
     india: {
@@ -53,7 +61,11 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const handleReset = () => {
     setInputs(initialInputs)
     setResults(null)
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname)
   }
+
+
 
   const handleAddToComparison = () => {
     if (results) {
@@ -82,17 +94,18 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   }
 
   const shareCalculation = () => {
+    const shareableURL = generateShareableURL('tax', inputs, results)
     const shareData = {
       title: 'finclamp.com - Tax Calculator Results',
       text: `Tax Calculation (${inputs.taxRegime === 'old' ? 'Old' : 'New'} Regime): Annual Income ${formatCurrency(results?.grossIncome)}, Monthly ${formatCurrency(results?.monthlyIncome)}, Tax ${formatCurrency(results?.taxPayable)}, Take Home ${formatCurrency(results?.netIncome)}`,
-      url: window.location.href
+      url: shareableURL
     }
 
     if (navigator.share) {
       navigator.share(shareData)
     } else {
-      navigator.clipboard.writeText(window.location.href)
-      alert('Calculation link copied to clipboard!')
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
     }
   }
 
@@ -266,7 +279,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                 <select
                   value={inputs.pfFrequency}
                   onChange={(e) => handleInputChange('pfFrequency', e.target.value)}
-                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-500"
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-500 cursor-pointer"
                 >
                   <option value="monthly">Monthly</option>
                   <option value="yearly">Yearly</option>

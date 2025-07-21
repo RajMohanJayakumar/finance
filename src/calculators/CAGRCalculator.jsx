@@ -24,7 +24,7 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
 
   // Initialize inputs with defaults if empty
   useEffect(() => {
-    if (Object.keys(inputs).length === 0 || (!inputs.beginningValue && !inputs.endingValue)) {
+    if (Object.keys(inputs).length === 0) {
       setInputs(prev => ({ ...initialInputs, ...prev }))
     }
   }, [])

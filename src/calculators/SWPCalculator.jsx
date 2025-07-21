@@ -6,14 +6,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import CurrencyInput from '../components/CurrencyInput'
-import CalculatorDropdown from '../components/CalculatorDropdown'
 
-const countries = {
-  'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
-  'usa': { flag: '🇺🇸', name: 'USA', currency: '$', typical_return: 8 },
-  'uk': { flag: '🇬🇧', name: 'UK', currency: '£', typical_return: 7 },
-  'canada': { flag: '🇨🇦', name: 'Canada', currency: 'C$', typical_return: 7.5 }
-}
 
 export default function SWPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
   const { addToComparison } = useComparison()
@@ -23,8 +16,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     initialInvestment: '',
     monthlyWithdrawal: '',
     annualReturn: '12',
-    withdrawalPeriodYears: '20',
-    country: 'india'
+    withdrawalPeriodYears: '20'
   }
 
   // Use URL state management for inputs
@@ -33,7 +25,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
 
   // Initialize inputs with defaults if empty
   useEffect(() => {
-    if (Object.keys(inputs).length === 0 || (!inputs.initialInvestment && !inputs.monthlyWithdrawal)) {
+    if (Object.keys(inputs).length === 0) {
       setInputs(prev => ({ ...initialInputs, ...prev }))
     }
   }, [])
@@ -44,11 +36,6 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
-
-    if (field === 'country') {
-      newInputs.annualReturn = countries[value].typical_return.toString()
-    }
-
     setInputs(newInputs)
   }
 
@@ -132,7 +119,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
           'Monthly Withdrawal': formatCurrency(inputs.monthlyWithdrawal),
           'Withdrawal Period': `${inputs.withdrawalPeriodYears} years`,
           'Expected Annual Return': `${inputs.annualReturn}%`,
-          'Country': `${selectedCountry.flag} ${selectedCountry.name}`
+
         },
         results: {
           'Total Withdrawn': formatCurrency(results.totalWithdrawn),
@@ -167,7 +154,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
-  const selectedCountry = countries[inputs.country] || countries['india']
+
 
   return (
     <motion.div
@@ -203,15 +190,6 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
           </div>
 
           <div className="space-y-5">
-            {/* Country Selection */}
-            <CalculatorDropdown
-              configKey="SWP_COUNTRIES"
-              value={inputs.country}
-              onChange={(value) => handleInputChange('country', value)}
-              category="mutual_funds"
-              placeholder="Select country"
-            />
-
             <CurrencyInput
               label="Initial Investment"
               value={inputs.initialInvestment}
@@ -409,7 +387,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
               'Monthly Withdrawal': formatCurrency(inputs.monthlyWithdrawal),
               'Withdrawal Period': `${inputs.withdrawalPeriodYears} years`,
               'Expected Annual Return': `${inputs.annualReturn}%`,
-              'Country': `${selectedCountry.flag} ${selectedCountry.name}`
+
             }}
             results={{
               'Total Withdrawn': formatCurrency(results.totalWithdrawn),

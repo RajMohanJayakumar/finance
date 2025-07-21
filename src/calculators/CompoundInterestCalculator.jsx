@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import CurrencyInput from '../components/CurrencyInput'
 import PDFExport from '../components/PDFExport'
 import CalculatorDropdown from '../components/CalculatorDropdown'
@@ -19,8 +20,16 @@ function CompoundInterestCalculator({ onAddToComparison, categoryColor = 'blue' 
     compoundingFrequency: '1' // 1=annually, 2=semi-annually, 4=quarterly, 12=monthly, 365=daily
   }
 
-  const [inputs, setInputs] = useState(initialInputs)
+  // Use URL state management for inputs
+  const [inputs, setInputs] = useURLStateObject('compound_')
   const [results, setResults] = useState(null)
+
+  // Initialize inputs with defaults if empty
+  useEffect(() => {
+    if (Object.keys(inputs).length === 0) {
+      setInputs(prev => ({ ...initialInputs, ...prev }))
+    }
+  }, [])
 
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
@@ -30,6 +39,8 @@ function CompoundInterestCalculator({ onAddToComparison, categoryColor = 'blue' 
   const handleReset = () => {
     setInputs(initialInputs)
     setResults(null)
+    // Clear URL parameters
+    window.history.replaceState({}, document.title, window.location.pathname + '?calculator=compound-interest')
   }
 
   const calculateCompoundInterest = () => {

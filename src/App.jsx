@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import './App.css'
 import './styles/mobile.css'
@@ -108,16 +108,113 @@ const staggerContainer = {
 }
 
 export default function App() {
-  const [activeMainTab, setActiveMainTab] = useState('loans')
+  // Function to detect calculator from URL parameters
+  const detectCalculatorFromURL = () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const paramKeys = Array.from(urlParams.keys())
+
+    // First, check for explicit calculator parameter
+    const calculatorParam = urlParams.get('calculator')
+    if (calculatorParam) {
+      // Map calculator names to tab info
+      const calculatorNameMap = {
+        'income-tax': { mainTab: 'tax', subTab: 'income-tax' },
+        'capital-gains': { mainTab: 'tax', subTab: 'capital-gains' },
+        'sip': { mainTab: 'mutual_funds', subTab: 'sip' },
+        'swp': { mainTab: 'mutual_funds', subTab: 'swp' },
+        'cagr': { mainTab: 'mutual_funds', subTab: 'cagr' },
+        'emi': { mainTab: 'loans', subTab: 'emi' },
+        'mortgage': { mainTab: 'loans', subTab: 'mortgage' },
+        'personal-loan': { mainTab: 'loans', subTab: 'personal-loan' },
+        'ppf': { mainTab: 'savings', subTab: 'ppf' },
+        'fd': { mainTab: 'savings', subTab: 'fd' },
+        'rd': { mainTab: 'savings', subTab: 'rd' },
+        'nps': { mainTab: 'retirement', subTab: 'nps' },
+        'epf': { mainTab: 'retirement', subTab: 'epf' },
+        'gratuity': { mainTab: 'retirement', subTab: 'gratuity' },
+        'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
+        'simple-interest': { mainTab: 'general', subTab: 'simple-interest' },
+        'inflation': { mainTab: 'general', subTab: 'inflation' }
+      }
+
+      if (calculatorNameMap[calculatorParam]) {
+        return calculatorNameMap[calculatorParam]
+      }
+    }
+
+    // Fallback: Map of parameter prefixes to calculator info (for backward compatibility)
+    const calculatorMap = {
+      'tax_': { mainTab: 'tax', subTab: 'income-tax' },
+      'sip_': { mainTab: 'mutual_funds', subTab: 'sip' },
+      'swp_': { mainTab: 'mutual_funds', subTab: 'swp' },
+      'emi_': { mainTab: 'loans', subTab: 'emi' },
+      'ppf_': { mainTab: 'savings', subTab: 'ppf' },
+      'fd_': { mainTab: 'savings', subTab: 'fd' },
+      'rd_': { mainTab: 'savings', subTab: 'rd' },
+      'nps_': { mainTab: 'retirement', subTab: 'nps' },
+      'epf_': { mainTab: 'retirement', subTab: 'epf' },
+      'cagr_': { mainTab: 'mutual_funds', subTab: 'cagr' },
+      'compound_': { mainTab: 'general', subTab: 'compound-interest' },
+      'simple_': { mainTab: 'general', subTab: 'simple-interest' },
+      'inflation_': { mainTab: 'general', subTab: 'inflation' },
+      'gratuity_': { mainTab: 'retirement', subTab: 'gratuity' }
+    }
+
+    // Find matching calculator by parameter prefix
+    for (const paramKey of paramKeys) {
+      for (const [prefix, calculator] of Object.entries(calculatorMap)) {
+        if (paramKey.startsWith(prefix)) {
+          return calculator
+        }
+      }
+    }
+
+    return null
+  }
+
+  const detectedCalculator = detectCalculatorFromURL()
+
+  const [activeMainTab, setActiveMainTab] = useState(detectedCalculator?.mainTab || 'loans')
   const [activeSubTabs, setActiveSubTabs] = useState({
-    loans: 'emi',
-    savings: 'fd',
-    mutual_funds: 'sip',
-    tax: 'income-tax',
-    retirement: 'nps',
-    general: 'compound-interest'
+    loans: detectedCalculator?.mainTab === 'loans' ? detectedCalculator.subTab : 'emi',
+    savings: detectedCalculator?.mainTab === 'savings' ? detectedCalculator.subTab : 'fd',
+    mutual_funds: detectedCalculator?.mainTab === 'mutual_funds' ? detectedCalculator.subTab : 'sip',
+    tax: detectedCalculator?.mainTab === 'tax' ? detectedCalculator.subTab : 'income-tax',
+    retirement: detectedCalculator?.mainTab === 'retirement' ? detectedCalculator.subTab : 'nps',
+    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'compound-interest'
   })
   const [comparisonData, setComparisonData] = useState([])
+
+  const updateCalculatorInURL = useCallback((calculatorId) => {
+    const url = new URL(window.location)
+
+    // Clear all existing calculator-specific input parameters (but keep calculator param)
+    const keysToRemove = []
+    for (const key of url.searchParams.keys()) {
+      if (key.includes('_') || key === 'shared') {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => url.searchParams.delete(key))
+
+    // Set the calculator parameter
+    url.searchParams.set('calculator', calculatorId)
+
+    // Update URL without page reload
+    window.history.replaceState({}, '', url.toString())
+  }, [])
+
+  // Set calculator parameter in URL on initial load if not present
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const calculatorParam = urlParams.get('calculator')
+
+    if (!calculatorParam) {
+      // Set default calculator parameter
+      const currentCalculatorId = activeSubTabs[activeMainTab]
+      updateCalculatorInURL(currentCalculatorId)
+    }
+  }, [updateCalculatorInURL]) // Only depend on the callback
   const [showComparison, setShowComparison] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
@@ -176,6 +273,17 @@ export default function App() {
 
   const handleSubTabChange = (categoryKey, calculatorId) => {
     setActiveSubTabs(prev => ({ ...prev, [categoryKey]: calculatorId }))
+    // Update URL with calculator name
+    updateCalculatorInURL(calculatorId)
+  }
+
+  const handleMainTabChange = (tabKey) => {
+    setActiveMainTab(tabKey)
+    // Get the default calculator for this tab and update URL
+    const defaultCalculator = calculatorData[tabKey]?.calculators[0]?.id
+    if (defaultCalculator) {
+      updateCalculatorInURL(defaultCalculator)
+    }
   }
 
   const currentCategory = calculatorData[activeMainTab]
@@ -204,7 +312,7 @@ export default function App() {
                   {Object.entries(calculatorData).map(([key, category]) => (
                     <button
                       key={key}
-                      onClick={() => setActiveMainTab(key)}
+                      onClick={() => handleMainTabChange(key)}
                       className={`px-4 py-3 sm:px-6 sm:py-3 rounded-xl font-semibold transition-all duration-200 flex items-center space-x-2 cursor-pointer text-sm ${
                         activeMainTab === key
                           ? 'bg-indigo-500 text-white shadow-md'

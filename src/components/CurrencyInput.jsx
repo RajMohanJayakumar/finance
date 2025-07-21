@@ -11,6 +11,8 @@ const CurrencyInput = ({
   placeholder,
   step,
   min,
+  max,
+  hideLabel = false,
   focusColor = '#6366F1'
 }) => {
   const { formatCurrency, unformatCurrency, shouldFormatAsCurrency, getDisplayValue } = useCurrency()
@@ -56,18 +58,22 @@ const CurrencyInput = ({
     }
   }
 
-  // Update display value when value prop changes
+  // Update display value when value prop changes (only when not focused)
   React.useEffect(() => {
-    setDisplayValue(getDisplayValue(value, fieldName))
-  }, [value, fieldName, getDisplayValue])
+    if (!isFocused) {
+      setDisplayValue(getDisplayValue(value, fieldName))
+    }
+  }, [value, fieldName, getDisplayValue, isFocused])
 
   return (
     <div className="relative">
       {/* Label positioned above the input */}
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
+      {!hideLabel && (
+        <label className="block text-sm font-semibold mb-2 text-gray-700">
+          <span className="mr-2">{icon}</span>
+          {label}
+        </label>
+      )}
 
       <div className="relative">
         <input
@@ -79,6 +85,7 @@ const CurrencyInput = ({
           onKeyDown={handleKeyDown}
           step={step}
           min={min}
+          max={max}
           className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
           style={{
             borderColor: isFocused ? focusColor : '#E5E7EB',

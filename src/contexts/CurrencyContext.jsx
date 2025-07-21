@@ -42,7 +42,7 @@ export const CURRENCY_FORMATS = {
 // List of fields that should be formatted as currency
 const currencyFields = [
   'loanAmount', 'monthlyPayment', 'totalInterest', 'totalPayment',
-  'monthlyInvestment', 'totalInvestment', 'maturityAmount', 'totalReturns',
+  'monthlyInvestment', 'lumpSumAmount', 'totalInvestment', 'maturityAmount', 'totalReturns',
   'principal', 'interest', 'amount', 'finalAmount',
   'initialInvestment', 'monthlyWithdrawal', 'remainingBalance', 'totalWithdrawn',
   'beginningValue', 'endingValue', 'netProfit', 'totalReturns',
