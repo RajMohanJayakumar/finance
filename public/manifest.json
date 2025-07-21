@@ -3,12 +3,12 @@
   "name": "FinClamp - Financial Calculator Suite",
   "short_name": "FinClamp",
   "description": "Complete financial calculator suite for loans, savings, mutual funds, and taxes. Professional financial planning made simple.",
-  "start_url": "/",
+  "start_url": "/finance",
   "display": "standalone",
   "theme_color": "#667eea",
   "background_color": "#f8fafc",
   "orientation": "portrait-primary",
-  "scope": "/",
+  "scope": "/finance",
   "lang": "en",
   "categories": ["finance", "productivity", "utilities"],
   "icons": [
@@ -24,7 +24,7 @@
       "name": "SIP Calculator",
       "short_name": "SIP",
       "description": "Calculate SIP returns",
-      "url": "/?tab=mutual_funds",
+      "url": "/finance?tab=mutual_funds",
       "icons": [
         {
           "src": "/favicon.svg",
@@ -37,7 +37,7 @@
       "name": "EMI Calculator",
       "short_name": "EMI",
       "description": "Calculate loan EMI",
-      "url": "/?tab=loans",
+      "url": "/finance?tab=loans",
       "icons": [
         {
           "src": "/favicon.svg",
