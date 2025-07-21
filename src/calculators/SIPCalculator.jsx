@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import PDFExport from '../components/PDFExport'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
@@ -31,15 +32,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   }, [inputs])
 
   const [results, setResults] = useState(null)
-  const [yearlyBreakdown, setYearlyBreakdown] = useState([])
-  const [comparisons, setComparisons] = useState([])
-  const [collapsedSections, setCollapsedSections] = useState({
-    inputs: false,
-    advanced: true,
-    results: false,
-    breakdown: true,
-    compare: true
-  })
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
   // Component initialization
@@ -88,8 +80,6 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
   const handleReset = () => {
     setInputs(initialInputs)
     setResults(null)
-    setYearlyBreakdown([])
-    setComparisons([])
     // Clear URL parameters
     window.history.replaceState({}, document.title, window.location.pathname)
   }
@@ -207,9 +197,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
 
 
 
-  const toggleSection = (section) => {
-    setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }))
-  }
+
 
   const handleAddToComparison = () => {
     if (results) {
@@ -255,18 +243,18 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
-  const colorClasses = {
-    blue: 'from-blue-500 to-blue-600',
-    green: 'from-green-500 to-green-600',
-    purple: 'from-purple-500 to-purple-600',
-    red: 'from-red-500 to-red-600'
-  }
+
 
   return (
-    <div className="space-y-6">
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       {/* PWA Install Button */}
       {deferredPrompt && (
-        <div className="text-center">
+        <div className="text-center mb-6">
           <button
             onClick={handlePWAInstall}
             className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold transition-all cursor-pointer"
@@ -276,442 +264,306 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
         </div>
       )}
 
-      {/* Calculator Inputs */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            <button
-              onClick={() => toggleSection('inputs')}
-              className="w-full p-4 bg-gray-50 flex items-center justify-between hover:bg-gray-100 transition-all duration-200 cursor-pointer border-b border-gray-200"
+      {/* Main Content - Single Row Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+
+        {/* Left Column - Investment Details */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              💰 Investment Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
             >
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-indigo-500 rounded-lg flex items-center justify-center">
-                  <span className="text-white text-sm">📊</span>
-                </div>
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Investment Parameters
-                </h3>
-              </div>
-              <span className="text-xl text-gray-400">{collapsedSections.inputs ? '▼' : '▲'}</span>
-            </button>
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
 
-            {!collapsedSections.inputs && (
-              <div className="p-6 space-y-6">
-                {/* Expected Return - Full Width */}
-                <div className="space-y-3">
-                  <label className="flex items-center space-x-2 text-sm font-bold text-gray-800 mb-3">
-                    <span className="text-lg">📈</span>
-                    <span>Expected Annual Return (%)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={inputs.annualReturn}
-                      onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                      className="w-full pl-4 pr-8 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-purple-200 focus:border-purple-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
-                      placeholder="12.0"
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold text-sm sm:text-base">
-                      %
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 bg-blue-50 p-3 rounded-xl border border-blue-200">
-                    💡 <strong>Tip:</strong> Typical mutual fund returns range from 10-15% annually
-                  </p>
-                </div>
+          <div className="space-y-5">
+            <CurrencyInput
+              label="Monthly Investment"
+              value={inputs.monthlyInvestment}
+              onChange={(value) => handleInputChange('monthlyInvestment', value)}
+              fieldName="monthlyInvestment"
+              icon="💰"
+              placeholder="Enter monthly investment"
+              min="0"
+              focusColor="#6366F1"
+            />
 
-                {/* Investment Amount Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <CurrencyInput
-                    label="Monthly Investment"
-                    value={inputs.monthlyInvestment}
-                    onChange={(value) => handleInputChange('monthlyInvestment', value)}
-                    fieldName="monthlyInvestment"
-                    icon="💰"
-                    placeholder="10,000"
-                    focusColor="#6366F1"
-                  />
+            <CurrencyInput
+              label="Expected Annual Return (%)"
+              value={inputs.annualReturn}
+              onChange={(value) => handleInputChange('annualReturn', value)}
+              fieldName="annualReturn"
+              icon="📈"
+              placeholder="Enter expected return"
+              step="0.1"
+              min="0"
+              focusColor="#6366F1"
+            />
 
-                  <CurrencyInput
-                    label="OR Target Amount"
-                    value={inputs.maturityAmount}
-                    onChange={(value) => handleInputChange('maturityAmount', value)}
-                    fieldName="maturityAmount"
-                    icon="🎯"
-                    placeholder="1,00,00,000"
-                    focusColor="#3B82F6"
-                  />
-                </div>
+            <CurrencyInput
+              label="Investment Period (Years)"
+              value={inputs.timePeriod}
+              onChange={(value) => handleInputChange('timePeriod', value)}
+              fieldName="timePeriod"
+              icon="📅"
+              placeholder="Enter investment period"
+              min="1"
+              focusColor="#6366F1"
+            />
 
-                {/* Lump Sum - Full Width */}
-                <div className="space-y-3">
-                  <CurrencyInput
-                    label="Lump Sum Amount - Optional"
-                    value={inputs.lumpSumAmount}
-                    onChange={(value) => handleInputChange('lumpSumAmount', value)}
-                    fieldName="lumpSumAmount"
-                    icon="💎"
-                    placeholder="50,000"
-                    focusColor="#F59E0B"
-                  />
-                  <p className="text-sm text-gray-600 bg-amber-50 p-3 rounded-xl border border-amber-200">
-                    💡 <strong>One-time investment:</strong> Add an initial lump sum to boost your returns
-                  </p>
-                </div>
+            <CurrencyInput
+              label="Lump Sum Amount (Optional)"
+              value={inputs.lumpSumAmount}
+              onChange={(value) => handleInputChange('lumpSumAmount', value)}
+              fieldName="lumpSumAmount"
+              icon="💎"
+              placeholder="Enter lump sum amount"
+              min="0"
+              focusColor="#6366F1"
+            />
 
-                {/* Time Period Row */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
-                  <div className="space-y-3">
-                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
-                      <span className="text-lg">⏰</span>
-                      <span>Investment Period</span>
-                    </label>
-                    <input
-                      type="number"
-                      value={inputs.timePeriod}
-                      onChange={(e) => handleInputChange('timePeriod', e.target.value)}
-                      placeholder="10"
-                      className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
-                    />
-                  </div>
+            <CurrencyInput
+              label="Annual Step-up (%)"
+              value={inputs.stepUpPercentage}
+              onChange={(value) => handleInputChange('stepUpPercentage', value)}
+              fieldName="stepUpPercentage"
+              icon="📈"
+              placeholder="Enter step-up percentage"
+              step="0.1"
+              min="0"
+              focusColor="#6366F1"
+            />
 
-                  <div className="space-y-3">
-                    <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
-                      <span className="text-lg">📅</span>
-                      <span>Period Unit</span>
-                    </label>
-                    <select
-                      value={inputs.timePeriodUnit}
-                      onChange={(e) => handleInputChange('timePeriodUnit', e.target.value)}
-                      className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 border-gray-200 rounded-xl sm:rounded-2xl focus:ring-4 focus:ring-indigo-200 focus:border-indigo-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg cursor-pointer"
-                    >
-                      <option value="years">Years</option>
-                      <option value="months">Months</option>
-                    </select>
-                  </div>
-                </div>
+            {/* Quick Actions */}
+            {results && (
+              <div className="pt-4 border-t border-gray-100 space-y-3">
+                <motion.button
+                  onClick={handleAddToComparison}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#10B981' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  📊 Compare
+                </motion.button>
 
-                {/* Annual Step-up - Integrated into main flow */}
-                <div className="space-y-3">
-                  <label className="flex items-center space-x-2 text-sm font-bold text-gray-800">
-                    <span className="text-lg">📈</span>
-                    <span>Annual Step-up (%)</span>
-                  </label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      step="0.1"
-                      value={inputs.stepUpPercentage}
-                      onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
-                      placeholder="5.0"
-                      className="w-full px-6 py-4 text-lg font-semibold border-2 border-gray-200 rounded-2xl focus:ring-4 focus:ring-emerald-200 focus:border-emerald-500 transition-all duration-300 bg-gradient-to-r from-gray-50 to-white hover:shadow-lg"
-                    />
-                    <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 font-semibold">
-                      %
-                    </div>
-                  </div>
-                  <p className="text-sm text-gray-600 bg-emerald-50 p-4 rounded-xl border border-emerald-200">
-                    <span className="font-semibold text-emerald-700">💡 Smart Strategy:</span> Increase your investment amount by this percentage every year to beat inflation and accelerate wealth creation
-                  </p>
-                </div>
+                <motion.button
+                  onClick={shareCalculation}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#6366F1' }}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  🔗 Share
+                </motion.button>
               </div>
             )}
           </div>
+        </motion.div>
 
-      {/* Action Buttons - Always Visible */}
-      <div className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden backdrop-blur-sm bg-white/95">
-            <div className="p-6">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <button
-                  onClick={handleReset}
-                  className="flex items-center justify-center space-x-2 bg-gray-500 hover:bg-gray-600 text-white py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer"
-                >
-                  <span className="text-xl">🔄</span>
-                  <span>Reset Calculator</span>
-                </button>
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Results
+          </h3>
 
-                <button
-                  onClick={handleAddToComparison}
-                  disabled={!results}
-                  className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${
-                    results
-                      ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105 cursor-pointer`
-                      : 'from-gray-300 to-gray-400 cursor-not-allowed'
-                  } text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg flex-1`}
-                >
-                  <span className="text-xl">📊</span>
-                  <span>Add to Comparison</span>
-                </button>
-
-                {results && (
-                  <>
-                    <button
-                      onClick={shareCalculation}
-                      className="flex items-center justify-center space-x-2 bg-emerald-500 hover:bg-emerald-600 text-white py-3 px-6 rounded-lg font-semibold transition-all cursor-pointer"
-                    >
-                      <span className="text-xl">🔗</span>
-                      <span>Share</span>
-                    </button>
-
-                    <PDFExport
-                      data={[{
-                        calculator: 'SIP Calculator',
-                        timestamp: new Date().toISOString(),
-                        inputs: {
-                          'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
-                          'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
-                          'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
-                          'Expected Annual Return': `${inputs.annualReturn}%`,
-                          'Step Up Percentage': `${inputs.stepUpPercentage}%`
-                        },
-                        results: {
-                          'Maturity Amount': formatCurrency(results.maturityAmount),
-                          'Total Investment': formatCurrency(results.totalInvestment),
-                          'Wealth Gained': formatCurrency(results.wealthGained)
-                        }
-                      }]}
-                      title="SIP Calculator Results"
-                      calculatorType="SIP"
-                      className="flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-                      buttonContent={
-                        <>
-                          <span className="text-xl">📄</span>
-                          <span>PDF</span>
-                        </>
-                      }
-                    />
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-
-      {/* Results */}
-      {results && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
-              <button
-                onClick={() => toggleSection('results')}
-                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
+              <motion.div
+                className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
               >
-                <h3 className="text-lg font-semibold text-gray-800">💰 Results</h3>
-                <span className="text-2xl">{collapsedSections.results ? '▼' : '▲'}</span>
-              </button>
-
-              {!collapsedSections.results && (
-                <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
-                      <p className="text-sm opacity-90">Monthly Investment</p>
-                      <p className="text-2xl font-bold">
-                        {formatCurrency(results.monthlyInvestment)}
-                      </p>
-                    </div>
-                    {results.lumpSumAmount > 0 && (
-                      <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
-                        <p className="text-sm opacity-90">Lump Sum</p>
-                        <p className="text-2xl font-bold">
-                          {formatCurrency(results.lumpSumAmount)}
-                        </p>
-                      </div>
-                    )}
-                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
-                      <p className="text-sm opacity-90">Maturity Amount</p>
-                      <p className="text-2xl font-bold">
-                        {formatCurrency(results.maturityAmount)}
-                      </p>
-                    </div>
-                    <div className={`bg-gradient-to-r ${colorClasses[categoryColor]} text-white p-4 rounded-xl`}>
-                      <p className="text-sm opacity-90">Wealth Gained</p>
-                      <p className="text-2xl font-bold">
-                        {formatCurrency(results.wealthGained)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="mt-6 space-y-4">
-                    {/* Primary Actions */}
-                    <div className="flex flex-col sm:flex-row gap-3">
-                      <button
-                        onClick={handleReset}
-                        className="flex items-center justify-center space-x-2 bg-gradient-to-r from-slate-500 to-slate-600 hover:from-slate-600 hover:to-slate-700 text-white py-4 px-6 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-lg hover:shadow-xl"
-                      >
-                        <span className="text-xl">🔄</span>
-                        <span>Reset Calculator</span>
-                      </button>
-
-                      <button
-                        onClick={handleAddToComparison}
-                        disabled={!results}
-                        className={`flex items-center justify-center space-x-2 bg-gradient-to-r ${
-                          results
-                            ? `${colorClasses[categoryColor]} hover:shadow-xl transform hover:scale-105`
-                            : 'from-gray-300 to-gray-400 cursor-not-allowed'
-                        } text-white py-4 px-6 rounded-2xl font-bold transition-all shadow-lg flex-1`}
-                      >
-                        <span className="text-xl">📊</span>
-                        <span>Add to Comparison</span>
-                      </button>
-                    </div>
-
-                    {/* Secondary Actions */}
-                    {results && (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <button
-                          onClick={shareCalculation}
-                          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white py-3 px-6 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg"
-                        >
-                          <span className="text-lg">🔗</span>
-                          <span>Share Results</span>
-                        </button>
-
-                        <PDFExport
-                          data={[{
-                            calculator: 'SIP Calculator',
-                            timestamp: new Date().toISOString(),
-                            inputs: {
-                              'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
-                              'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
-                              'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
-                              'Expected Annual Return': `${inputs.annualReturn}%`,
-                              'Step Up Percentage': `${inputs.stepUpPercentage}%`
-                            },
-                            results: {
-                              'Maturity Amount': formatCurrency(results.maturityAmount),
-                              'Total Investment': formatCurrency(results.totalInvestment),
-                              'Wealth Gained': formatCurrency(results.wealthGained)
-                            }
-                          }]}
-                          title="SIP Calculator Results"
-                          calculatorType="SIP"
-                          className="flex items-center justify-center space-x-2 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white py-3 px-6 rounded-xl font-semibold transition-all transform hover:scale-105 shadow-md hover:shadow-lg w-full"
-                          buttonContent={
-                            <>
-                              <span className="text-lg">📄</span>
-                              <span>Export PDF</span>
-                            </>
-                          }
-                        />
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Maturity Amount</h4>
                 </div>
-              )}
+                <p className="text-2xl font-bold text-purple-600 leading-tight">
+                  {formatCurrency(results.maturityAmount)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">🏦</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Investment</h4>
+                </div>
+                <p className="text-2xl font-bold text-green-600 leading-tight">
+                  {formatCurrency(results.totalInvestment)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-semibold text-base text-gray-700">Wealth Gained</h4>
+                </div>
+                <p className="text-2xl font-bold text-orange-600 leading-tight">
+                  {formatCurrency(results.wealthGained)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💎</span>
+                  <h4 className="font-semibold text-base text-gray-700">Monthly SIP</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                  {formatCurrency(results.monthlyInvestment || inputs.monthlyInvestment)}
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <p className="text-gray-500 text-lg">Enter investment details to see results</p>
             </div>
           )}
-
-      {/* Year-wise Breakdown */}
-      {yearlyBreakdown.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-lg border border-gray-200/50 overflow-hidden">
-              <button
-                onClick={() => toggleSection('breakdown')}
-                className="w-full p-4 bg-gradient-to-r from-gray-50 to-gray-100 flex items-center justify-between hover:from-gray-100 hover:to-gray-200 transition-all cursor-pointer"
-              >
-                <h3 className="text-lg font-semibold text-gray-800">📈 Year-wise Breakdown</h3>
-                <span className="text-2xl">{collapsedSections.breakdown ? '▼' : '▲'}</span>
-              </button>
-
-              {!collapsedSections.breakdown && (
-                <div className="p-6">
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b">
-                          <th className="text-left py-2">Year</th>
-                          <th className="text-right py-2">Yearly Investment</th>
-                          <th className="text-right py-2">Year End Value</th>
-                          <th className="text-right py-2">Total Investment</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {yearlyBreakdown.map((year, index) => (
-                          <tr key={index} className="border-b">
-                            <td className="py-2">{year.year}</td>
-                            <td className="text-right py-2">
-                              {formatCurrency(year.yearlyInvestment)}
-                            </td>
-                            <td className="text-right py-2">
-                              {formatCurrency(year.yearEndValue)}
-                            </td>
-                            <td className="text-right py-2">
-                              {formatCurrency(year.totalInvestment)}
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-      {/* Compare Section */}
-      {comparisons.length > 0 && (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-              <button
-                onClick={() => toggleSection('compare')}
-                className="w-full p-6 bg-gradient-to-r from-teal-600 to-cyan-600 text-white font-semibold text-left flex justify-between items-center cursor-pointer"
-              >
-                <span className="text-xl">📊 Compare Calculations ({comparisons.length})</span>
-                <span className="text-2xl">{collapsedSections.compare ? '▼' : '▲'}</span>
-              </button>
-              {!collapsedSections.compare && (
-                <div className="p-6">
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {comparisons.map((comp, index) => (
-                      <div key={comp.id} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 border-2 border-gray-200">
-                        <div className="flex justify-between items-start mb-4">
-                          <h4 className="font-bold text-lg text-gray-800">Calculation #{index + 1}</h4>
-                          <button
-                            onClick={() => removeFromCompare(comp.id)}
-                            className="text-red-500 hover:text-red-700 text-xl cursor-pointer"
-                          >
-                            ✕
-                          </button>
-                        </div>
-                        <div className="space-y-3 text-sm">
-                          <div className="flex justify-between">
-                            <span>Monthly:</span>
-                            <span className="font-semibold">₹{comp.monthlyInvestment}</span>
-                          </div>
-                          {comp.lumpSumAmount > 0 && (
-                            <div className="flex justify-between">
-                              <span>Lump Sum:</span>
-                              <span className="font-semibold">₹{comp.lumpSumAmount}</span>
-                            </div>
-                          )}
-                          <div className="flex justify-between">
-                            <span>Duration:</span>
-                            <span>{comp.timePeriod} {comp.timePeriodUnit}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span>Return:</span>
-                            <span>{comp.annualReturn}%</span>
-                          </div>
-                          <div className="flex justify-between border-t pt-2">
-                            <span>Maturity:</span>
-                            <span className="font-bold text-green-600">{formatCurrency(parseInt(comp.futureValue))}</span>
-                          </div>
-                          <div className="text-xs text-gray-500">{comp.timestamp}</div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-      {/* Share Section */}
-      <div className="bg-white rounded-2xl shadow-xl p-6 text-center">
-            <h3 className="text-xl font-bold mb-4 text-gray-800">📤 Share Your Calculation</h3>
-            <button
-              onClick={shareCalculation}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-700 transition-all transform hover:scale-105 shadow-lg cursor-pointer"
-            >
-              🔗 Share Results
-            </button>
+        </motion.div>
       </div>
-    </div>
+      {/* Detailed Analysis Section - Below Main Content */}
+      <AnimatePresence>
+        {results && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="mt-4 space-y-4"
+          >
+            {/* Detailed Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Investment Summary */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  💼 Investment Summary
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Monthly SIP</span>
+                    <span className="font-semibold text-purple-600 text-sm">{formatCurrency(results.monthlyInvestment || inputs.monthlyInvestment)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Investment Period</span>
+                    <span className="font-semibold text-sm">{inputs.timePeriod} {inputs.timePeriodUnit}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Expected Return</span>
+                    <span className="font-semibold text-sm">{inputs.annualReturn}% p.a.</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 text-sm">Wealth Multiplier</span>
+                    <span className="font-semibold text-orange-600 text-sm">
+                      {(parseFloat(results.maturityAmount) / parseFloat(results.totalInvestment)).toFixed(1)}x
+                    </span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* Chart Placeholder */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  📊 Growth Visualization
+                </h4>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📈</div>
+                  <p className="text-gray-500 text-sm">Investment growth chart</p>
+                </div>
+              </motion.div>
+
+              {/* Actions & Export */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  🎯 Quick Actions
+                </h4>
+                <div className="space-y-4">
+                  <PDFExport
+                    data={[{
+                      calculator: 'SIP Calculator',
+                      timestamp: new Date().toISOString(),
+                      inputs: {
+                        'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
+                        'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
+                        'Investment Period': `${inputs.timePeriod} ${inputs.timePeriodUnit}`,
+                        'Expected Annual Return': `${inputs.annualReturn}%`,
+                        'Step Up Percentage': `${inputs.stepUpPercentage}%`
+                      },
+                      results: {
+                        'Maturity Amount': formatCurrency(results.maturityAmount),
+                        'Total Investment': formatCurrency(results.totalInvestment),
+                        'Wealth Gained': formatCurrency(results.wealthGained)
+                      }
+                    }]}
+                    title="SIP Calculator Results"
+                    calculatorType="SIP"
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                    style={{ backgroundColor: '#EF4444' }}
+                    buttonContent={
+                      <>
+                        <span className="text-lg mr-2">📄</span>
+                        <span>Export PDF</span>
+                      </>
+                    }
+                  />
+
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      💡 All calculations are approximate and for reference only
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
   )
 }

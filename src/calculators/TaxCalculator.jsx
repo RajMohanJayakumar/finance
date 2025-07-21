@@ -1,58 +1,14 @@
 
-import React, { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 
-// Input component with floating label
-const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
-  const [isFocused, setIsFocused] = useState(false)
-  const hasValue = value && value.toString().length > 0
 
-  const handleKeyDown = (e) => {
-    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
-    if (type === 'number') {
-      if (['e', 'E', '+', '-'].includes(e.key)) {
-        e.preventDefault()
-      }
-    }
-  }
 
-  return (
-    <div className="relative">
-      {/* Label positioned above the input */}
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
-
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleKeyDown}
-          step={step}
-          min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-          style={{
-            borderColor: isFocused ? '#EF4444' : '#E5E7EB',
-            backgroundColor: '#FFFFFF',
-            boxShadow: isFocused ? 'rgba(239, 68, 68, 0.1) 0px 0px 0px 4px' : 'none'
-          }}
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
-  )
-}
-
-export default function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
+function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
   
@@ -201,29 +157,46 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
     })) : []
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <motion.div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        {/* Input Section */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            💼 Income Details
-          </h3>
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Main Content - Single Row Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
 
-          <div className="space-y-6">
+        {/* Left Column - Income Details */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              💼 Income Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
+
+          <div className="space-y-5">
             <CurrencyInput
               label="Annual Gross Income"
               value={inputs.annualIncome}
               onChange={(value) => handleInputChange('annualIncome', value)}
               fieldName="annualIncome"
-              icon="₹"
+              icon="💰"
               placeholder="Enter your annual income"
               min="0"
               focusColor="#EF4444"
@@ -236,7 +209,7 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                 Country
               </label>
               <select
-                className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
                 value={inputs.country}
                 onChange={(e) => handleInputChange('country', e.target.value)}
               >
@@ -251,7 +224,7 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                 Tax Regime (India)
               </label>
               <select
-                className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
+                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
                 value={inputs.taxRegime}
                 onChange={(e) => handleInputChange('taxRegime', e.target.value)}
               >
@@ -259,50 +232,27 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
                 <option value="new">New Tax Regime</option>
               </select>
             </div>
-          </div>
-        </motion.div>
 
-        {/* Actions Section */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            🎯 Actions
-          </h3>
+            {/* Deductions - Only for Old Regime */}
+            {inputs.taxRegime === 'old' && (
+              <CurrencyInput
+                label="Total Deductions (80C, 80D, etc.)"
+                value={inputs.deductions}
+                onChange={(value) => handleInputChange('deductions', value)}
+                fieldName="deductions"
+                icon="💰"
+                placeholder="Enter total deductions"
+                min="0"
+                focusColor="#EF4444"
+              />
+            )}
 
-          <div className="space-y-4">
-            {/* Calculate Button */}
-            <motion.button
-              onClick={calculateTax}
-              className="w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer"
-              style={{ backgroundColor: '#EF4444' }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🧮 Calculate Tax
-            </motion.button>
-
-            {/* Reset Button */}
-            <motion.button
-              onClick={handleReset}
-              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50 cursor-pointer"
-              style={{
-                borderColor: '#E5E7EB',
-                color: '#6B7280'
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🔄 Reset
-            </motion.button>
-
-            {/* Secondary Actions */}
+            {/* Quick Actions */}
             {results && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-3">
                 <motion.button
                   onClick={handleAddToComparison}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
                   style={{ backgroundColor: '#EF4444' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -312,8 +262,8 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
 
                 <motion.button
                   onClick={shareCalculation}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
-                  style={{ backgroundColor: '#EF4444' }}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#6366F1' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -323,160 +273,198 @@ export default function TaxCalculator({ onAddToComparison, categoryColor = 'red'
             )}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Results Section */}
-      <AnimatePresence>
-        {results && (
-          <motion.div
-            className="mt-8 space-y-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-          >
-            {/* Key Results */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Tax Results
+          </h3>
+
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-100"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEE2E2' }}>
-                    <span className="text-xl">💸</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Tax</h4>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💸</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Tax</h4>
                 </div>
-                <p className="text-3xl font-bold" style={{ color: '#EF4444' }}>
-                  {formatCurrency(results.totalTaxWithCess)}
+                <p className="text-2xl font-bold text-red-600 leading-tight">
+                  {formatCurrency(results.totalTax)}
                 </p>
               </motion.div>
 
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#D1FAE5' }}>
-                    <span className="text-xl">💰</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Net Income</h4>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Take Home</h4>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: '#10B981' }}>
-                  {formatCurrency(results.netIncome)}
+                <p className="text-2xl font-bold text-green-600 leading-tight">
+                  {formatCurrency(results.takeHome)}
                 </p>
               </motion.div>
 
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
-                    <span className="text-xl">📊</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Effective Tax Rate</h4>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-semibold text-base text-gray-700">Tax Rate</h4>
                 </div>
-                <p className="text-2xl font-bold" style={{ color: '#3B82F6' }}>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
                   {results.effectiveTaxRate}%
                 </p>
               </motion.div>
-            </div>
 
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              {/* Income Breakdown */}
               <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
+                className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  💼 Income Breakdown
-                </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={taxBreakdownData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                    >
-                      {taxBreakdownData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                  </PieChart>
-                </ResponsiveContainer>
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">🏦</span>
+                  <h4 className="font-semibold text-base text-gray-700">Taxable Income</h4>
+                </div>
+                <p className="text-2xl font-bold text-purple-600 leading-tight">
+                  {formatCurrency(results.taxableIncome)}
+                </p>
               </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <p className="text-gray-500 text-lg">Enter income details to see tax calculation</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
 
-              {/* Tax Details */}
+      {/* Detailed Analysis Section - Below Main Content */}
+      <AnimatePresence>
+        {results && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.5 }}
+            className="mt-4 space-y-4"
+          >
+            {/* Detailed Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Tax Summary */}
               <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  📋 Tax Breakdown
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  💼 Tax Summary
                 </h4>
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Gross Income</span>
-                    <span className="font-semibold">{formatCurrency(results.grossIncome)}</span>
+                    <span className="text-gray-600 text-sm">Gross Income</span>
+                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(inputs.annualIncome)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Income Tax</span>
-                    <span className="font-semibold text-red-600">{formatCurrency(results.totalTax)}</span>
+                    <span className="text-gray-600 text-sm">Tax Regime</span>
+                    <span className="font-semibold text-sm">{inputs.taxRegime === 'old' ? 'Old' : 'New'}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Health & Education Cess (4%)</span>
-                    <span className="font-semibold text-orange-600">{formatCurrency(results.cess)}</span>
+                    <span className="text-gray-600 text-sm">Effective Tax Rate</span>
+                    <span className="font-semibold text-sm">{results.effectiveTaxRate}%</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Tax Regime</span>
-                    <span className="font-semibold">
-                      {inputs.taxRegime === 'old' ? 'Old Tax Regime' : 'New Tax Regime'}
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 text-sm">Tax Savings</span>
+                    <span className="font-semibold text-green-600 text-sm">
+                      {inputs.taxRegime === 'old' ? formatCurrency(inputs.deductions || 0) : 'N/A'}
                     </span>
                   </div>
                 </div>
               </motion.div>
-            </div>
 
-            {/* PDF Export */}
-            <motion.div
-              className="flex justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <PDFExport
-                data={[{
-                  calculator: 'Tax Calculator',
-                  timestamp: new Date().toISOString(),
-                  inputs: {
-                    'Annual Income': `₹${inputs.annualIncome}`,
-                    'Country': inputs.country === 'india' ? '🇮🇳 India' : inputs.country,
-                    'Tax Regime': inputs.taxRegime === 'old' ? 'Old Tax Regime' : 'New Tax Regime'
-                  },
-                  results: {
-                    'Total Tax': `₹${results.totalTaxWithCess?.toLocaleString()}`,
-                    'Net Income': `₹${results.netIncome?.toLocaleString()}`,
-                    'Effective Tax Rate': `${results.effectiveTaxRate}%`
-                  }
-                }]}
-              />
-            </motion.div>
+              {/* Tax Breakdown Chart */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  📊 Tax Breakdown
+                </h4>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📈</div>
+                  <p className="text-gray-500 text-sm">Tax slab visualization</p>
+                </div>
+              </motion.div>
+
+              {/* Actions & Export */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  🎯 Quick Actions
+                </h4>
+                <div className="space-y-4">
+                  <PDFExport
+                    data={[{
+                      calculator: 'Tax Calculator',
+                      timestamp: new Date().toISOString(),
+                      inputs: {
+                        'Annual Income': formatCurrency(inputs.annualIncome),
+                        'Tax Regime': inputs.taxRegime === 'old' ? 'Old Tax Regime' : 'New Tax Regime',
+                        'Deductions': inputs.taxRegime === 'old' ? formatCurrency(inputs.deductions || 0) : 'N/A',
+                        'Country': '🇮🇳 India'
+                      },
+                      results: {
+                        'Total Tax': formatCurrency(results.totalTax),
+                        'Take Home': formatCurrency(results.takeHome),
+                        'Taxable Income': formatCurrency(results.taxableIncome),
+                        'Effective Tax Rate': `${results.effectiveTaxRate}%`
+                      }
+                    }]}
+                    title="Tax Calculator Results"
+                    calculatorType="Tax"
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                    style={{ backgroundColor: '#EF4444' }}
+                    buttonContent={
+                      <>
+                        <span className="text-lg mr-2">📄</span>
+                        <span>Export PDF</span>
+                      </>
+                    }
+                  />
+
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      💡 Tax calculations are approximate and for reference only
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
+
+export default TaxCalculator

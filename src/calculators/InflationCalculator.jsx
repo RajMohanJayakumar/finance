@@ -1,45 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 
-// Input component with floating label
-const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
-  const [isFocused, setIsFocused] = useState(false)
-
-  return (
-    <div className="relative">
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
-      
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          step={step}
-          min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-          style={{
-            borderColor: isFocused ? '#EF4444' : '#E5E7EB',
-            backgroundColor: '#FFFFFF',
-            boxShadow: isFocused ? 'rgba(239, 68, 68, 0.1) 0px 0px 0px 4px' : 'none'
-          }}
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
-  )
-}
-
-export default function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
+function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
@@ -179,21 +145,38 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
   }, [inputs])
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <motion.div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        {/* Input Section */}
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Main Content - Single Row Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+
+        {/* Left Column - Inflation Details */}
         <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
         >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            📈 Inflation Details
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              📈 Inflation Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
 
           <div className="space-y-6">
             <CurrencyInput
@@ -227,47 +210,18 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
               min="1"
             />
 
-            {/* Information Box */}
-            <div className="bg-red-50 border border-red-200 rounded-xl p-4">
-              <h4 className="font-semibold text-red-800 mb-2">💡 About Inflation:</h4>
-              <ul className="text-sm text-red-700 space-y-1">
-                <li>• Inflation reduces purchasing power over time</li>
-                <li>• India's average inflation: ~6% per year</li>
-                <li>• Formula: Future Value = Present Value × (1 + r)^n</li>
-                <li>• Higher inflation = Lower purchasing power</li>
-              </ul>
+            <div className="bg-red-50 p-4 rounded-xl border border-red-200">
+              <p className="text-sm text-red-800">
+                💡 <strong>Inflation reduces purchasing power over time</strong>
+              </p>
             </div>
-          </div>
-        </motion.div>
 
-        {/* Actions Section */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            🎯 Actions
-          </h3>
-
-          <div className="space-y-4">
-            <motion.button
-              onClick={handleReset}
-              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50 cursor-pointer"
-              style={{
-                borderColor: '#E5E7EB',
-                color: '#6B7280'
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🔄 Reset
-            </motion.button>
-
+            {/* Quick Actions */}
             {results && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-3">
                 <motion.button
                   onClick={handleAddToComparison}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
                   style={{ backgroundColor: '#EF4444' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -277,8 +231,8 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
 
                 <motion.button
                   onClick={shareCalculation}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
-                  style={{ backgroundColor: '#EF4444' }}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#6366F1' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -288,216 +242,196 @@ export default function InflationCalculator({ onAddToComparison, categoryColor =
             )}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Results Section */}
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Inflation Results
+          </h3>
+
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
+              <motion.div
+                className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Future Value</h4>
+                </div>
+                <p className="text-2xl font-bold text-red-600 leading-tight">
+                  {formatCurrency(results.futureValue)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">🏦</span>
+                  <h4 className="font-semibold text-base text-gray-700">Current Value</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                  {formatCurrency(inputs.currentAmount)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-semibold text-base text-gray-700">Inflation Impact</h4>
+                </div>
+                <p className="text-2xl font-bold text-orange-600 leading-tight">
+                  {formatCurrency(results.inflationImpact)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📅</span>
+                  <h4 className="font-semibold text-base text-gray-700">Time Period</h4>
+                </div>
+                <p className="text-2xl font-bold text-purple-600 leading-tight">
+                  {inputs.timePeriod} Years
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <p className="text-gray-500 text-lg">Enter inflation details to see results</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Detailed Analysis Section - Below Main Content */}
       <AnimatePresence>
         {results && (
           <motion.div
-            className="mt-8 space-y-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="mt-4 space-y-4"
           >
-            {/* Key Results */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Detailed Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Inflation Summary */}
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEE2E2' }}>
-                    <span className="text-xl">💰</span>
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  💼 Inflation Summary
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Current Amount</span>
+                    <span className="font-semibold text-red-600 text-sm">{formatCurrency(inputs.currentAmount)}</span>
                   </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Future Value</h4>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Inflation Rate</span>
+                    <span className="font-semibold text-sm">{inputs.inflationRate}% p.a.</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Time Period</span>
+                    <span className="font-semibold text-sm">{inputs.timePeriod} years</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 text-sm">Purchasing Power Loss</span>
+                    <span className="font-semibold text-red-600 text-sm">
+                      {((parseFloat(results.inflationImpact) / parseFloat(inputs.currentAmount)) * 100).toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-                <p className="text-3xl font-bold" style={{ color: '#EF4444' }}>
-                  ₹{results.futureValue?.toLocaleString()}
-                </p>
               </motion.div>
 
+              {/* Chart Placeholder */}
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEF3C7' }}>
-                    <span className="text-xl">📈</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Inflation</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#F59E0B' }}>
-                  ₹{results.totalInflation?.toLocaleString()}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
-                    <span className="text-xl">📉</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Power Loss</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#3B82F6' }}>
-                  {results.purchasingPowerLoss}%
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#D1FAE5' }}>
-                    <span className="text-xl">💵</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Real Value</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#10B981' }}>
-                  ₹{results.realValue?.toLocaleString()}
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  📈 Inflation Impact Over Time
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  📊 Inflation Impact
                 </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <LineChart data={results.yearlyBreakdown?.slice(0, 10)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                    <Line type="monotone" dataKey="futureValue" stroke="#EF4444" strokeWidth={3} name="Future Value" />
-                    <Line type="monotone" dataKey="realValue" stroke="#10B981" strokeWidth={2} name="Real Value" />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📈</div>
+                  <p className="text-gray-500 text-sm">Inflation visualization</p>
+                </div>
               </motion.div>
 
+              {/* Actions & Export */}
               <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  🛒 Price Impact Examples
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  🎯 Quick Actions
                 </h4>
                 <div className="space-y-4">
-                  {results.inflatedPrices?.map((item, index) => (
-                    <div key={index} className="flex justify-between items-center py-3 border-b border-gray-100">
-                      <div>
-                        <span className="font-medium">{item.item}</span>
-                        <div className="text-sm text-gray-500">Today: ₹{item.currentPrice}</div>
-                      </div>
-                      <div className="text-right">
-                        <span className="font-semibold text-red-600">₹{item.futurePrice}</span>
-                        <div className="text-sm text-gray-500">
-                          +{Math.round(((item.futurePrice - item.currentPrice) / item.currentPrice) * 100)}%
-                        </div>
-                      </div>
-                    </div>
-                  ))}
+                  <PDFExport
+                    data={[{
+                      calculator: 'Inflation Calculator',
+                      timestamp: new Date().toISOString(),
+                      inputs: {
+                        'Current Amount': formatCurrency(inputs.currentAmount),
+                        'Inflation Rate': `${inputs.inflationRate}% p.a.`,
+                        'Time Period': `${inputs.timePeriod} years`
+                      },
+                      results: {
+                        'Future Value': formatCurrency(results.futureValue),
+                        'Inflation Impact': formatCurrency(results.inflationImpact),
+                        'Purchasing Power Loss': `${((parseFloat(results.inflationImpact) / parseFloat(inputs.currentAmount)) * 100).toFixed(1)}%`
+                      }
+                    }]}
+                    title="Inflation Calculator Results"
+                    calculatorType="Inflation"
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                    style={{ backgroundColor: '#EF4444' }}
+                    buttonContent={
+                      <>
+                        <span className="text-lg mr-2">📄</span>
+                        <span>Export PDF</span>
+                      </>
+                    }
+                  />
+
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      💡 All calculations are approximate and for reference only
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             </div>
-
-            {/* Summary */}
-            <motion.div
-              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                📋 Inflation Summary
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Current Amount</span>
-                    <span className="font-semibold">{formatCurrency(results.currentAmount)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Inflation Rate</span>
-                    <span className="font-semibold">{inputs.inflationRate}% per annum</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Time Period</span>
-                    <span className="font-semibold">{inputs.timePeriod} years</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Average Annual Increase</span>
-                    <span className="font-semibold">₹{results.averageAnnualIncrease?.toLocaleString()}</span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Cumulative Inflation</span>
-                    <span className="font-semibold text-red-600">
-                      {((results.futureValue - results.currentAmount) / results.currentAmount * 100).toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Money Multiplier</span>
-                    <span className="font-semibold">{(results.futureValue / results.currentAmount).toFixed(2)}x</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Purchasing Power</span>
-                    <span className="font-semibold text-green-600">
-                      {(100 - parseFloat(results.purchasingPowerLoss)).toFixed(2)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Real Value Today</span>
-                    <span className="font-semibold text-blue-600">₹{results.realValue?.toLocaleString()}</span>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="flex justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <PDFExport
-                data={[{
-                  calculator: 'Inflation Calculator',
-                  timestamp: new Date().toISOString(),
-                  inputs: {
-                    'Current Amount': `₹${inputs.currentAmount}`,
-                    'Inflation Rate': `${inputs.inflationRate}%`,
-                    'Time Period': `${inputs.timePeriod} years`
-                  },
-                  results: {
-                    'Future Value': `₹${results.futureValue?.toLocaleString()}`,
-                    'Total Inflation': `₹${results.totalInflation?.toLocaleString()}`,
-                    'Purchasing Power Loss': `${results.purchasingPowerLoss}%`
-                  }
-                }]}
-              />
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
+
+export default InflationCalculator

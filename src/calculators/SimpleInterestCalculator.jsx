@@ -1,55 +1,11 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 
-// Input component with floating label
-const FloatingLabelInput = ({ label, value, onChange, type = "number", icon, placeholder, step, min }) => {
-  const [isFocused, setIsFocused] = useState(false)
-
-  const handleKeyDown = (e) => {
-    // Prevent 'e', 'E', '+', '-' for number inputs to avoid scientific notation
-    if (type === 'number') {
-      if (['e', 'E', '+', '-'].includes(e.key)) {
-        e.preventDefault()
-      }
-    }
-  }
-
-  return (
-    <div className="relative">
-      <label className="block text-sm font-semibold mb-2 text-gray-700">
-        <span className="mr-2">{icon}</span>
-        {label}
-      </label>
-
-      <div className="relative">
-        <input
-          type={type}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
-          onKeyDown={handleKeyDown}
-          step={step}
-          min={min}
-          className="w-full px-4 py-4 text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-          style={{
-            borderColor: isFocused ? '#F59E0B' : '#E5E7EB',
-            backgroundColor: '#FFFFFF',
-            boxShadow: isFocused ? 'rgba(245, 158, 11, 0.1) 0px 0px 0px 4px' : 'none'
-          }}
-          placeholder={placeholder}
-        />
-      </div>
-    </div>
-  )
-}
-
-export default function SimpleInterestCalculator({ onAddToComparison, categoryColor = 'yellow' }) {
+function SimpleInterestCalculator({ onAddToComparison, categoryColor = 'yellow' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
@@ -176,21 +132,38 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
   }, [inputs])
 
   return (
-    <div className="max-w-6xl mx-auto">
-      <motion.div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-        variants={staggerContainer}
-        initial="initial"
-        animate="animate"
-      >
-        {/* Input Section */}
+    <motion.div
+      className="max-w-7xl mx-auto"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      {/* Main Content - Single Row Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+
+        {/* Left Column - Simple Interest Details */}
         <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
         >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            📊 Investment Details
-          </h3>
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              📊 Investment Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
 
           <div className="space-y-6">
             <CurrencyInput
@@ -224,45 +197,18 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
               min="0"
             />
 
-            {/* Information Box */}
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-              <h4 className="font-semibold text-yellow-800 mb-2">💡 Simple Interest Formula:</h4>
-              <p className="text-sm text-yellow-700">SI = (P × R × T) / 100</p>
-              <p className="text-xs text-yellow-600 mt-1">
-                Where: SI = Simple Interest, P = Principal, R = Rate per annum, T = Time in years
+            <div className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
+              <p className="text-sm text-yellow-800">
+                💡 <strong>Formula:</strong> SI = (P × R × T) / 100
               </p>
             </div>
-          </div>
-        </motion.div>
 
-        {/* Actions Section */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={fadeInUp}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            🎯 Actions
-          </h3>
-
-          <div className="space-y-4">
-            <motion.button
-              onClick={handleReset}
-              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50 cursor-pointer"
-              style={{
-                borderColor: '#E5E7EB',
-                color: '#6B7280'
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🔄 Reset
-            </motion.button>
-
+            {/* Quick Actions */}
             {results && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-3">
                 <motion.button
                   onClick={handleAddToComparison}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
                   style={{ backgroundColor: '#F59E0B' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -272,8 +218,8 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
 
                 <motion.button
                   onClick={shareCalculation}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
-                  style={{ backgroundColor: '#F59E0B' }}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#6366F1' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -283,214 +229,196 @@ export default function SimpleInterestCalculator({ onAddToComparison, categoryCo
             )}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Results Section */}
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Simple Interest Results
+          </h3>
+
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
+              <motion.div
+                className="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-6 border border-yellow-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Simple Interest</h4>
+                </div>
+                <p className="text-2xl font-bold text-yellow-600 leading-tight">
+                  {formatCurrency(results.simpleInterest)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">🏦</span>
+                  <h4 className="font-semibold text-base text-gray-700">Principal</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                  {formatCurrency(results.principal)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Amount</h4>
+                </div>
+                <p className="text-2xl font-bold text-green-600 leading-tight">
+                  {formatCurrency(results.totalAmount)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📅</span>
+                  <h4 className="font-semibold text-base text-gray-700">Time Period</h4>
+                </div>
+                <p className="text-2xl font-bold text-purple-600 leading-tight">
+                  {inputs.timePeriod} Years
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <p className="text-gray-500 text-lg">Enter investment details to see results</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Detailed Analysis Section - Below Main Content */}
       <AnimatePresence>
         {results && (
           <motion.div
-            className="mt-8 space-y-8"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.5 }}
+            className="mt-4 space-y-4"
           >
-            {/* Key Results */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {/* Detailed Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Investment Summary */}
               <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEF3C7' }}>
-                    <span className="text-xl">💰</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Final Amount</h4>
-                </div>
-                <p className="text-3xl font-bold" style={{ color: '#F59E0B' }}>
-                  ₹{results.amount?.toLocaleString()}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FCD34D' }}>
-                    <span className="text-xl">📈</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Simple Interest</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#D97706' }}>
-                  ₹{results.simpleInterest?.toLocaleString()}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#DBEAFE' }}>
-                    <span className="text-xl">📅</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Monthly Interest</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#3B82F6' }}>
-                  ₹{results.monthlyInterest?.toLocaleString()}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#D1FAE5' }}>
-                    <span className="text-xl">📆</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Daily Interest</h4>
-                </div>
-                <p className="text-2xl font-bold" style={{ color: '#10B981' }}>
-                  ₹{results.dailyInterest?.toLocaleString()}
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  💼 Amount Breakdown
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  💼 Investment Summary
                 </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={100}
-                      dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                  </PieChart>
-                </ResponsiveContainer>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  📈 Year-wise Growth
-                </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={results.yearlyBreakdown?.slice(0, 10)}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="year" />
-                    <YAxis />
-                    <Tooltip formatter={(value) => `₹${value.toLocaleString()}`} />
-                    <Bar dataKey="interest" fill="#F59E0B" name="Interest Earned" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </motion.div>
-            </div>
-
-            {/* Summary */}
-            <motion.div
-              className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                📋 Investment Summary
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Principal Amount</span>
-                    <span className="font-semibold">{formatCurrency(results.principal)}</span>
+                    <span className="text-gray-600 text-sm">Principal Amount</span>
+                    <span className="font-semibold text-yellow-600 text-sm">{formatCurrency(results.principal)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Interest Rate</span>
-                    <span className="font-semibold">{results.interestRate}% per annum</span>
+                    <span className="text-gray-600 text-sm">Interest Rate</span>
+                    <span className="font-semibold text-sm">{inputs.interestRate}% p.a.</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Time Period</span>
-                    <span className="font-semibold">{results.timePeriod} years</span>
+                    <span className="text-gray-600 text-sm">Time Period</span>
+                    <span className="font-semibold text-sm">{inputs.timePeriod} years</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Interest Type</span>
-                    <span className="font-semibold">Simple Interest</span>
-                  </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Total Return</span>
-                    <span className="font-semibold text-yellow-600">
-                      {((results.simpleInterest / results.principal) * 100).toFixed(2)}%
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 text-sm">Growth Rate</span>
+                    <span className="font-semibold text-green-600 text-sm">
+                      {((parseFloat(results.totalAmount) / parseFloat(results.principal) - 1) * 100).toFixed(1)}%
                     </span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Annual Interest</span>
-                    <span className="font-semibold">₹{Math.round(results.simpleInterest / results.timePeriod).toLocaleString()}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Interest per ₹100</span>
-                    <span className="font-semibold">₹{((results.interestRate * results.timePeriod)).toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600">Maturity Value</span>
-                    <span className="font-semibold text-green-600">₹{results.amount?.toLocaleString()}</span>
+                </div>
+              </motion.div>
+
+              {/* Chart Placeholder */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  📊 Interest Breakdown
+                </h4>
+                <div className="text-center py-8">
+                  <div className="text-4xl mb-2">📈</div>
+                  <p className="text-gray-500 text-sm">Interest visualization</p>
+                </div>
+              </motion.div>
+
+              {/* Actions & Export */}
+              <motion.div
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+              >
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  🎯 Quick Actions
+                </h4>
+                <div className="space-y-4">
+                  <PDFExport
+                    data={[{
+                      calculator: 'Simple Interest Calculator',
+                      timestamp: new Date().toISOString(),
+                      inputs: {
+                        'Principal Amount': formatCurrency(inputs.principal),
+                        'Interest Rate': `${inputs.interestRate}% p.a.`,
+                        'Time Period': `${inputs.timePeriod} years`
+                      },
+                      results: {
+                        'Simple Interest': formatCurrency(results.simpleInterest),
+                        'Total Amount': formatCurrency(results.totalAmount),
+                        'Principal': formatCurrency(results.principal)
+                      }
+                    }]}
+                    title="Simple Interest Calculator Results"
+                    calculatorType="Simple Interest"
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                    style={{ backgroundColor: '#F59E0B' }}
+                    buttonContent={
+                      <>
+                        <span className="text-lg mr-2">📄</span>
+                        <span>Export PDF</span>
+                      </>
+                    }
+                  />
+
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      💡 All calculations are approximate and for reference only
+                    </p>
                   </div>
                 </div>
-              </div>
-            </motion.div>
-
-            <motion.div
-              className="flex justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 }}
-            >
-              <PDFExport
-                data={[{
-                  calculator: 'Simple Interest Calculator',
-                  timestamp: new Date().toISOString(),
-                  inputs: {
-                    'Principal Amount': `₹${inputs.principal}`,
-                    'Interest Rate': `${inputs.interestRate}%`,
-                    'Time Period': `${inputs.timePeriod} years`
-                  },
-                  results: {
-                    'Final Amount': `₹${results.amount?.toLocaleString()}`,
-                    'Simple Interest': `₹${results.simpleInterest?.toLocaleString()}`,
-                    'Monthly Interest': `₹${results.monthlyInterest?.toLocaleString()}`
-                  }
-                }]}
-              />
-            </motion.div>
+              </motion.div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </motion.div>
   )
 }
+
+export default SimpleInterestCalculator
