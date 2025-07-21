@@ -4,6 +4,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 function RDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
@@ -229,20 +230,13 @@ function RDCalculator({ onAddToComparison, categoryColor = 'green' }) {
               />
 
               {/* Calculation Type */}
-              <div>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">
-                  <span className="mr-2">🧮</span>
-                  Calculation Type
-                </label>
-                <select
-                  value={inputs.calculationType}
-                  onChange={(e) => handleInputChange('calculationType', e.target.value)}
-                  className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-green-500 focus:ring-4 focus:ring-green-100 cursor-pointer"
-                >
-                  <option value="maturity">Calculate Maturity Amount</option>
-                  <option value="reverse-maturity">Calculate Required Monthly Deposit</option>
-                </select>
-              </div>
+              <CalculatorDropdown
+                configKey="CALCULATION_TYPES.RD"
+                value={inputs.calculationType}
+                onChange={(value) => handleInputChange('calculationType', value)}
+                category="savings"
+                placeholder="Select calculation type"
+              />
 
               <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
                 <p className="text-sm text-blue-800">

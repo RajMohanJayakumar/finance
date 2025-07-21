@@ -6,6 +6,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 const countries = {
   'india': { flag: '🇮🇳', name: 'India', currency: '₹', typical_return: 12 },
@@ -203,28 +204,13 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
 
           <div className="space-y-5">
             {/* Country Selection */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">🌍</span>
-                Country
-              </label>
-              <select
-                value={inputs.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-                style={{
-                  borderColor: '#E5E7EB',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: 'none'
-                }}
-              >
-                {Object.entries(countries).map(([key, country]) => (
-                  <option key={key} value={key}>
-                    {country.flag} {country.name} (Typical: {country.typical_return}%)
-                  </option>
-                ))}
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="SWP_COUNTRIES"
+              value={inputs.country}
+              onChange={(value) => handleInputChange('country', value)}
+              category="mutual_funds"
+              placeholder="Select country"
+            />
 
             <CurrencyInput
               label="Initial Investment"

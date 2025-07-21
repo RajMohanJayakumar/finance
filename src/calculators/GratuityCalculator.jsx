@@ -4,6 +4,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 function GratuityCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
@@ -219,20 +220,13 @@ function GratuityCalculator({ onAddToComparison, categoryColor = 'red' }) {
             />
 
             {/* Organization Type */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">🏢</span>
-                Organization Type
-              </label>
-              <select
-                value={inputs.organizationType}
-                onChange={(e) => handleInputChange('organizationType', e.target.value)}
-                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
-              >
-                <option value="covered">Covered under Gratuity Act</option>
-                <option value="non-covered">Not covered under Gratuity Act</option>
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="ORGANIZATION_TYPE"
+              value={inputs.organizationType}
+              onChange={(value) => handleInputChange('organizationType', value)}
+              category="retirement"
+              placeholder="Select organization type"
+            />
 
             <div className="bg-blue-50 p-4 rounded-xl border border-blue-200">
               <p className="text-sm text-blue-800">

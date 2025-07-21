@@ -5,6 +5,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 export default function CAGRCalculator({ onAddToComparison, categoryColor = 'purple' }) {
   const { addToComparison } = useComparison()
@@ -165,25 +166,13 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
 
           <div className="space-y-5">
             {/* Calculation Type */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">🔢</span>
-                Calculation Type
-              </label>
-              <select
-                value={inputs.calculationType}
-                onChange={(e) => handleInputChange('calculationType', e.target.value)}
-                className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
-                style={{
-                  borderColor: '#E5E7EB',
-                  backgroundColor: '#FFFFFF',
-                  boxShadow: 'none'
-                }}
-              >
-                <option value="cagr">CAGR (Compound Annual Growth Rate)</option>
-                <option value="roi">ROI (Return on Investment)</option>
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="CALCULATION_TYPES.CAGR"
+              value={inputs.calculationType}
+              onChange={(value) => handleInputChange('calculationType', value)}
+              category="mutual_funds"
+              placeholder="Select calculation type"
+            />
 
             <CurrencyInput
               label={inputs.calculationType === 'cagr' ? 'Beginning Value' : 'Initial Investment'}

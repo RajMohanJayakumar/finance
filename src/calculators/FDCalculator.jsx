@@ -5,6 +5,7 @@ import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 function FDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
@@ -222,38 +223,22 @@ function FDCalculator({ onAddToComparison, categoryColor = 'green' }) {
             />
 
             {/* Calculation Type */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">⚙️</span>
-                Calculation Type
-              </label>
-              <select
-                value={inputs.calculationType}
-                onChange={(e) => handleInputChange('calculationType', e.target.value)}
-                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 cursor-pointer"
-              >
-                <option value="maturity">Calculate Maturity Amount</option>
-                <option value="reverse-maturity">Calculate Principal Required</option>
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="CALCULATION_TYPES.FD"
+              value={inputs.calculationType}
+              onChange={(value) => handleInputChange('calculationType', value)}
+              category="savings"
+              placeholder="Select calculation type"
+            />
 
             {/* Compounding Frequency */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">🔄</span>
-                Compounding Frequency
-              </label>
-              <select
-                value={inputs.compoundingFrequency}
-                onChange={(e) => handleInputChange('compoundingFrequency', e.target.value)}
-                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 cursor-pointer"
-              >
-                <option value="1">Annually</option>
-                <option value="2">Semi-annually</option>
-                <option value="4">Quarterly</option>
-                <option value="12">Monthly</option>
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="COMPOUNDING_FREQUENCY"
+              value={inputs.compoundingFrequency}
+              onChange={(value) => handleInputChange('compoundingFrequency', value)}
+              category="savings"
+              placeholder="Select compounding frequency"
+            />
 
             {/* Quick Actions */}
             {results && (

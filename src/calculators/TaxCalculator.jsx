@@ -1,10 +1,11 @@
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
 
 
 
@@ -15,7 +16,10 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const initialInputs = {
     annualIncome: '',
     country: 'india',
-    taxRegime: 'old'
+    taxRegime: 'old',
+    deductions: '',
+    pfContribution: '',
+    pfFrequency: 'monthly'
   }
 
   const [inputs, setInputs] = useState(initialInputs)
@@ -58,14 +62,19 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
         calculator: 'Tax Calculator',
         timestamp: new Date().toISOString(),
         inputs: {
-          'Annual Income': `₹${inputs.annualIncome}`,
+          'Annual Income': formatCurrency(results.grossIncome),
+          'Monthly Income': formatCurrency(results.monthlyIncome),
+          'PF Contribution': `${formatCurrency(inputs.pfFrequency === 'monthly' ? (results.pfContribution / 12) : results.pfContribution)} (${inputs.pfFrequency})`,
+          'PF Annual': formatCurrency(results.pfContribution),
+          'Total Deductions': formatCurrency(results.totalDeductions),
           'Country': inputs.country === 'india' ? '🇮🇳 India' : inputs.country,
           'Tax Regime': inputs.taxRegime === 'old' ? 'Old Tax Regime' : 'New Tax Regime'
         },
         results: {
-          'Tax Payable': `₹${results.taxPayable?.toLocaleString()}`,
-          'Net Income': `₹${results.netIncome?.toLocaleString()}`,
-          'Effective Tax Rate': `${results.effectiveTaxRate?.toFixed(2)}%`
+          'Tax Payable': formatCurrency(results.taxPayable),
+          'Net Income': formatCurrency(results.netIncome),
+          'Monthly Take Home': formatCurrency(results.monthlyNetIncome),
+          'Effective Tax Rate': `${results.effectiveTaxRate}%`
         }
       }
       addToComparison(comparisonData)
@@ -75,7 +84,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const shareCalculation = () => {
     const shareData = {
       title: 'finclamp.com - Tax Calculator Results',
-      text: `Tax Calculation: Income ₹${inputs.annualIncome}, Tax ₹${results?.taxPayable?.toLocaleString()}`,
+      text: `Tax Calculation (${inputs.taxRegime === 'old' ? 'Old' : 'New'} Regime): Annual Income ${formatCurrency(results?.grossIncome)}, Monthly ${formatCurrency(results?.monthlyIncome)}, Tax ${formatCurrency(results?.taxPayable)}, Take Home ${formatCurrency(results?.netIncome)}`,
       url: window.location.href
     }
 
@@ -104,15 +113,20 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   }
 
   const calculateTax = () => {
-    const income = parseFloat(inputs.annualIncome) || 0
+    const grossIncome = parseFloat(inputs.annualIncome) || 0
+    const pfInput = parseFloat(inputs.pfContribution) || 0
+    const pfContribution = inputs.pfFrequency === 'monthly' ? pfInput * 12 : pfInput
+    const otherDeductions = inputs.taxRegime === 'old' ? (parseFloat(inputs.deductions) || 0) : 0
+    const totalDeductions = pfContribution + otherDeductions
+    const taxableIncome = Math.max(0, grossIncome - totalDeductions)
     const slabs = taxSlabs[inputs.country][inputs.taxRegime]
-    
+
     let totalTax = 0
     let taxBreakdown = []
 
     for (let slab of slabs) {
-      if (income > slab.min) {
-        const taxableInThisSlab = Math.min(income, slab.max) - slab.min
+      if (taxableIncome > slab.min) {
+        const taxableInThisSlab = Math.min(taxableIncome, slab.max) - slab.min
         const taxInThisSlab = (taxableInThisSlab * slab.rate) / 100
         totalTax += taxInThisSlab
 
@@ -130,18 +144,33 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
     // Add cess (4% on total tax for India)
     const cess = totalTax * 0.04
     const totalTaxWithCess = totalTax + cess
-    const netIncome = income - totalTaxWithCess
+    const netIncome = grossIncome - pfContribution - totalTaxWithCess
 
     setResults({
-      grossIncome: income,
+      grossIncome: grossIncome,
+      monthlyIncome: Math.round(grossIncome / 12),
+      taxableIncome: taxableIncome,
+      pfContribution: pfContribution,
+      otherDeductions: otherDeductions,
+      totalDeductions: totalDeductions,
       totalTax: Math.round(totalTax),
       cess: Math.round(cess),
-      totalTaxWithCess: Math.round(totalTaxWithCess),
+      taxPayable: Math.round(totalTaxWithCess),
       netIncome: Math.round(netIncome),
-      effectiveTaxRate: ((totalTaxWithCess / income) * 100).toFixed(2),
+      monthlyNetIncome: Math.round(netIncome / 12),
+      effectiveTaxRate: grossIncome > 0 ? ((totalTaxWithCess / grossIncome) * 100).toFixed(2) : '0.00',
       taxBreakdown
     })
   }
+
+  // Auto-calculate when inputs change
+  useEffect(() => {
+    if (inputs.annualIncome && inputs.country && inputs.taxRegime) {
+      calculateTax()
+    } else {
+      setResults(null)
+    }
+  }, [inputs.annualIncome, inputs.country, inputs.taxRegime, inputs.deductions, inputs.pfContribution, inputs.pfFrequency])
 
   // Chart data for visualization
   const taxBreakdownData = results ? [
@@ -203,45 +232,57 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
             />
 
             {/* Country Selection */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">🌍</span>
-                Country
-              </label>
-              <select
-                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
-                value={inputs.country}
-                onChange={(e) => handleInputChange('country', e.target.value)}
-              >
-                <option value="india">🇮🇳 India</option>
-              </select>
-            </div>
+            <CalculatorDropdown
+              configKey="COUNTRIES"
+              value={inputs.country}
+              onChange={(value) => handleInputChange('country', value)}
+              category="tax"
+              placeholder="Select country"
+            />
 
             {/* Tax Regime Selection */}
-            <div>
-              <label className="block text-sm font-semibold mb-2 text-gray-700">
-                <span className="mr-2">⚖️</span>
-                Tax Regime (India)
+            <CalculatorDropdown
+              configKey="TAX_REGIME"
+              value={inputs.taxRegime}
+              onChange={(value) => handleInputChange('taxRegime', value)}
+              category="tax"
+              placeholder="Select tax regime"
+            />
+
+            {/* PF Contribution - Available for both regimes */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🏦 PF Contribution
               </label>
-              <select
-                className="w-full px-3 py-3 text-base font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-100"
-                value={inputs.taxRegime}
-                onChange={(e) => handleInputChange('taxRegime', e.target.value)}
-              >
-                <option value="old">Old Tax Regime</option>
-                <option value="new">New Tax Regime</option>
-              </select>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={inputs.pfContribution}
+                  onChange={(e) => handleInputChange('pfContribution', e.target.value)}
+                  placeholder={`Enter ${inputs.pfFrequency} PF contribution`}
+                  className="w-full pl-4 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+                  min="0"
+                />
+                <select
+                  value={inputs.pfFrequency}
+                  onChange={(e) => handleInputChange('pfFrequency', e.target.value)}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-gray-100 border border-gray-300 rounded px-2 py-1 text-xs font-medium text-gray-700 focus:outline-none focus:ring-1 focus:ring-red-500"
+                >
+                  <option value="monthly">Monthly</option>
+                  <option value="yearly">Yearly</option>
+                </select>
+              </div>
             </div>
 
             {/* Deductions - Only for Old Regime */}
             {inputs.taxRegime === 'old' && (
               <CurrencyInput
-                label="Total Deductions (80C, 80D, etc.)"
+                label="Other Deductions (80C, 80D, etc.)"
                 value={inputs.deductions}
                 onChange={(value) => handleInputChange('deductions', value)}
                 fieldName="deductions"
                 icon="💰"
-                placeholder="Enter total deductions"
+                placeholder="Enter other deductions"
                 min="0"
                 focusColor="#EF4444"
               />
@@ -286,7 +327,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
           </h3>
 
           {results ? (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-2 gap-4 sm:gap-6">
               <motion.div
                 className="bg-gradient-to-br from-red-50 to-pink-50 rounded-xl p-6 border border-red-100"
                 whileHover={{ scale: 1.02 }}
@@ -297,7 +338,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                   <h4 className="font-semibold text-base text-gray-700">Total Tax</h4>
                 </div>
                 <p className="text-2xl font-bold text-red-600 leading-tight">
-                  {formatCurrency(results.totalTax)}
+                  {formatCurrency(results.taxPayable)}
                 </p>
               </motion.div>
 
@@ -311,7 +352,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                   <h4 className="font-semibold text-base text-gray-700">Take Home</h4>
                 </div>
                 <p className="text-2xl font-bold text-green-600 leading-tight">
-                  {formatCurrency(results.takeHome)}
+                  {formatCurrency(results.netIncome)}
                 </p>
               </motion.div>
 
@@ -340,6 +381,36 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                 </div>
                 <p className="text-2xl font-bold text-purple-600 leading-tight">
                   {formatCurrency(results.taxableIncome)}
+                </p>
+              </motion.div>
+
+              {/* Monthly Income */}
+              <motion.div
+                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📅</span>
+                  <h4 className="font-semibold text-base text-gray-700">Monthly Income</h4>
+                </div>
+                <p className="text-2xl font-bold text-orange-600 leading-tight">
+                  {formatCurrency(results.monthlyIncome)}
+                </p>
+              </motion.div>
+
+              {/* Monthly Take Home */}
+              <motion.div
+                className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-xl p-6 border border-teal-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💳</span>
+                  <h4 className="font-semibold text-base text-gray-700">Monthly Take Home</h4>
+                </div>
+                <p className="text-2xl font-bold text-teal-600 leading-tight">
+                  {formatCurrency(results.monthlyNetIncome)}
                 </p>
               </motion.div>
             </div>
@@ -377,21 +448,47 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600 text-sm">Gross Income</span>
-                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(inputs.annualIncome)}</span>
+                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(results.grossIncome)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Monthly Income</span>
+                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(results.monthlyIncome)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">PF Contribution ({inputs.pfFrequency})</span>
+                    <span className="font-semibold text-sm">
+                      {formatCurrency(inputs.pfFrequency === 'monthly' ? (results.pfContribution / 12) : results.pfContribution)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">PF Contribution (Annual)</span>
+                    <span className="font-semibold text-sm">{formatCurrency(results.pfContribution)}</span>
+                  </div>
+                  {inputs.taxRegime === 'old' && (
+                    <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                      <span className="text-gray-600 text-sm">Other Deductions</span>
+                      <span className="font-semibold text-sm">{formatCurrency(results.otherDeductions)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Total Deductions</span>
+                    <span className="font-semibold text-green-600 text-sm">-{formatCurrency(results.totalDeductions)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Taxable Income</span>
+                    <span className="font-semibold text-purple-600 text-sm">{formatCurrency(results.taxableIncome)}</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Tax Payable</span>
+                    <span className="font-semibold text-red-600 text-sm">-{formatCurrency(results.taxPayable)}</span>
                   </div>
                   <div className="flex justify-between items-center py-2 border-b border-gray-100">
                     <span className="text-gray-600 text-sm">Tax Regime</span>
                     <span className="font-semibold text-sm">{inputs.taxRegime === 'old' ? 'Old' : 'New'}</span>
                   </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                  <div className="flex justify-between items-center py-2">
                     <span className="text-gray-600 text-sm">Effective Tax Rate</span>
                     <span className="font-semibold text-sm">{results.effectiveTaxRate}%</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600 text-sm">Tax Savings</span>
-                    <span className="font-semibold text-green-600 text-sm">
-                      {inputs.taxRegime === 'old' ? formatCurrency(inputs.deductions || 0) : 'N/A'}
-                    </span>
                   </div>
                 </div>
               </motion.div>
@@ -406,10 +503,37 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
                 <h4 className="text-lg font-bold mb-4 text-gray-800">
                   📊 Tax Breakdown
                 </h4>
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📈</div>
-                  <p className="text-gray-500 text-sm">Tax slab visualization</p>
-                </div>
+                {results.taxBreakdown && results.taxBreakdown.length > 0 ? (
+                  <div className="space-y-3">
+                    {results.taxBreakdown.map((slab, index) => (
+                      <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                        <div className="flex-1">
+                          <div className="text-sm font-medium text-gray-700">{slab.range}</div>
+                          <div className="text-xs text-gray-500">Rate: {slab.rate}%</div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-semibold text-gray-800">
+                            {formatCurrency(slab.tax)}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            on {formatCurrency(slab.taxableAmount)}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                    <div className="border-t pt-3 mt-3">
+                      <div className="flex justify-between items-center font-semibold">
+                        <span>Total Tax (incl. 4% cess)</span>
+                        <span className="text-red-600">{formatCurrency(results.taxPayable)}</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <div className="text-4xl mb-2">📈</div>
+                    <p className="text-gray-500 text-sm">No tax breakdown available</p>
+                  </div>
+                )}
               </motion.div>
 
               {/* Actions & Export */}
