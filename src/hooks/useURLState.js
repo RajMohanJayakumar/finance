@@ -108,14 +108,35 @@ export const useURLStateObject = (prefix = '') => {
     setStateAndURL(newState)
   }, [state, setStateAndURL])
 
-  // Listen for URL changes
+  // Listen for URL changes (including programmatic changes)
   useEffect(() => {
-    const handlePopState = () => {
-      setState(getURLParams())
+    const handleURLChange = () => {
+      const newParams = getURLParams()
+      setState(newParams)
     }
 
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
+    // Listen for back/forward navigation
+    window.addEventListener('popstate', handleURLChange)
+
+    // Listen for programmatic URL changes
+    const originalPushState = window.history.pushState
+    const originalReplaceState = window.history.replaceState
+
+    window.history.pushState = function(...args) {
+      originalPushState.apply(window.history, args)
+      setTimeout(handleURLChange, 0)
+    }
+
+    window.history.replaceState = function(...args) {
+      originalReplaceState.apply(window.history, args)
+      setTimeout(handleURLChange, 0)
+    }
+
+    return () => {
+      window.removeEventListener('popstate', handleURLChange)
+      window.history.pushState = originalPushState
+      window.history.replaceState = originalReplaceState
+    }
   }, [getURLParams])
 
   return [state, setStateAndURL, updateKey]

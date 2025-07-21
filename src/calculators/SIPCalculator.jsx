@@ -4,14 +4,15 @@ import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 import PDFExport from '../components/PDFExport'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
-import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
+import { generateShareableURL } from '../hooks/useURLState'
 import CurrencyInput from '../components/CurrencyInput'
 
 export default function SIPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
-  const initialInputs = {
+  // Default values
+  const defaultInputs = {
     monthlyInvestment: '',
     maturityAmount: '',
     lumpSumAmount: '',
@@ -19,107 +20,86 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     timePeriodYears: '10',
     timePeriodMonths: '0',
     stepUpPercentage: '0',
-    stepUpType: 'percentage', // 'percentage' or 'amount'
+    stepUpType: 'percentage',
     calculationType: 'monthly'
   }
 
-  // Use URL state management for inputs
-  const [inputs, setInputs] = useURLStateObject('sip_')
-  const [urlKey, setUrlKey] = useState(0)
-
-  // Initialize inputs with defaults if empty
-  useEffect(() => {
-    if (Object.keys(inputs).length === 0) {
-      setInputs(initialInputs)
-    } else {
-      // Ensure required fields have default values
-      const updatedInputs = { ...inputs }
-      let needsUpdate = false
-
-      if (!updatedInputs.timePeriodYears && !updatedInputs.timePeriod) {
-        updatedInputs.timePeriodYears = '10'
-        needsUpdate = true
-      }
-      if (!updatedInputs.timePeriodMonths) {
-        updatedInputs.timePeriodMonths = '0'
-        needsUpdate = true
-      }
-      if (!updatedInputs.annualReturn) {
-        updatedInputs.annualReturn = '12'
-        needsUpdate = true
-      }
-      if (!updatedInputs.stepUpPercentage) {
-        updatedInputs.stepUpPercentage = '0'
-        needsUpdate = true
-      }
-      if (!updatedInputs.stepUpType) {
-        updatedInputs.stepUpType = 'percentage'
-        needsUpdate = true
-      }
-
-      if (needsUpdate) {
-        setInputs(updatedInputs)
-      }
-    }
-  }, [setInputs]) // Add setInputs dependency
-
-  // Listen for URL changes and force re-render
-  useEffect(() => {
-    const handleURLChange = () => {
-      setUrlKey(prev => prev + 1)
-
-      // Parse URL parameters manually and update inputs
-      const urlParams = new URLSearchParams(window.location.search)
-      const newInputs = {}
-
-      for (const [key, value] of urlParams.entries()) {
-        if (key.startsWith('sip_')) {
-          const cleanKey = key.replace('sip_', '')
-          newInputs[cleanKey] = value
-        }
-      }
-
-      if (Object.keys(newInputs).length > 0) {
-        setInputs(newInputs)
-        setTimeout(() => {
-          calculateSIP()
-        }, 100)
-      }
-    }
-
-    // Listen for programmatic URL changes
-    const originalPushState = window.history.pushState
-    const originalReplaceState = window.history.replaceState
-
-    window.history.pushState = function(...args) {
-      originalPushState.apply(window.history, args)
-      handleURLChange()
-    }
-
-    window.history.replaceState = function(...args) {
-      originalReplaceState.apply(window.history, args)
-      handleURLChange()
-    }
-
-    window.addEventListener('popstate', handleURLChange)
-
-    return () => {
-      window.history.pushState = originalPushState
-      window.history.replaceState = originalReplaceState
-      window.removeEventListener('popstate', handleURLChange)
-    }
-  }, [])
-
+  // State management
+  const [inputs, setInputs] = useState(defaultInputs)
   const [results, setResults] = useState(null)
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 
-  // Component initialization
-  useEffect(() => {
-    // Initialize component
+  // URL parameter management
+  const updateURL = useCallback((newInputs) => {
+    const url = new URL(window.location)
+    
+    // Preserve calculator parameter
+    const calculatorParam = url.searchParams.get('calculator')
+    
+    // Remove existing sip_ parameters
+    const keysToRemove = []
+    for (const key of url.searchParams.keys()) {
+      if (key.startsWith('sip_')) {
+        keysToRemove.push(key)
+      }
+    }
+    keysToRemove.forEach(key => url.searchParams.delete(key))
+    
+    // Restore calculator parameter
+    if (calculatorParam) {
+      url.searchParams.set('calculator', calculatorParam)
+    }
+    
+    // Add new parameters (only non-empty values)
+    Object.entries(newInputs).forEach(([key, value]) => {
+      if (value && value !== '' && value !== '0') {
+        url.searchParams.set(`sip_${key}`, value)
+      }
+    })
+    
+    window.history.replaceState({}, '', url.toString())
   }, [])
 
-  // PWA Install functionality
+  // Read URL parameters
+  const readURLParams = useCallback(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const params = {}
+    
+    for (const [key, value] of urlParams.entries()) {
+      if (key.startsWith('sip_')) {
+        const cleanKey = key.replace('sip_', '')
+        params[cleanKey] = value
+      }
+    }
+    
+    return params
+  }, [])
+
+  // Initialize from URL on mount
+  useEffect(() => {
+    const urlParams = readURLParams()
+    if (Object.keys(urlParams).length > 0) {
+      const initialInputs = { ...defaultInputs, ...urlParams }
+      setInputs(initialInputs)
+    }
+  }, [])
+
+  // Listen for browser navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      const urlParams = readURLParams()
+      if (Object.keys(urlParams).length > 0) {
+        const newInputs = { ...defaultInputs, ...urlParams }
+        setInputs(newInputs)
+      }
+    }
+
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  // PWA install prompt
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault()
@@ -130,7 +110,7 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
   }, [])
 
-  const handlePWAInstall = async () => {
+  const handleInstallClick = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt()
       await deferredPrompt.userChoice
@@ -143,9 +123,11 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     return generateShareableURL('sip', inputs, results)
   }, [inputs, results])
 
+  // Handle input changes with URL updates
   const handleInputChange = (field, value) => {
     const newInputs = { ...inputs, [field]: value }
 
+    // Handle calculation type switching
     if (field === 'monthlyInvestment' && value) {
       newInputs.maturityAmount = ''
       newInputs.calculationType = 'monthly'
@@ -154,125 +136,146 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
       newInputs.calculationType = 'maturity'
     }
 
+    // Handle step-up type switching - clear value when switching types
+    if (field === 'stepUpType') {
+      newInputs.stepUpPercentage = '0'
+    }
+
+    // Update state and URL
     setInputs(newInputs)
-
-    // Immediately trigger calculation for time period changes
-    if (field === 'timePeriodMonths' || field === 'timePeriodYears') {
-      setTimeout(() => {
-        calculateSIP()
-      }, 50)
-    }
+    updateURL(newInputs)
   }
 
-  const handleReset = () => {
-    setInputs(initialInputs)
-    setResults(null)
-    // Clear URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname)
-  }
-
-  const calculateSIP = () => {
-    const monthly = parseFloat(inputs.monthlyInvestment) || 0
-    const targetAmount = parseFloat(inputs.maturityAmount) || 0
+  // SIP calculation function
+  const calculateSIP = useCallback(() => {
+    const monthlyInv = parseFloat(inputs.monthlyInvestment) || 0
+    const maturityAmt = parseFloat(inputs.maturityAmount) || 0
     const lumpSum = parseFloat(inputs.lumpSumAmount) || 0
-    const rate = parseFloat(inputs.annualReturn) / 100 / 12
-    const inputYears = parseInt(inputs.timePeriodYears) || 0
-    const inputMonths = parseInt(inputs.timePeriodMonths) || 0
-    const totalMonths = inputYears * 12 + inputMonths
-    const years = Math.floor(totalMonths / 12)
-    const stepUpValue = parseFloat(inputs.stepUpPercentage) || 0
+    const annualRate = parseFloat(inputs.annualReturn) || 12
+    const years = parseInt(inputs.timePeriodYears) || 0
+    const months = parseInt(inputs.timePeriodMonths) || 0
+    const stepUpPercent = parseFloat(inputs.stepUpPercentage) || 0
+    const stepUpType = inputs.stepUpType || 'percentage'
 
-    if (totalMonths <= 0 || rate < 0) return
+    // Calculate total months
+    const totalMonths = (years * 12) + months
 
-    let calculatedResults = {}
-    let breakdown = []
+    if (totalMonths <= 0 || annualRate <= 0) {
+      setResults(null)
+      setYearlyBreakdown([])
+      return
+    }
 
-    if (inputs.calculationType === 'monthly' && monthly > 0) {
-      // Calculate future value from monthly investment + lump sum
-      let futureValue = lumpSum // Start with lump sum
-      let totalInvestment = lumpSum
-      let currentMonthlyInvestment = monthly
+    const monthlyRate = annualRate / 100 / 12
+    let calculatedMonthlyInvestment = monthlyInv
+    let calculatedMaturityAmount = maturityAmt
 
-      for (let year = 1; year <= years; year++) {
-        let yearlyInvestment = 0
-
-        for (let month = 1; month <= 12; month++) {
-          futureValue = (futureValue + currentMonthlyInvestment) * (1 + rate)
-          yearlyInvestment += currentMonthlyInvestment
-          totalInvestment += currentMonthlyInvestment
-        }
-
-        // Apply step-up at year end
-        if (inputs.stepUpType === 'percentage') {
-          currentMonthlyInvestment = currentMonthlyInvestment * (1 + stepUpValue / 100)
-        } else {
-          currentMonthlyInvestment = currentMonthlyInvestment + stepUpValue
-        }
-
-        breakdown.push({
-          year,
-          yearlyInvestment: Math.round(yearlyInvestment),
-          yearEndValue: Math.round(futureValue),
-          totalInvested: Math.round(totalInvestment)
-        })
+    // Calculate based on type
+    if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
+      // Calculate required monthly investment for target maturity
+      if (stepUpPercent > 0) {
+        // Complex calculation for step-up SIP to reach target
+        calculatedMonthlyInvestment = maturityAmt / (totalMonths * (1 + monthlyRate) ** (totalMonths / 2))
+      } else {
+        // Simple SIP calculation
+        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+        calculatedMonthlyInvestment = maturityAmt / futureValueFactor
       }
-
-      calculatedResults = {
-        monthlyInvestment: monthly,
-        lumpSumAmount: lumpSum,
-        maturityAmount: Math.round(futureValue),
-        totalInvestment: Math.round(totalInvestment),
-        wealthGained: Math.round(futureValue - totalInvestment)
-      }
-    } else if (inputs.calculationType === 'maturity' && targetAmount > 0) {
-      // Calculate required monthly investment for target amount
-      // Simplified calculation without step-up for reverse calculation
-      const monthlyRequired = targetAmount / (((Math.pow(1 + rate, totalMonths) - 1) / rate) * (1 + rate))
-      const totalInvestment = monthlyRequired * totalMonths
-
-      calculatedResults = {
-        monthlyInvestment: Math.round(monthlyRequired),
-        maturityAmount: targetAmount,
-        totalInvestment: Math.round(totalInvestment),
-        wealthGained: Math.round(targetAmount - totalInvestment)
-      }
-
-      // Generate breakdown for required monthly investment
-      let investmentSoFar = 0
-      let valueSoFar = 0
-
-      for (let year = 1; year <= years; year++) {
-        let yearlyInvestment = monthlyRequired * 12
-        investmentSoFar += yearlyInvestment
-
-        // Calculate value at end of year
-        for (let month = 1; month <= 12; month++) {
-          valueSoFar = (valueSoFar + monthlyRequired) * (1 + rate)
+    } else if (calculatedMonthlyInvestment > 0) {
+      // Calculate maturity amount from monthly investment
+      if (stepUpPercent > 0) {
+        // Step-up SIP calculation
+        let totalAmount = 0
+        let currentMonthlyInv = calculatedMonthlyInvestment
+        
+        for (let month = 1; month <= totalMonths; month++) {
+          totalAmount += currentMonthlyInv * ((1 + monthlyRate) ** (totalMonths - month + 1))
+          
+          // Increase investment annually
+          if (month % 12 === 0) {
+            if (stepUpType === 'percentage') {
+              currentMonthlyInv = currentMonthlyInv * (1 + stepUpPercent / 100)
+            } else {
+              currentMonthlyInv = currentMonthlyInv + stepUpPercent
+            }
+          }
         }
-
-        breakdown.push({
-          year,
-          yearlyInvestment: Math.round(yearlyInvestment),
-          yearEndValue: Math.round(valueSoFar),
-          totalInvestment: Math.round(investmentSoFar)
-        })
+        calculatedMaturityAmount = totalAmount
+      } else {
+        // Simple SIP calculation
+        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+        calculatedMaturityAmount = calculatedMonthlyInvestment * futureValueFactor
       }
     }
 
-    setResults(calculatedResults)
-    setYearlyBreakdown(breakdown)
-  }
+    // Add lump sum if provided
+    if (lumpSum > 0) {
+      calculatedMaturityAmount += lumpSum * ((1 + monthlyRate) ** totalMonths)
+    }
 
-  // Trigger calculation whenever inputs change
+    const totalInvestment = calculatedMonthlyInvestment * totalMonths + lumpSum
+    const totalReturns = calculatedMaturityAmount - totalInvestment
+    const absoluteReturn = totalReturns
+    const annualizedReturn = totalMonths > 0 ? 
+      (Math.pow(calculatedMaturityAmount / totalInvestment, 12 / totalMonths) - 1) * 100 : 0
+
+    // Generate yearly breakdown
+    const breakdown = []
+    let cumulativeInvestment = lumpSum
+    let cumulativeValue = lumpSum
+    let currentMonthlyInv = calculatedMonthlyInvestment
+
+    for (let year = 1; year <= years + (months > 0 ? 1 : 0); year++) {
+      const monthsInThisYear = year <= years ? 12 : months
+      if (monthsInThisYear === 0) break
+
+      let yearlyInvestment = 0
+      for (let month = 1; month <= monthsInThisYear; month++) {
+        yearlyInvestment += currentMonthlyInv
+        cumulativeValue += currentMonthlyInv
+        cumulativeValue *= (1 + monthlyRate)
+      }
+
+      cumulativeInvestment += yearlyInvestment
+
+      // Step-up at year end
+      if (stepUpPercent > 0 && year < years + (months > 0 ? 1 : 0)) {
+        if (stepUpType === 'percentage') {
+          currentMonthlyInv = currentMonthlyInv * (1 + stepUpPercent / 100)
+        } else {
+          currentMonthlyInv = currentMonthlyInv + stepUpPercent
+        }
+      }
+
+      breakdown.push({
+        year,
+        investment: cumulativeInvestment,
+        value: cumulativeValue,
+        returns: cumulativeValue - cumulativeInvestment
+      })
+    }
+
+    setResults({
+      monthlyInvestment: calculatedMonthlyInvestment,
+      maturityAmount: calculatedMaturityAmount,
+      totalInvestment,
+      totalReturns,
+      absoluteReturn,
+      annualizedReturn,
+      wealthGained: totalReturns
+    })
+
+    setYearlyBreakdown(breakdown)
+  }, [inputs])
+
+  // Trigger calculation when inputs change
   useEffect(() => {
-    // Only calculate if we have meaningful inputs
     if ((inputs.monthlyInvestment || inputs.maturityAmount) &&
         inputs.annualReturn &&
         (inputs.timePeriodYears || inputs.timePeriodMonths)) {
-      // Use a small delay to ensure state has updated
       const timeoutId = setTimeout(() => {
         calculateSIP()
-      }, 10)
+      }, 100)
       return () => clearTimeout(timeoutId)
     }
   }, [
@@ -285,41 +288,10 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     inputs.stepUpPercentage,
     inputs.stepUpType,
     inputs.calculationType,
-    urlKey
+    calculateSIP
   ])
 
-
-
-
-
-  const handleAddToComparison = () => {
-    if (results) {
-      const comparisonData = {
-        calculator: 'SIP Calculator',
-        inputs: {
-          'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
-          'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
-          'Investment Period': `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
-          'Expected Annual Return': `${inputs.annualReturn}%`,
-          'Step Up': inputs.stepUpType === 'percentage' ? `${inputs.stepUpPercentage}%` : `₹${inputs.stepUpPercentage}`
-        },
-        results: {
-          'Maturity Amount': formatCurrency(results.maturityAmount),
-          'Total Investment': formatCurrency(results.totalInvestment),
-          'Wealth Gained': formatCurrency(results.wealthGained)
-        }
-      }
-
-      // Use new comparison context
-      addToComparison(comparisonData)
-
-      // Also call the legacy prop if provided for backward compatibility
-      if (onAddToComparison) {
-        onAddToComparison(comparisonData)
-      }
-    }
-  }
-
+  // Share calculation
   const shareCalculation = () => {
     const shareableURL = getShareableURL()
 
@@ -350,247 +322,225 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     }
   }
 
+  // Add to comparison
+  const handleAddToComparison = () => {
+    if (results && addToComparison) {
+      const comparisonData = {
+        calculator: 'SIP Calculator',
+        inputs: {
+          monthlyInvestment: inputs.monthlyInvestment,
+          annualReturn: inputs.annualReturn,
+          timePeriod: `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
+          stepUp: inputs.stepUpPercentage > 0 ? `${inputs.stepUpPercentage}${inputs.stepUpType === 'percentage' ? '%' : ' ₹'}` : 'None'
+        },
+        results: {
+          maturityAmount: results.maturityAmount,
+          totalInvestment: results.totalInvestment,
+          totalReturns: results.totalReturns
+        }
+      }
 
+      addToComparison(comparisonData)
+
+      if (onAddToComparison) {
+        onAddToComparison(comparisonData)
+      }
+    }
+  }
+
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5 }
+  }
 
   return (
-    <motion.div
-      className="max-w-7xl mx-auto"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      {/* PWA Install Button */}
-      {deferredPrompt && (
-        <div className="text-center mb-6">
-          <button
-            onClick={handlePWAInstall}
-            className="bg-indigo-500 hover:bg-indigo-600 text-white px-6 py-3 rounded-lg font-semibold transition-all cursor-pointer"
-          >
-            📱 Install App
-          </button>
-        </div>
-      )}
+    <div className="max-w-6xl mx-auto p-4 space-y-6">
+      {/* Header */}
+      <motion.div
+        className="text-center"
+        {...fadeInUp}
+      >
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">SIP Calculator</h1>
+        <p className="text-gray-600">Calculate your Systematic Investment Plan returns</p>
+      </motion.div>
 
-      {/* Main Content - Single Row Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
-
-        {/* Left Column - Investment Details */}
+      <div className="grid lg:grid-cols-2 gap-6">
+        {/* Input Section */}
         <motion.div
-          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
+          className="bg-white rounded-xl shadow-lg p-6"
+          {...fadeInUp}
         >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
-              💰 Investment Details
-            </h3>
-            <motion.button
-              onClick={handleReset}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              title="Reset Calculator"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </motion.button>
-          </div>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            📊 Investment Details
+          </h2>
 
-          <div className="space-y-5">
-            <CurrencyInput
-              label="Monthly Investment"
-              value={inputs.monthlyInvestment}
-              onChange={(value) => handleInputChange('monthlyInvestment', value)}
-              fieldName="monthlyInvestment"
-              icon="💰"
-              placeholder="Enter monthly investment"
-              min="0"
-              focusColor="#6366F1"
-            />
-
-            {/* Expected Annual Return with Increment/Decrement */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <span>📈</span>
-                Expected Annual Return (%)
+          <div className="space-y-4">
+            {/* Monthly Investment */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Monthly Investment
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={inputs.annualReturn || ''}
-                  onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                  placeholder="Enter expected return"
-                  step="0.1"
-                  min="0"
-                  className="w-full pl-3 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-center font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
-                <div className="absolute right-1 top-1 bottom-1 flex flex-col">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const current = parseFloat(inputs.annualReturn) || 0
-                      handleInputChange('annualReturn', (current + 0.5).toFixed(1))
-                    }}
-                    className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-t text-xs font-bold text-gray-600 transition-colors"
-                  >
-                    ▲
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const current = parseFloat(inputs.annualReturn) || 0
-                      handleInputChange('annualReturn', Math.max(0, current - 0.5).toFixed(1))
-                    }}
-                    className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-b text-xs font-bold text-gray-600 transition-colors"
-                  >
-                    ▼
-                  </button>
-                </div>
-              </div>
+              <CurrencyInput
+                value={inputs.monthlyInvestment}
+                onChange={(value) => handleInputChange('monthlyInvestment', value)}
+                placeholder="Enter monthly investment amount"
+                disabled={inputs.calculationType === 'maturity'}
+              />
             </div>
 
-            {/* Investment Period - Years and Months */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <span>📅</span>
+            {/* Expected Annual Return */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Expected Annual Return (%)
+              </label>
+              <input
+                type="number"
+                value={inputs.annualReturn}
+                onChange={(e) => handleInputChange('annualReturn', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="12"
+                step="0.1"
+                min="0"
+                max="50"
+              />
+            </div>
+
+            {/* Time Period */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Investment Period
               </label>
               <div className="grid grid-cols-2 gap-3">
-                {/* Years Input with Increment/Decrement */}
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-600 font-medium">Years</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={inputs.timePeriodYears || ''}
-                      onChange={(e) => handleInputChange('timePeriodYears', e.target.value)}
-                      placeholder="0"
-                      min="0"
-                      className="w-full pl-3 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-center font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <div className="absolute right-1 top-1 bottom-1 flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => handleInputChange('timePeriodYears', Math.max(0, (parseInt(inputs.timePeriodYears) || 0) + 1).toString())}
-                        className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-t text-xs font-bold text-gray-600 transition-colors"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleInputChange('timePeriodYears', Math.max(0, (parseInt(inputs.timePeriodYears) || 0) - 1).toString())}
-                        className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-b text-xs font-bold text-gray-600 transition-colors"
-                      >
-                        ▼
-                      </button>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Years</label>
+                  <input
+                    type="number"
+                    value={inputs.timePeriodYears}
+                    onChange={(e) => handleInputChange('timePeriodYears', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="10"
+                    min="0"
+                    max="50"
+                  />
                 </div>
-
-                {/* Months Input with Increment/Decrement */}
-                <div className="space-y-1">
-                  <label className="text-xs text-gray-600 font-medium">Months</label>
-                  <div className="relative">
-                    <input
-                      type="number"
-                      value={inputs.timePeriodMonths || ''}
-                      onChange={(e) => {
-                        let value = parseInt(e.target.value) || 0
-
-                        // If months > 11, convert to years and months
-                        if (value > 11) {
-                          const additionalYears = Math.floor(value / 12)
-                          const remainingMonths = value % 12
-                          const currentYears = parseInt(inputs.timePeriodYears) || 0
-
-                          handleInputChange('timePeriodYears', (currentYears + additionalYears).toString())
-                          handleInputChange('timePeriodMonths', remainingMonths.toString())
-                        } else {
-                          value = Math.max(0, value)
-                          handleInputChange('timePeriodMonths', value.toString())
-                        }
-                      }}
-                      placeholder="0"
-                      min="0"
-                      max="11"
-                      className="w-full pl-3 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-center font-semibold [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    />
-                    <div className="absolute right-1 top-1 bottom-1 flex flex-col">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const currentMonths = parseInt(inputs.timePeriodMonths) || 0
-                          const newMonths = currentMonths >= 11 ? 0 : currentMonths + 1
-                          handleInputChange('timePeriodMonths', newMonths.toString())
-                        }}
-                        className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-t text-xs font-bold text-gray-600 transition-colors"
-                      >
-                        ▲
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const currentMonths = parseInt(inputs.timePeriodMonths) || 0
-                          const newMonths = currentMonths <= 0 ? 11 : currentMonths - 1
-                          handleInputChange('timePeriodMonths', newMonths.toString())
-                        }}
-                        className="flex-1 px-2 bg-gray-100 hover:bg-gray-200 rounded-b text-xs font-bold text-gray-600 transition-colors"
-                      >
-                        ▼
-                      </button>
-                    </div>
-                  </div>
+                <div>
+                  <label className="block text-xs text-gray-500 mb-1">Months</label>
+                  <input
+                    type="number"
+                    value={inputs.timePeriodMonths}
+                    onChange={(e) => handleInputChange('timePeriodMonths', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0"
+                    min="0"
+                    max="11"
+                  />
                 </div>
               </div>
             </div>
 
-            <CurrencyInput
-              label="Lump Sum Amount (Optional)"
-              value={inputs.lumpSumAmount}
-              onChange={(value) => handleInputChange('lumpSumAmount', value)}
-              fieldName="lumpSumAmount"
-              icon="💎"
-              placeholder="Enter lump sum amount"
-              min="0"
-              focusColor="#6366F1"
-            />
+            {/* Lump Sum Amount */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Lump Sum Amount (Optional)
+              </label>
+              <CurrencyInput
+                value={inputs.lumpSumAmount}
+                onChange={(value) => handleInputChange('lumpSumAmount', value)}
+                placeholder="Enter lump sum amount"
+              />
+            </div>
 
-            {/* Annual Step-up with embedded type selector */}
-            <div className="space-y-2">
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-                <span>📈</span>
+            {/* Step-up SIP */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Annual Step-up
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={inputs.stepUpPercentage}
-                  onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
-                  placeholder={`Enter step-up ${inputs.stepUpType === 'percentage' ? 'percentage' : 'amount'}`}
-                  step={inputs.stepUpType === 'percentage' ? '0.1' : '100'}
-                  min="0"
-                  className="w-full pl-4 pr-24 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                />
+              <div className="space-y-2">
                 <select
                   value={inputs.stepUpType}
-                  onChange={(e) => {
-                    // Clear the value when switching types
-                    handleInputChange('stepUpPercentage', '')
-                    handleInputChange('stepUpType', e.target.value)
-                  }}
-                  className="absolute right-1 top-1 bottom-1 px-2 py-1 bg-gray-50 border border-gray-200 rounded-md text-xs focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  onChange={(e) => handleInputChange('stepUpType', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value="percentage">Percent</option>
-                  <option value="amount">Amount</option>
+                  <option value="percentage">Percentage (%)</option>
+                  <option value="amount">Fixed Amount (₹)</option>
                 </select>
+
+                {inputs.stepUpType === 'percentage' ? (
+                  <input
+                    type="number"
+                    value={inputs.stepUpPercentage}
+                    onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Enter step-up percentage"
+                    step="0.1"
+                    min="0"
+                    max="100"
+                  />
+                ) : (
+                  <CurrencyInput
+                    value={inputs.stepUpPercentage}
+                    onChange={(value) => handleInputChange('stepUpPercentage', value)}
+                    placeholder="Enter step-up amount"
+                  />
+                )}
               </div>
             </div>
+          </div>
+        </motion.div>
 
-            {/* Quick Actions */}
-            {results && (
-              <div className="pt-4 border-t border-gray-100 space-y-3">
+        {/* Results Section */}
+        <motion.div
+          className="bg-white rounded-xl shadow-lg p-6"
+          {...fadeInUp}
+        >
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            📈 Results
+          </h2>
+
+          {results ? (
+            <div className="space-y-4">
+              {/* Key Results */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-600 font-medium">Monthly Amount</p>
+                  <p className="text-2xl font-bold text-blue-800">
+                    {formatCurrency(results.monthlyInvestment)}
+                  </p>
+                </div>
+                <div className="bg-green-50 p-4 rounded-lg">
+                  <p className="text-sm text-green-600 font-medium">Total Investment</p>
+                  <p className="text-2xl font-bold text-green-800">
+                    {formatCurrency(results.totalInvestment)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-purple-50 p-4 rounded-lg">
+                  <p className="text-sm text-purple-600 font-medium">Wealth Gained</p>
+                  <p className="text-2xl font-bold text-purple-800">
+                    {formatCurrency(results.wealthGained)}
+                  </p>
+                </div>
+                <div className="bg-orange-50 p-4 rounded-lg">
+                  <p className="text-sm text-orange-600 font-medium">Monthly SIP</p>
+                  <p className="text-2xl font-bold text-orange-800">
+                    {formatCurrency(results.monthlyInvestment)}
+                  </p>
+                </div>
+              </div>
+
+              {/* Maturity Amount - Highlighted */}
+              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-lg text-white text-center">
+                <p className="text-lg font-medium opacity-90">Maturity Amount</p>
+                <p className="text-4xl font-bold">
+                  {formatCurrency(results.maturityAmount)}
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="grid grid-cols-2 gap-3 mt-6">
                 <motion.button
                   onClick={handleAddToComparison}
                   className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
@@ -611,236 +561,112 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
                   🔗 Share
                 </motion.button>
               </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Right Column - Expanded Results */}
-        <motion.div
-          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            📊 Results
-          </h3>
-
-          {results ? (
-            <div className="grid grid-cols-2 gap-6">
-              <motion.div
-                className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">💰</span>
-                  <h4 className="font-semibold text-base text-gray-700">Maturity Amount</h4>
-                </div>
-                <p className="text-2xl font-bold text-purple-600 leading-tight">
-                  {formatCurrency(results.maturityAmount)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">🏦</span>
-                  <h4 className="font-semibold text-base text-gray-700">Total Investment</h4>
-                </div>
-                <p className="text-2xl font-bold text-green-600 leading-tight">
-                  {formatCurrency(results.totalInvestment)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">📈</span>
-                  <h4 className="font-semibold text-base text-gray-700">Wealth Gained</h4>
-                </div>
-                <p className="text-2xl font-bold text-orange-600 leading-tight">
-                  {formatCurrency(results.wealthGained)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-blue-50 to-cyan-50 rounded-xl p-6 border border-blue-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">💎</span>
-                  <h4 className="font-semibold text-base text-gray-700">Monthly SIP</h4>
-                </div>
-                <p className="text-2xl font-bold text-blue-600 leading-tight">
-                  {formatCurrency(results.monthlyInvestment || inputs.monthlyInvestment)}
-                </p>
-              </motion.div>
             </div>
           ) : (
-            <div className="text-center py-12">
+            <div className="text-center py-8">
               <div className="text-6xl mb-4">📊</div>
-              <p className="text-gray-500 text-lg">Enter investment details to see results</p>
+              <p className="text-gray-500">Enter investment details to see results</p>
             </div>
           )}
         </motion.div>
       </div>
-      {/* Detailed Analysis Section - Below Main Content */}
-      <AnimatePresence>
-        {results && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="mt-4 space-y-4"
-          >
-            {/* Detailed Analysis Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {/* Investment Summary */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  💼 Investment Summary
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Monthly SIP</span>
-                    <span className="font-semibold text-purple-600 text-sm">{formatCurrency(results.monthlyInvestment || inputs.monthlyInvestment)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Investment Period</span>
-                    <span className="font-semibold text-sm">
-                      {inputs.timePeriodYears || 0} years {inputs.timePeriodMonths || 0} months
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Expected Return</span>
-                    <span className="font-semibold text-sm">{inputs.annualReturn}% p.a.</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600 text-sm">Wealth Multiplier</span>
-                    <span className="font-semibold text-orange-600 text-sm">
-                      {(parseFloat(results.maturityAmount) / parseFloat(results.totalInvestment)).toFixed(1)}x
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
 
-              {/* Growth Chart */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  📊 Growth Visualization
-                </h4>
-                {yearlyBreakdown.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={yearlyBreakdown}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis
-                        dataKey="year"
-                        label={{ value: 'Year', position: 'insideBottom', offset: -5 }}
-                      />
-                      <YAxis
-                        tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`}
-                        label={{ value: 'Amount (₹)', angle: -90, position: 'insideLeft' }}
-                      />
-                      <Tooltip
-                        formatter={(value, name) => [formatCurrency(value), name]}
-                        labelFormatter={(label) => `Year ${label}`}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="yearEndValue"
-                        stroke="#6366F1"
-                        strokeWidth={3}
-                        name="Portfolio Value"
-                        dot={{ fill: '#6366F1', strokeWidth: 2, r: 4 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="totalInvested"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Total Invested"
-                        dot={{ fill: '#10B981', strokeWidth: 2, r: 3 }}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-2">📈</div>
-                    <p className="text-gray-500 text-sm">Enter investment details to see growth chart</p>
-                  </div>
-                )}
-              </motion.div>
+      {/* Investment Summary */}
+      {results && (
+        <motion.div
+          className="bg-white rounded-xl shadow-lg p-6"
+          {...fadeInUp}
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Investment Summary</h3>
 
-              {/* Actions & Export */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  🎯 Quick Actions
-                </h4>
-                <div className="space-y-4">
-                  <PDFExport
-                    data={[{
-                      calculator: 'SIP Calculator',
-                      timestamp: new Date().toISOString(),
-                      inputs: {
-                        'Monthly Investment': `₹${inputs.monthlyInvestment || results.monthlyInvestment}`,
-                        'Lump Sum Amount': inputs.lumpSumAmount ? `₹${inputs.lumpSumAmount}` : 'None',
-                        'Investment Period': `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
-                        'Expected Annual Return': `${inputs.annualReturn}%`,
-                        'Step Up': inputs.stepUpType === 'percentage' ? `${inputs.stepUpPercentage}%` : `₹${inputs.stepUpPercentage}`
-                      },
-                      results: {
-                        'Maturity Amount': formatCurrency(results.maturityAmount),
-                        'Total Investment': formatCurrency(results.totalInvestment),
-                        'Wealth Gained': formatCurrency(results.wealthGained)
-                      }
-                    }]}
-                    title="SIP Calculator Results"
-                    calculatorType="SIP"
-                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
-                    style={{ backgroundColor: '#EF4444' }}
-                    buttonContent={
-                      <>
-                        <span className="text-lg mr-2">📄</span>
-                        <span>Export PDF</span>
-                      </>
-                    }
-                  />
-
-                  <div className="text-center pt-2">
-                    <p className="text-sm text-gray-500">
-                      💡 All calculations are approximate and for reference only
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+          <div className="grid md:grid-cols-4 gap-4 text-center">
+            <div>
+              <p className="text-sm text-gray-600">Monthly SIP</p>
+              <p className="text-xl font-bold text-blue-600">
+                {formatCurrency(results.monthlyInvestment)}
+              </p>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+            <div>
+              <p className="text-sm text-gray-600">Total Investment</p>
+              <p className="text-xl font-bold text-green-600">
+                {formatCurrency(results.totalInvestment)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Total Returns</p>
+              <p className="text-xl font-bold text-purple-600">
+                {formatCurrency(results.totalReturns)}
+              </p>
+            </div>
+            <div>
+              <p className="text-sm text-gray-600">Wealth Gained</p>
+              <p className="text-xl font-bold text-orange-600">
+                {results.totalReturns > 0 ? '+' : ''}{((results.totalReturns / results.totalInvestment) * 100).toFixed(1)}%
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Growth Visualization */}
+      {yearlyBreakdown.length > 0 && (
+        <motion.div
+          className="bg-white rounded-xl shadow-lg p-6"
+          {...fadeInUp}
+        >
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Growth Visualization</h3>
+
+          <div className="h-80">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={yearlyBreakdown}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="year" />
+                <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
+                <Tooltip
+                  formatter={(value, name) => [formatCurrency(value), name]}
+                  labelFormatter={(label) => `Year ${label}`}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="investment"
+                  stroke="#3B82F6"
+                  strokeWidth={2}
+                  name="Total Investment"
+                />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#10B981"
+                  strokeWidth={2}
+                  name="Portfolio Value"
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
+      )}
+
+      {/* PDF Export */}
+      {results && (
+        <PDFExport
+          calculatorName="SIP Calculator"
+          inputs={inputs}
+          results={results}
+          yearlyBreakdown={yearlyBreakdown}
+        />
+      )}
+
+      {/* PWA Install Button */}
+      {deferredPrompt && (
+        <motion.button
+          onClick={handleInstallClick}
+          className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg"
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          📱 Install App
+        </motion.button>
+      )}
+    </div>
   )
 }
