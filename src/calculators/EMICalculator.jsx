@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
@@ -135,39 +135,39 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
   return (
     <motion.div
-      className="space-y-8"
+      className="max-w-7xl mx-auto"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      {/* Input Section */}
-      <motion.div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-8"
-        variants={{
-          hidden: { opacity: 0 },
-          show: {
-            opacity: 1,
-            transition: {
-              staggerChildren: 0.1
-            }
-          }
-        }}
-        initial="hidden"
-        animate="show"
-      >
-        {/* Loan Details Card */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={{
-            hidden: { opacity: 0, x: -20 },
-            show: { opacity: 1, x: 0 }
-          }}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            💰 Loan Details
-          </h3>
+      {/* Main Content - Single Row Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
 
-          <div className="space-y-6">
+        {/* Left Column - Loan Details */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
+              💰 Loan Details
+            </h3>
+            <motion.button
+              onClick={handleReset}
+              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Reset Calculator"
+            >
+              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </motion.button>
+          </div>
+
+          <div className="space-y-5">
             <CurrencyInput
               label="Loan Amount"
               value={inputs.principal}
@@ -201,53 +201,13 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
               min="1"
               focusColor="#6366F1"
             />
-          </div>
-        </motion.div>
 
-        {/* Action Buttons Card */}
-        <motion.div
-          className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-          variants={{
-            hidden: { opacity: 0, x: 20 },
-            show: { opacity: 1, x: 0 }
-          }}
-        >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            🎯 Actions
-          </h3>
-
-          <div className="space-y-4">
-            {/* Calculate Button */}
-            <motion.button
-              onClick={calculateEMI}
-              className="w-full py-4 px-6 rounded-xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg cursor-pointer"
-              style={{ backgroundColor: '#6366F1' }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              📊 Calculate EMI
-            </motion.button>
-
-            {/* Reset Button */}
-            <motion.button
-              onClick={handleReset}
-              className="w-full py-3 px-6 rounded-xl font-semibold border-2 transition-all duration-300 hover:bg-gray-50 cursor-pointer"
-              style={{
-                borderColor: '#E5E7EB',
-                color: '#6B7280'
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🔄 Reset
-            </motion.button>
-
-            {/* Secondary Actions */}
+            {/* Quick Actions */}
             {results && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4 border-t border-gray-100">
+              <div className="pt-4 border-t border-gray-100 space-y-3">
                 <motion.button
                   onClick={handleAddToComparison}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
                   style={{ backgroundColor: '#10B981' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
@@ -257,8 +217,8 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
                 <motion.button
                   onClick={shareCalculation}
-                  className="py-3 px-4 rounded-xl font-semibold text-white transition-all duration-300 cursor-pointer"
-                  style={{ backgroundColor: '#10B981' }}
+                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
+                  style={{ backgroundColor: '#6366F1' }}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                 >
@@ -268,9 +228,86 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             )}
           </div>
         </motion.div>
-      </motion.div>
 
-      {/* Results Section */}
+        {/* Right Column - Expanded Results */}
+        <motion.div
+          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
+            📊 Results
+          </h3>
+
+          {results ? (
+            <div className="grid grid-cols-2 gap-6">
+              <motion.div
+                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💰</span>
+                  <h4 className="font-semibold text-base text-gray-700">Monthly EMI</h4>
+                </div>
+                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                  {formatCurrency(results.emi)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">🏦</span>
+                  <h4 className="font-semibold text-base text-gray-700">Principal</h4>
+                </div>
+                <p className="text-2xl font-bold text-green-600 leading-tight">
+                  {formatCurrency(results.principal)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">📈</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Interest</h4>
+                </div>
+                <p className="text-2xl font-bold text-orange-600 leading-tight">
+                  {formatCurrency(results.totalInterest)}
+                </p>
+              </motion.div>
+
+              <motion.div
+                className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <div className="flex items-center space-x-3 mb-3">
+                  <span className="text-2xl">💎</span>
+                  <h4 className="font-semibold text-base text-gray-700">Total Amount</h4>
+                </div>
+                <p className="text-2xl font-bold text-purple-600 leading-tight">
+                  {formatCurrency(results.totalAmount)}
+                </p>
+              </motion.div>
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <div className="text-6xl mb-4">📊</div>
+              <p className="text-gray-500 text-lg">Enter loan details to see results</p>
+            </div>
+          )}
+        </motion.div>
+      </div>
+
+      {/* Detailed Charts and Information - Below Main Content */}
       <AnimatePresence>
         {results && (
           <motion.div
@@ -278,96 +315,62 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.5 }}
-            className="space-y-8"
+            className="mt-4 space-y-4"
           >
-            {/* EMI Results Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6 auto-rows-fr">
+
+            {/* Detailed Analysis Section */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+              {/* Detailed Breakdown */}
               <motion.div
-                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
               >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#E0F2FE' }}>
-                    <span className="text-xl">💰</span>
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  💼 Loan Summary
+                </h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Monthly EMI</span>
+                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(results.emi)}</span>
                   </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Monthly EMI</h4>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Total Payments</span>
+                    <span className="font-semibold text-sm">{parseInt(inputs.tenure) * 12} months</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
+                    <span className="text-gray-600 text-sm">Interest Rate</span>
+                    <span className="font-semibold text-sm">{inputs.interestRate}% p.a.</span>
+                  </div>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-gray-600 text-sm">Interest vs Principal</span>
+                    <span className="font-semibold text-orange-600 text-sm">
+                      {((parseFloat(results.totalInterest) / parseFloat(results.principal)) * 100).toFixed(1)}%
+                    </span>
+                  </div>
                 </div>
-                <p className="text-lg sm:text-xl lg:text-2xl xl:text-3xl font-bold break-words overflow-hidden" style={{ color: '#6366F1' }}>
-                  {formatCurrency(results.emi)}
-                </p>
               </motion.div>
 
-              <motion.div
-                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#E0F2FE' }}>
-                    <span className="text-xl">🏦</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Principal</h4>
-                </div>
-                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#10B981' }}>
-                  {formatCurrency(results.principal)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#FEF3C7' }}>
-                    <span className="text-xl">📈</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Interest</h4>
-                </div>
-                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#F59E0B' }}>
-                  {formatCurrency(results.totalInterest)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-white rounded-2xl p-4 sm:p-6 shadow-lg border border-gray-100 min-h-[120px] flex flex-col justify-between"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-2">
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: '#F3E8FF' }}>
-                    <span className="text-xl">💎</span>
-                  </div>
-                  <h4 className="font-semibold" style={{ color: '#6B7280' }}>Total Amount</h4>
-                </div>
-                <p className="text-lg sm:text-xl lg:text-2xl xl:text-2xl font-bold break-words overflow-hidden" style={{ color: '#8B5CF6' }}>
-                  {formatCurrency(results.totalAmount)}
-                </p>
-              </motion.div>
-            </div>
-
-            {/* Charts Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Pie Chart */}
               <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  💼 Loan Breakdown
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  📊 Amount Breakdown
                 </h4>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={200}>
                   <PieChart>
                     <Pie
                       data={pieChartData}
                       cx="50%"
                       cy="50%"
-                      outerRadius={100}
+                      outerRadius={80}
                       dataKey="value"
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                      label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
                     >
                       {pieChartData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
@@ -376,64 +379,64 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
                     <Tooltip formatter={(value) => formatCurrency(value)} />
                   </PieChart>
                 </ResponsiveContainer>
+                <div className="flex justify-center space-x-4 mt-3">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
+                    <span className="text-sm text-gray-600">Principal</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
+                    <span className="text-sm text-gray-600">Interest</span>
+                  </div>
+                </div>
               </motion.div>
 
-              {/* Bar Chart */}
+              {/* Actions & Export */}
               <motion.div
-                className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
+                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h4 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-                  📊 Amount Comparison
+                <h4 className="text-lg font-bold mb-4 text-gray-800">
+                  🎯 Quick Actions
                 </h4>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={barChartData}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#E5E7EB" />
-                    <XAxis dataKey="name" stroke="#6B7280" />
-                    <YAxis stroke="#6B7280" tickFormatter={(value) => formatCurrency(value / 100000) + 'L'} />
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                    <Bar dataKey="amount" fill="#6366F1" radius={[8, 8, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <div className="space-y-4">
+                  <PDFExport
+                    data={[{
+                      calculator: 'EMI Calculator',
+                      timestamp: new Date().toISOString(),
+                      inputs: {
+                        'Loan Amount': formatCurrency(inputs.principal),
+                        'Interest Rate': `${inputs.interestRate}%`,
+                        'Tenure': `${inputs.tenure} years`
+                      },
+                      results: {
+                        'Monthly EMI': formatCurrency(results.emi),
+                        'Total Amount': formatCurrency(results.totalAmount),
+                        'Total Interest': formatCurrency(results.totalInterest)
+                      }
+                    }]}
+                    title="EMI Calculator Results"
+                    calculatorType="EMI"
+                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
+                    style={{ backgroundColor: '#EF4444' }}
+                    buttonContent={
+                      <>
+                        <span className="text-lg mr-2">📄</span>
+                        <span>Export PDF</span>
+                      </>
+                    }
+                  />
+
+                  <div className="text-center pt-2">
+                    <p className="text-sm text-gray-500">
+                      💡 All calculations are approximate and for reference only
+                    </p>
+                  </div>
+                </div>
               </motion.div>
             </div>
-
-            {/* PDF Export */}
-            <motion.div
-              className="flex justify-center"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.4 }}
-            >
-              <PDFExport
-                data={[{
-                  calculator: 'EMI Calculator',
-                  timestamp: new Date().toISOString(),
-                  inputs: {
-                    'Loan Amount': formatCurrency(inputs.principal),
-                    'Interest Rate': `${inputs.interestRate}%`,
-                    'Tenure': `${inputs.tenure} years`
-                  },
-                  results: {
-                    'Monthly EMI': formatCurrency(results.emi),
-                    'Total Amount': formatCurrency(results.totalAmount),
-                    'Total Interest': formatCurrency(results.totalInterest)
-                  }
-                }]}
-                title="EMI Calculator Results"
-                calculatorType="EMI"
-                className="px-8 py-4 rounded-2xl font-bold text-white transition-all duration-300 transform hover:scale-105 shadow-lg"
-                style={{ backgroundColor: '#EF4444' }}
-                buttonContent={
-                  <>
-                    <span className="text-xl mr-2">📄</span>
-                    <span>Export Colorful PDF</span>
-                  </>
-                }
-              />
-            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
