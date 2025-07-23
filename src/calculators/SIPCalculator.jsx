@@ -23,8 +23,7 @@ export default function SIPCalculator({ onAddToComparison }) {
     timePeriodYears: '10',
     timePeriodMonths: '0',
     stepUpPercentage: '0',
-    stepUpType: 'percentage',
-    calculationType: 'monthly'
+    stepUpType: 'percentage'
   }
 
   // State management with URL synchronization
@@ -37,83 +36,43 @@ export default function SIPCalculator({ onAddToComparison }) {
   } = useCalculatorState('sip_', defaultInputs)
 
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
+  const [lastUpdatedField, setLastUpdatedField] = useState(null)
 
-  // Handle input changes for SIP calculator with real-time calculation
-  const handleSIPInputChange = (field, value) => {
-    // Always update the field value first
+  // Handle input changes with field tracking
+  const handleFieldChange = (field, value) => {
     handleInputChange(field, value)
-
-    // Set calculation type based on which field is being updated
-    if (field === 'monthlyInvestment') {
-      handleInputChange('calculationType', 'monthly')
-      // Trigger calculation of maturity amount after a short delay
-      if (value && parseFloat(value) > 0) {
-        setTimeout(() => {
-          calculateAndUpdateOtherField('monthly', value)
-        }, 200)
-      }
-    } else if (field === 'maturityAmount') {
-      handleInputChange('calculationType', 'maturity')
-      // Trigger calculation of monthly investment after a short delay
-      if (value && parseFloat(value) > 0) {
-        setTimeout(() => {
-          calculateAndUpdateOtherField('maturity', value)
-        }, 200)
-      }
-    }
-    // Note: Removed immediate recalculation for parameter changes to prevent interference
-    // These will be handled by the useEffect below
+    setLastUpdatedField(field)
   }
 
-  // Helper function to calculate and update the other field
-  const calculateAndUpdateOtherField = (calculationType, value) => {
-    const inputValue = parseFloat(value) || 0
-    if (inputValue <= 0) return
-
-    const annualRate = parseFloat(inputs.annualReturn) || 0
-    const years = parseInt(inputs.timePeriodYears) || 0
-    const months = parseInt(inputs.timePeriodMonths) || 0
-    const stepUpValue = parseFloat(inputs.stepUpPercentage) || 0
-    const stepUpType = inputs.stepUpType || 'percentage'
-    const totalMonths = (years * 12) + months
-
-    if (totalMonths <= 0 || annualRate <= 0) return
-
+  // Calculate SIP maturity amount from monthly investment
+  const calculateMaturityFromMonthly = (monthlyInv, annualRate, totalMonths, stepUpValue, stepUpType) => {
     const monthlyRate = annualRate / 100 / 12
 
-    if (calculationType === 'monthly') {
-      // Calculate maturity amount from monthly investment
-      let calculatedMaturityAmount
-      if (stepUpValue > 0) {
-        calculatedMaturityAmount = calculateStepUpSIPMaturity(
-          inputValue, monthlyRate, totalMonths, stepUpValue, stepUpType
-        )
+    if (stepUpValue > 0) {
+      return calculateStepUpSIPMaturity(monthlyInv, monthlyRate, totalMonths, stepUpValue, stepUpType)
+    } else {
+      if (monthlyRate > 0) {
+        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+        return monthlyInv * futureValueFactor
       } else {
-        if (monthlyRate > 0) {
-          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-          calculatedMaturityAmount = inputValue * futureValueFactor
-        } else {
-          calculatedMaturityAmount = inputValue * totalMonths
-        }
+        return monthlyInv * totalMonths
       }
-      handleInputChange('maturityAmount', Math.round(calculatedMaturityAmount).toString())
+    }
+  }
 
-    } else if (calculationType === 'maturity') {
-      // Calculate monthly investment from maturity amount
-      let calculatedMonthlyInvestment
-      if (stepUpValue > 0) {
-        calculatedMonthlyInvestment = calculateRequiredMonthlyForStepUp(
-          inputValue, monthlyRate, totalMonths, stepUpValue, stepUpType
-        )
+  // Calculate required monthly investment for target maturity
+  const calculateMonthlyFromMaturity = (maturityAmt, annualRate, totalMonths, stepUpValue, stepUpType) => {
+    const monthlyRate = annualRate / 100 / 12
+
+    if (stepUpValue > 0) {
+      return calculateRequiredMonthlyForStepUp(maturityAmt, monthlyRate, totalMonths, stepUpValue, stepUpType)
+    } else {
+      if (monthlyRate > 0) {
+        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+        return maturityAmt / futureValueFactor
       } else {
-        if (monthlyRate > 0) {
-          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-          calculatedMonthlyInvestment = inputValue / futureValueFactor
-        } else {
-          calculatedMonthlyInvestment = inputValue / totalMonths
-        }
+        return maturityAmt / totalMonths
       }
-      handleInputChange('monthlyInvestment', Math.round(calculatedMonthlyInvestment).toString())
     }
   }
 
@@ -179,7 +138,7 @@ export default function SIPCalculator({ onAddToComparison }) {
     return (low + high) / 2
   }
 
-  // SIP calculation function with real-time updates
+  // Main SIP calculation function
   const calculateSIP = useCallback(() => {
     const monthlyInv = parseFloat(inputs.monthlyInvestment) || 0
     const maturityAmt = parseFloat(inputs.maturityAmount) || 0
@@ -193,7 +152,7 @@ export default function SIPCalculator({ onAddToComparison }) {
     // Calculate total months
     const totalMonths = (years * 12) + months
 
-    if (totalMonths <= 0 || annualRate <= 0) {
+    if (totalMonths <= 0 || annualRate <= 0 || (monthlyInv <= 0 && maturityAmt <= 0)) {
       setResults(null)
       setYearlyBreakdown([])
       return
@@ -203,41 +162,28 @@ export default function SIPCalculator({ onAddToComparison }) {
     let calculatedMonthlyInvestment = monthlyInv
     let calculatedMaturityAmount = maturityAmt
 
-    // Real-time calculation based on which field was last updated
-    if (inputs.calculationType === 'monthly' && monthlyInv > 0) {
-      // Calculate maturity amount from monthly investment
-      if (stepUpValue > 0) {
-        calculatedMaturityAmount = calculateStepUpSIPMaturity(
-          monthlyInv, monthlyRate, totalMonths, stepUpValue, stepUpType
+    // Determine which value to calculate based on what user provided
+    if (monthlyInv > 0 && maturityAmt <= 0) {
+      // Calculate maturity from monthly investment
+      calculatedMaturityAmount = calculateMaturityFromMonthly(
+        monthlyInv, annualRate, totalMonths, stepUpValue, stepUpType
+      )
+    } else if (maturityAmt > 0 && monthlyInv <= 0) {
+      // Calculate monthly investment from target maturity
+      calculatedMonthlyInvestment = calculateMonthlyFromMaturity(
+        maturityAmt, annualRate, totalMonths, stepUpValue, stepUpType
+      )
+    } else if (monthlyInv > 0 && maturityAmt > 0) {
+      // Both values provided - use the last updated field to determine calculation direction
+      if (lastUpdatedField === 'monthlyInvestment') {
+        calculatedMaturityAmount = calculateMaturityFromMonthly(
+          monthlyInv, annualRate, totalMonths, stepUpValue, stepUpType
         )
-      } else {
-        if (monthlyRate > 0) {
-          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-          calculatedMaturityAmount = monthlyInv * futureValueFactor
-        } else {
-          calculatedMaturityAmount = monthlyInv * totalMonths
-        }
-      }
-
-    } else if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
-      // Calculate required monthly investment for target maturity
-      if (stepUpValue > 0) {
-        calculatedMonthlyInvestment = calculateRequiredMonthlyForStepUp(
-          maturityAmt, monthlyRate, totalMonths, stepUpValue, stepUpType
+      } else if (lastUpdatedField === 'maturityAmount') {
+        calculatedMonthlyInvestment = calculateMonthlyFromMaturity(
+          maturityAmt, annualRate, totalMonths, stepUpValue, stepUpType
         )
-      } else {
-        if (monthlyRate > 0) {
-          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-          calculatedMonthlyInvestment = maturityAmt / futureValueFactor
-        } else {
-          calculatedMonthlyInvestment = maturityAmt / totalMonths
-        }
       }
-
-    } else if (monthlyInv === 0 && maturityAmt === 0) {
-      setResults(null)
-      setYearlyBreakdown([])
-      return
     }
 
     // Add lump sum if provided
@@ -337,53 +283,46 @@ export default function SIPCalculator({ onAddToComparison }) {
     })
 
     setYearlyBreakdown(breakdown)
-  }, [inputs, setResults])
+  }, [inputs, setResults, lastUpdatedField])
 
-  // Handle updates to other parameters (rate, time, step-up) to recalculate the dependent field
+  // Real-time calculation with bidirectional updates
   useEffect(() => {
     const monthlyInv = parseFloat(inputs.monthlyInvestment) || 0
     const maturityAmt = parseFloat(inputs.maturityAmount) || 0
+    const annualRate = parseFloat(inputs.annualReturn) || 0
+    const years = parseInt(inputs.timePeriodYears) || 0
+    const months = parseInt(inputs.timePeriodMonths) || 0
+    const totalMonths = (years * 12) + months
 
-    // Only recalculate if we have valid inputs and one of the main fields has a value
-    // AND we have all required parameters
-    if ((monthlyInv > 0 || maturityAmt > 0) &&
-        inputs.annualReturn && parseFloat(inputs.annualReturn) > 0 &&
-        ((inputs.timePeriodYears && parseInt(inputs.timePeriodYears) > 0) ||
-         (inputs.timePeriodMonths && parseInt(inputs.timePeriodMonths) > 0))) {
+    // Only calculate if we have minimum required inputs
+    if (annualRate > 0 && totalMonths > 0 && (monthlyInv > 0 || maturityAmt > 0)) {
+      const stepUpValue = parseFloat(inputs.stepUpPercentage) || 0
+      const stepUpType = inputs.stepUpType || 'percentage'
 
-      const timeoutId = setTimeout(() => {
-        // Only recalculate if we have a clear calculation direction
-        if (inputs.calculationType === 'monthly' && monthlyInv > 0) {
-          calculateAndUpdateOtherField('monthly', monthlyInv.toString())
-        } else if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
-          calculateAndUpdateOtherField('maturity', maturityAmt.toString())
+      // Real-time bidirectional updates
+      if (lastUpdatedField === 'monthlyInvestment' && monthlyInv > 0) {
+        const calculatedMaturity = calculateMaturityFromMonthly(
+          monthlyInv, annualRate, totalMonths, stepUpValue, stepUpType
+        )
+        if (Math.abs(calculatedMaturity - maturityAmt) > 1) {
+          handleInputChange('maturityAmount', Math.round(calculatedMaturity).toString())
         }
-      }, 300) // Increased delay to prevent interference
+      } else if (lastUpdatedField === 'maturityAmount' && maturityAmt > 0) {
+        const calculatedMonthly = calculateMonthlyFromMaturity(
+          maturityAmt, annualRate, totalMonths, stepUpValue, stepUpType
+        )
+        if (Math.abs(calculatedMonthly - monthlyInv) > 1) {
+          handleInputChange('monthlyInvestment', Math.round(calculatedMonthly).toString())
+        }
+      }
 
-      return () => clearTimeout(timeoutId)
-    }
-  }, [inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.stepUpType])
-
-  // Trigger calculation when inputs change
-  useEffect(() => {
-    const hasValidInputs = (
-      (inputs.monthlyInvestment && parseFloat(inputs.monthlyInvestment) > 0) ||
-      (inputs.maturityAmount && parseFloat(inputs.maturityAmount) > 0)
-    ) &&
-    inputs.annualReturn &&
-    parseFloat(inputs.annualReturn) > 0 &&
-    (
-      (inputs.timePeriodYears && parseInt(inputs.timePeriodYears) > 0) ||
-      (inputs.timePeriodMonths && parseInt(inputs.timePeriodMonths) > 0)
-    )
-
-    if (hasValidInputs) {
+      // Always trigger main calculation
       calculateSIP()
     } else {
       setResults(null)
       setYearlyBreakdown([])
     }
-  }, [calculateSIP])
+  }, [inputs.monthlyInvestment, inputs.maturityAmount, inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.stepUpType, lastUpdatedField])
 
   // Add to comparison
   const handleAddToComparison = () => {
@@ -424,7 +363,7 @@ export default function SIPCalculator({ onAddToComparison }) {
           <CurrencyInput
             label="Monthly Investment"
             value={inputs.monthlyInvestment}
-            onChange={(value) => handleSIPInputChange('monthlyInvestment', value)}
+            onChange={(value) => handleFieldChange('monthlyInvestment', value)}
             fieldName="monthlyInvestment"
             icon="💰"
             placeholder="Enter monthly investment amount"
@@ -436,7 +375,7 @@ export default function SIPCalculator({ onAddToComparison }) {
           <CurrencyInput
             label="Target Maturity Amount"
             value={inputs.maturityAmount}
-            onChange={(value) => handleSIPInputChange('maturityAmount', value)}
+            onChange={(value) => handleFieldChange('maturityAmount', value)}
             fieldName="maturityAmount"
             icon="🎯"
             placeholder="Enter target maturity amount"

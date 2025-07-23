@@ -6,12 +6,12 @@ import { useCurrency } from '../contexts/CurrencyContext'
 import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
-import NumberInput from '../components/NumberInput'
+import UnifiedNumberInput from '../components/UnifiedNumberInput'
 import PercentageInput from '../components/PercentageInput'
 import CalculatorDropdown from '../components/CalculatorDropdown'
 import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientResultCard } from '../components/CalculatorLayout'
 
-export default function NPSCalculator({ onAddToComparison, categoryColor = 'purple' }) {
+export default function NPSCalculator({ onAddToComparison }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
@@ -67,13 +67,13 @@ export default function NPSCalculator({ onAddToComparison, categoryColor = 'purp
     const totalInvestment = monthlyContribution * totalMonths
 
     setResults({
-      corpus,
-      totalInvestment,
-      lumpSum,
-      annuityAmount,
-      monthlyPension,
-      investmentPeriod,
-      totalMonths
+      corpus: Math.round(corpus),
+      annuityAmount: Math.round(annuityAmount),
+      lumpSum: Math.round(lumpSum),
+      monthlyPension: Math.round(monthlyPension),
+      totalInvestment: Math.round(totalInvestment),
+      totalReturns: Math.round(corpus - totalInvestment),
+      investmentPeriod
     })
   }, [inputs, setResults])
 
@@ -167,7 +167,7 @@ export default function NPSCalculator({ onAddToComparison, categoryColor = 'purp
             focusColor="#8B5CF6"
           />
 
-          <NumberInput
+          <UnifiedNumberInput
             label="Current Age"
             value={inputs.currentAge}
             onChange={(value) => handleInputChange('currentAge', value)}
