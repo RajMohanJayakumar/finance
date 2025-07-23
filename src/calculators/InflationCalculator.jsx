@@ -221,7 +221,6 @@ function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
               min={1}
               max={50}
               step="1"
-              min="1"
             />
 
             <div className="bg-red-50 p-4 rounded-xl border border-red-200">
