@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
-import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
+import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 import CalculatorDropdown from '../components/CalculatorDropdown'
@@ -14,7 +14,7 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
   
-  const initialInputs = {
+  const defaultInputs = {
     annualIncome: '',
     country: 'india',
     taxRegime: 'old',
@@ -23,16 +23,14 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
     pfFrequency: 'monthly'
   }
 
-  // Use URL state management for inputs
-  const [inputs, setInputs] = useURLStateObject('tax_')
-  const [results, setResults] = useState(null)
-
-  // Initialize inputs with defaults if empty
-  useEffect(() => {
-    if (Object.keys(inputs).length === 0) {
-      setInputs(prev => ({ ...initialInputs, ...prev }))
-    }
-  }, [])
+  // Use calculator state hook for consistent state management
+  const {
+    inputs,
+    results,
+    setResults,
+    handleInputChange,
+    resetCalculator
+  } = useCalculatorState('tax_', defaultInputs)
 
   const taxSlabs = {
     india: {
@@ -53,16 +51,8 @@ function TaxCalculator({ onAddToComparison, categoryColor = 'red' }) {
     }
   }
 
-  const handleInputChange = (field, value) => {
-    const newInputs = { ...inputs, [field]: value }
-    setInputs(newInputs)
-  }
-
   const handleReset = () => {
-    setInputs(initialInputs)
-    setResults(null)
-    // Clear URL parameters
-    window.history.replaceState({}, document.title, window.location.pathname)
+    resetCalculator()
   }
 
 

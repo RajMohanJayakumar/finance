@@ -404,9 +404,44 @@ function GratuityCalculator({ onAddToComparison, categoryColor = 'red' }) {
                 <h4 className="text-lg font-bold mb-4 text-gray-800">
                   📊 Calculation Breakdown
                 </h4>
-                <div className="text-center py-8">
-                  <div className="text-4xl mb-2">📈</div>
-                  <p className="text-gray-500 text-sm">Gratuity calculation details</p>
+                <div className="space-y-4">
+                  <div className="bg-blue-50 p-4 rounded-lg">
+                    <h5 className="font-semibold text-blue-800 mb-2">Formula Used:</h5>
+                    <p className="text-sm text-blue-700">
+                      Gratuity = (Last Salary × 15 × Years of Service) ÷ 26
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600">Last Salary</p>
+                      <p className="font-semibold">{formatCurrency(results?.lastSalary)}</p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600">Service Period</p>
+                      <p className="font-semibold">{results?.servicePeriod}</p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600">Eligibility</p>
+                      <p className="font-semibold text-green-600">{results?.eligibility}</p>
+                    </div>
+
+                    <div className="bg-gray-50 p-3 rounded-lg">
+                      <p className="text-sm text-gray-600">Organization Type</p>
+                      <p className="font-semibold">{inputs.organizationType === 'covered' ? 'Covered under Gratuity Act' : 'Not Covered'}</p>
+                    </div>
+                  </div>
+
+                  <div className="bg-yellow-50 p-4 rounded-lg">
+                    <h5 className="font-semibold text-yellow-800 mb-2">Note:</h5>
+                    <p className="text-sm text-yellow-700">
+                      • Minimum 5 years of continuous service required for gratuity eligibility<br/>
+                      • Maximum gratuity amount is capped as per current regulations<br/>
+                      • Calculation may vary based on organization type and applicable laws
+                    </p>
+                  </div>
                 </div>
               </motion.div>
 

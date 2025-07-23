@@ -22,6 +22,7 @@ import InflationCalculator from './calculators/InflationCalculator'
 
 // Components
 import Header from './components/Header'
+import ToggleDesignDemo from './components/ToggleDesignDemo'
 import ComparisonPanel from './components/ComparisonPanel'
 import PDFExport from './components/PDFExport'
 import FloatingComparisonButton from './components/FloatingComparisonButton'
@@ -89,6 +90,14 @@ const calculatorData = {
       { id: 'simple-interest', name: 'Simple Interest', icon: '📊', component: SimpleInterestCalculator, description: 'Calculate simple interest' },
       { id: 'inflation', name: 'Inflation Calculator', icon: '📈', component: InflationCalculator, description: 'Calculate inflation impact over time' }
     ]
+  },
+  demo: {
+    title: "Design Demo",
+    icon: "🎨",
+    color: "indigo",
+    calculators: [
+      { id: 'toggle-demo', name: 'Toggle Design Demo', icon: '🎨', component: ToggleDesignDemo, description: 'Showcase different toggle design variants' }
+    ]
   }
 }
 
@@ -134,7 +143,8 @@ export default function App() {
         'gratuity': { mainTab: 'retirement', subTab: 'gratuity' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
         'simple-interest': { mainTab: 'general', subTab: 'simple-interest' },
-        'inflation': { mainTab: 'general', subTab: 'inflation' }
+        'inflation': { mainTab: 'general', subTab: 'inflation' },
+        'toggle-demo': { mainTab: 'demo', subTab: 'toggle-demo' }
       }
 
       if (calculatorNameMap[calculatorParam]) {

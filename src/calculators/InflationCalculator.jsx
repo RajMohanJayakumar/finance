@@ -5,6 +5,8 @@ import { useCurrency } from '../contexts/CurrencyContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
+import PercentageInput from '../components/PercentageInput'
+import NumberInput from '../components/NumberInput'
 
 function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
   const { addToComparison } = useComparison()
@@ -201,22 +203,23 @@ function InflationCalculator({ onAddToComparison, categoryColor = 'red' }) {
               focusColor="#EF4444"
             />
 
-            <FloatingLabelInput
-              label="Expected Inflation Rate (%)"
+            <PercentageInput
+              label="Expected Inflation Rate"
               value={inputs.inflationRate}
               onChange={(value) => handleInputChange('inflationRate', value)}
               icon="📊"
               placeholder="Enter inflation rate"
-              step="0.1"
-              min="0"
             />
 
-            <FloatingLabelInput
-              label="Time Period (Years)"
+            <NumberInput
+              label="Time Period"
               value={inputs.timePeriod}
               onChange={(value) => handleInputChange('timePeriod', value)}
               icon="📅"
               placeholder="Enter time period"
+              suffix="years"
+              min={1}
+              max={50}
               step="1"
               min="1"
             />

@@ -1,0 +1,22 @@
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://finclamp.com/sitemap.xml
+
+# Allow all calculators
+Allow: /calculator/*
+Allow: /loans/*
+Allow: /investments/*
+Allow: /savings/*
+Allow: /tax/*
+
+# Important files for ad networks
+Allow: /ads.txt
+
+# Disallow admin or private areas (if any)
+# Disallow: /admin/
+# Disallow: /private/
+
+# Crawl delay (optional)
+# Crawl-delay: 1

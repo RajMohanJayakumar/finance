@@ -24,7 +24,7 @@ function SimpleInterestCalculator({ onAddToComparison, categoryColor = 'yellow' 
   // Initialize inputs with defaults if empty
   useEffect(() => {
     if (Object.keys(inputs).length === 0) {
-      setInputs(prev => ({ ...initialInputs, ...prev }))
+      setInputs(initialInputs)
     }
   }, [])
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
@@ -50,26 +51,28 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
     if (annualDeposit > 0 && timePeriod > 0 && annualRate > 0) {
       // PPF calculation with compound interest
       const rate = annualRate / 100
-      let maturityAmount = 0
       let totalInvestment = annualDeposit * timePeriod
       let breakdown = []
+      let cumulativeBalance = 0
 
-      // Calculate year by year
+      // Calculate year by year with proper compounding
       for (let year = 1; year <= timePeriod; year++) {
-        // Each year's deposit earns interest for remaining years
-        const yearsRemaining = timePeriod - year + 1
-        const yearContribution = annualDeposit * Math.pow(1 + rate, yearsRemaining - 1)
-        maturityAmount += yearContribution
+        // Add this year's deposit
+        cumulativeBalance += annualDeposit
+
+        // Apply interest on the entire balance
+        cumulativeBalance = cumulativeBalance * (1 + rate)
 
         breakdown.push({
           year: year,
           deposit: annualDeposit,
           totalDeposited: annualDeposit * year,
-          interestEarned: Math.round(maturityAmount - (annualDeposit * year)),
-          balance: Math.round(maturityAmount)
+          interestEarned: Math.round(cumulativeBalance - (annualDeposit * year)),
+          balance: Math.round(cumulativeBalance)
         })
       }
 
+      const maturityAmount = cumulativeBalance
       const totalInterest = maturityAmount - totalInvestment
 
       setResults({
@@ -80,6 +83,9 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
       })
 
       setYearlyBreakdown(breakdown)
+    } else {
+      setResults(null)
+      setYearlyBreakdown([])
     }
   }
 
@@ -277,63 +283,87 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
             </h3>
 
             {results ? (
-              <div className="grid grid-cols-2 gap-6">
-                <motion.div
-                  className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 border border-purple-100"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-2xl">💰</span>
-                    <h4 className="font-semibold text-base text-gray-700">Maturity Amount</h4>
-                  </div>
-                  <p className="text-2xl font-bold text-purple-600 leading-tight">
-                    {formatCurrency(results.maturityAmount)}
-                  </p>
-                </motion.div>
+              <>
+                {/* Main Result */}
+                <div className="mb-8">
+                  <motion.div
+                    className="bg-gradient-to-r from-purple-500 to-indigo-600 p-6 rounded-lg text-white text-center"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center justify-center mb-2">
+                      <span className="text-2xl mr-2">💰</span>
+                      <p className="text-lg font-medium opacity-90">Maturity Amount</p>
+                    </div>
+                    <p className="text-4xl font-bold">
+                      {formatCurrency(results.maturityAmount)}
+                    </p>
+                  </motion.div>
+                </div>
 
-                <motion.div
-                  className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-2xl">🏦</span>
-                    <h4 className="font-semibold text-base text-gray-700">Total Investment</h4>
-                  </div>
-                  <p className="text-2xl font-bold text-blue-600 leading-tight">
-                    {formatCurrency(results.totalInvestment)}
-                  </p>
-                </motion.div>
+                {/* Key Metrics - 2 per row */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <motion.div
+                    className="p-6 rounded-lg border bg-blue-50 text-blue-600 border-blue-200"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium opacity-80">Total Investment</p>
+                      <span className="text-lg">🏦</span>
+                    </div>
+                    <p className="font-bold text-2xl text-blue-600 mb-2">
+                      {formatCurrency(results.totalInvestment)}
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">Total amount deposited over {inputs.timePeriod} years</p>
+                  </motion.div>
 
-                <motion.div
-                  className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-2xl">📈</span>
-                    <h4 className="font-semibold text-base text-gray-700">Total Interest</h4>
-                  </div>
-                  <p className="text-2xl font-bold text-green-600 leading-tight">
-                    {formatCurrency(results.totalInterest)}
-                  </p>
-                </motion.div>
+                  <motion.div
+                    className="p-6 rounded-lg border bg-green-50 text-green-600 border-green-200"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium opacity-80">Total Interest Earned</p>
+                      <span className="text-lg">📈</span>
+                    </div>
+                    <p className="font-bold text-2xl text-green-600 mb-2">
+                      {formatCurrency(results.totalInterest)}
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">Interest earned through compound growth</p>
+                  </motion.div>
 
-                <motion.div
-                  className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
-                  whileHover={{ scale: 1.02 }}
-                  transition={{ duration: 0.2 }}
-                >
-                  <div className="flex items-center space-x-3 mb-3">
-                    <span className="text-2xl">💎</span>
-                    <h4 className="font-semibold text-base text-gray-700">Annual Deposit</h4>
-                  </div>
-                  <p className="text-2xl font-bold text-orange-600 leading-tight">
-                    {formatCurrency(inputs.annualDeposit)}
-                  </p>
-                </motion.div>
-              </div>
+                  <motion.div
+                    className="p-6 rounded-lg border bg-orange-50 text-orange-600 border-orange-200"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium opacity-80">Annual Deposit</p>
+                      <span className="text-lg">💎</span>
+                    </div>
+                    <p className="font-bold text-2xl text-orange-600 mb-2">
+                      {formatCurrency(inputs.annualDeposit)}
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">Fixed amount deposited every year</p>
+                  </motion.div>
+
+                  <motion.div
+                    className="p-6 rounded-lg border bg-purple-50 text-purple-600 border-purple-200"
+                    whileHover={{ scale: 1.02 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm font-medium opacity-80">Growth Multiplier</p>
+                      <span className="text-lg">🚀</span>
+                    </div>
+                    <p className="font-bold text-2xl text-purple-600 mb-2">
+                      {(parseFloat(results.maturityAmount) / parseFloat(results.totalInvestment)).toFixed(1)}x
+                    </p>
+                    <p className="text-xs text-gray-500 leading-relaxed">How much your money will grow</p>
+                  </motion.div>
+                </div>
+              </>
             ) : (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📊</div>
@@ -387,21 +417,46 @@ function PPFCalculator({ onAddToComparison, categoryColor = 'green' }) {
                   </div>
                 </motion.div>
 
-                {/* Chart Placeholder */}
-                <motion.div
-                  className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                >
-                  <h4 className="text-lg font-bold mb-4 text-gray-800">
-                    📊 Growth Visualization
-                  </h4>
-                  <div className="text-center py-8">
-                    <div className="text-4xl mb-2">📈</div>
-                    <p className="text-gray-500 text-sm">PPF growth chart</p>
-                  </div>
-                </motion.div>
+                {/* Growth Chart */}
+                {yearlyBreakdown.length > 0 && (
+                  <motion.div
+                    className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                  >
+                    <h4 className="text-lg font-bold mb-4 text-gray-800">
+                      📊 PPF Growth Visualization
+                    </h4>
+                    <div className="h-80">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={yearlyBreakdown}>
+                          <CartesianGrid strokeDasharray="3 3" />
+                          <XAxis dataKey="year" />
+                          <YAxis tickFormatter={(value) => `₹${(value/100000).toFixed(0)}L`} />
+                          <Tooltip
+                            formatter={(value, name) => [formatCurrency(value), name]}
+                            labelFormatter={(label) => `Year ${label}`}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="totalDeposited"
+                            stroke="#8B5CF6"
+                            strokeWidth={2}
+                            name="Total Deposited"
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="balance"
+                            stroke="#10B981"
+                            strokeWidth={2}
+                            name="PPF Balance"
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </motion.div>
+                )}
 
                 {/* Actions & Export */}
                 <motion.div

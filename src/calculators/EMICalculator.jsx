@@ -1,64 +1,115 @@
-
-import React, { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
-import { useURLStateObject, generateShareableURL } from '../hooks/useURLState'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
-
-
+import UnifiedNumberInput from '../components/UnifiedNumberInput'
+import InputWithDropdown from '../components/InputWithDropdown'
+import PercentageInput from '../components/PercentageInput'
+import CalculatorDropdown from '../components/CalculatorDropdown'
+import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientResultCard } from '../components/CalculatorLayout'
 
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
-  const initialInputs = {
-    principal: '',
+  // Default values
+  const defaultInputs = {
+    loanAmount: '',
     interestRate: '',
-    tenure: '',
-    emi: '',
-    calculationType: 'emi' // emi, reverse-emi
+    loanTenure: '',
+    tenureType: 'years'
   }
 
-  // Use URL state management for inputs
-  const [inputs, setInputs] = useURLStateObject('emi_')
+  // State management with URL synchronization
+  const {
+    inputs,
+    results,
+    setResults,
+    handleInputChange,
+    resetCalculator
+  } = useCalculatorState('emi_', defaultInputs)
 
-  // Initialize inputs with defaults if empty
-  useEffect(() => {
-    if (Object.keys(inputs).length === 0) {
-      setInputs(prev => ({ ...initialInputs, ...prev }))
+  // EMI calculation function
+  const calculateEMI = useCallback(() => {
+    const principal = parseFloat(inputs.loanAmount) || 0
+    const annualRate = parseFloat(inputs.interestRate) || 0
+    const tenure = parseFloat(inputs.loanTenure) || 0
+    const tenureType = inputs.tenureType || 'years'
+
+    if (principal <= 0 || annualRate < 0 || tenure <= 0) {
+      setResults(null)
+      return
     }
-  }, [])
 
-  const [results, setResults] = useState(null)
+    // Convert tenure to months if needed
+    const tenureInMonths = tenureType === 'years' ? tenure * 12 : tenure
+    const monthlyRate = annualRate / 100 / 12
 
-  // Removed URL parameter handling since we're using tabs instead of routes
+    let emi, totalAmount, totalInterest
 
-  const handleInputChange = (field, value) => {
-    const newInputs = { ...inputs, [field]: value }
-    setInputs(newInputs)
+    if (annualRate === 0) {
+      // Handle zero interest rate case
+      emi = principal / tenureInMonths
+      totalAmount = principal
+      totalInterest = 0
+    } else {
+      // Calculate EMI using formula: P * r * (1+r)^n / ((1+r)^n - 1)
+      emi = (principal * monthlyRate * Math.pow(1 + monthlyRate, tenureInMonths)) /
+                  (Math.pow(1 + monthlyRate, tenureInMonths) - 1)
+      totalAmount = emi * tenureInMonths
+      totalInterest = totalAmount - principal
+    }
+
+    setResults({
+      emi,
+      totalAmount,
+      totalInterest,
+      principal,
+      tenureInMonths
+    })
+  }, [inputs, setResults])
+
+  // Trigger calculation when inputs change
+  useEffect(() => {
+    calculateEMI()
+  }, [calculateEMI])
+
+  // Share calculation
+  const shareCalculation = () => {
+    const shareableURL = generateCalculatorShareURL('emi', inputs, results)
+
+    const shareData = {
+      title: 'finclamp.com - EMI Calculator Results',
+      text: `EMI Calculation: Loan Amount ${formatCurrency(inputs.loanAmount)}, EMI: ${formatCurrency(results?.emi)}`,
+      url: shareableURL
+    }
+
+    if (navigator.share) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(shareableURL)
+      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
+    }
   }
 
-  const handleReset = () => {
-    setInputs(initialInputs)
-    setResults(null)
-  }
-
+  // Add to comparison
   const handleAddToComparison = () => {
-    if (results) {
+    if (results && addToComparison) {
       const comparisonData = {
         calculator: 'EMI Calculator',
         inputs: {
-          'Loan Amount': formatCurrency(inputs.principal),
-          'Interest Rate': `${inputs.interestRate}%`,
-          'Tenure': `${inputs.tenure} years`
+          loanAmount: inputs.loanAmount,
+          interestRate: inputs.interestRate,
+          loanTenure: `${inputs.loanTenure} ${inputs.tenureType}`,
         },
         results: {
-          'EMI': formatCurrency(results.emi),
-          'Total Amount': formatCurrency(results.totalAmount),
-          'Total Interest': formatCurrency(results.totalInterest)
+          emi: results.emi,
+          totalAmount: results.totalAmount,
+          totalInterest: results.totalInterest
         }
       }
 
@@ -70,376 +121,204 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
     }
   }
 
-  const shareCalculation = () => {
-    const shareableURL = generateShareableURL('emi', inputs, results)
-    const shareData = {
-      title: 'finclamp.com - EMI Calculator Results',
-      text: `EMI Calculation: Loan Amount ${formatCurrency(inputs.principal)}, EMI ${formatCurrency(results?.emi)}`,
-      url: shareableURL
-    }
-
-    if (navigator.share) {
-      navigator.share(shareData)
-    } else {
-      navigator.clipboard.writeText(shareableURL)
-      alert('Shareable link copied to clipboard!')
-    }
-  }
-
-  const calculateEMI = () => {
-    if (inputs.calculationType === 'emi') {
-      // Clean and parse inputs, handling large numbers
-      const principalStr = inputs.principal.toString().replace(/[^\d.]/g, '')
-      const P = parseFloat(principalStr) || 0
-      const r = (parseFloat(inputs.interestRate) || 0) / 100 / 12 // Monthly rate
-      const n = (parseFloat(inputs.tenure) || 0) * 12 // Total months
-
-      // Check for very large numbers that might cause precision issues
-      if (P > Number.MAX_SAFE_INTEGER) {
-        alert('Principal amount is too large. Please enter a smaller value.')
-        return
-      }
-
-      // EMI = P × R × (1+R)^N / [(1+R)^N – 1]
-      const emi = r > 0 ? (P * r * Math.pow(1 + r, n)) / (Math.pow(1 + r, n) - 1) : P / n
-      const totalAmount = emi * n
-      const totalInterest = totalAmount - P
-
-      setResults({
-        emi: Math.round(emi),
-        totalAmount: Math.round(totalAmount),
-        totalInterest: Math.round(totalInterest),
-        principal: Math.round(P)
-      })
-    }
-  }
-
-  // Prepare chart data
-  const pieChartData = results ? [
-    { name: 'Principal', value: results.principal, color: '#6366F1' },
-    { name: 'Interest', value: results.totalInterest, color: '#10B981' }
+  // Pie chart data - safely handle null results
+  const pieData = results ? [
+    { name: 'Principal', value: results.principal, color: '#3B82F6' },
+    { name: 'Interest', value: results.totalInterest, color: '#EF4444' }
   ] : []
-
-  const barChartData = results ? [
-    { name: 'Principal', amount: results.principal },
-    { name: 'Interest', amount: results.totalInterest },
-    { name: 'Total', amount: results.totalAmount }
-  ] : []
-
-  // Auto-calculate when inputs change
-  useEffect(() => {
-    if (inputs.principal && inputs.interestRate && inputs.tenure) {
-      calculateEMI()
-    }
-  }, [inputs.principal, inputs.interestRate, inputs.tenure, inputs.calculationType])
 
   return (
-    <motion.div
-      className="max-w-7xl mx-auto"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
+    <CalculatorLayout
+      title="EMI Calculator"
+      description="Calculate your loan EMI and repayment schedule"
+      icon="🏠"
     >
-      {/* Main Content - Single Row Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-full">
+      {/* Input Section */}
+      <InputSection title="Loan Details" icon="💰" onReset={resetCalculator}>
+        <CurrencyInput
+          label="Loan Amount"
+          value={inputs.loanAmount}
+          onChange={(value) => handleInputChange('loanAmount', value)}
+          fieldName="loanAmount"
+          icon="💰"
+          placeholder="Enter loan amount"
+          min="0"
+          focusColor="#3B82F6"
+        />
 
-        {/* Left Column - Loan Details */}
+        <PercentageInput
+          label="Interest Rate"
+          value={inputs.interestRate}
+          onChange={(value) => handleInputChange('interestRate', value)}
+          icon="📈"
+          placeholder="Enter interest rate"
+        />
+
+        <InputWithDropdown
+          label="Loan Tenure"
+          icon="📅"
+          inputValue={inputs.loanTenure}
+          onInputChange={(value) => handleInputChange('loanTenure', value)}
+          dropdownValue={inputs.tenureType}
+          onDropdownChange={(value) => handleInputChange('tenureType', value)}
+          inputProps={{
+            placeholder: "Enter tenure",
+            min: 1,
+            max: 50,
+            step: 1
+          }}
+          dropdownProps={{
+            customConfig: {
+              label: "Tenure Type",
+              icon: "⏰",
+              options: [
+                { value: 'years', label: 'Years', icon: '📅' },
+                { value: 'months', label: 'Months', icon: '📆' }
+              ]
+            },
+            category: "loans",
+            placeholder: "Select tenure type"
+          }}
+        />
+      </InputSection>
+
+      {/* Results Section */}
+      <ResultsSection
+        title="Results"
+        icon="📊"
+        results={results}
+        onShare={shareCalculation}
+        onAddToComparison={handleAddToComparison}
+        emptyStateMessage="Enter loan details to see EMI calculation"
+      >
+        {/* Main Result */}
+        <div className="mb-8">
+          <GradientResultCard
+            label="Monthly EMI"
+            value={results?.emi}
+            gradient="from-blue-500 to-purple-600"
+            icon="💳"
+          />
+        </div>
+
+        {/* Key Metrics - 2 per row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <ResultCard
+            label="Principal Amount"
+            value={results?.principal}
+            description="Original loan amount borrowed"
+            icon="🏦"
+            color="purple"
+          />
+
+          <ResultCard
+            label="Total Interest"
+            value={results?.totalInterest}
+            description="Total interest paid over loan tenure"
+            icon="📈"
+            color="orange"
+          />
+
+          <ResultCard
+            label="Total Amount Payable"
+            value={results?.totalAmount}
+            description="Principal + Total Interest"
+            icon="💰"
+            color="green"
+          />
+
+          <ResultCard
+            label="Loan Tenure"
+            value={`${inputs.tenureType === 'years' ? inputs.loanTenure + ' years' : inputs.loanTenure + ' months'}`}
+            description="Duration of the loan repayment"
+            icon="⏰"
+            color="blue"
+          />
+        </div>
+      </ResultsSection>
+
+      {/* Loan Breakdown */}
+      {results && (
         <motion.div
-          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
-        >
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-xl font-bold" style={{ color: '#1F2937' }}>
-              💰 Loan Details
-            </h3>
-            <motion.button
-              onClick={handleReset}
-              className="p-2 rounded-lg hover:bg-gray-100 transition-all duration-200 cursor-pointer"
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              title="Reset Calculator"
-            >
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-              </svg>
-            </motion.button>
-          </div>
-
-          <div className="space-y-5">
-            <CurrencyInput
-              label="Loan Amount"
-              value={inputs.principal}
-              onChange={(value) => handleInputChange('principal', value)}
-              fieldName="principal"
-              icon="💰"
-              placeholder="Enter loan amount"
-              min="0"
-              focusColor="#6366F1"
-            />
-
-            <CurrencyInput
-              label="Interest Rate (% per annum)"
-              value={inputs.interestRate}
-              onChange={(value) => handleInputChange('interestRate', value)}
-              fieldName="interestRate"
-              icon="📈"
-              placeholder="Enter interest rate"
-              step="0.1"
-              min="0"
-              focusColor="#6366F1"
-            />
-
-            <CurrencyInput
-              label="Loan Tenure (Years)"
-              value={inputs.tenure}
-              onChange={(value) => handleInputChange('tenure', value)}
-              fieldName="tenure"
-              icon="📅"
-              placeholder="Enter tenure in years"
-              min="1"
-              focusColor="#6366F1"
-            />
-
-            {/* Quick Actions */}
-            {results && (
-              <div className="pt-4 border-t border-gray-100 space-y-3">
-                <motion.button
-                  onClick={handleAddToComparison}
-                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
-                  style={{ backgroundColor: '#10B981' }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  📊 Compare
-                </motion.button>
-
-                <motion.button
-                  onClick={shareCalculation}
-                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
-                  style={{ backgroundColor: '#6366F1' }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  🔗 Share
-                </motion.button>
-              </div>
-            )}
-          </div>
-        </motion.div>
-
-        {/* Right Column - Expanded Results */}
-        <motion.div
-          className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
+          className="bg-white rounded-xl shadow-lg p-6"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ duration: 0.5 }}
         >
-          <h3 className="text-xl font-bold mb-6" style={{ color: '#1F2937' }}>
-            📊 Results
-          </h3>
+          <h3 className="text-lg font-semibold text-gray-800 mb-4">Loan Breakdown</h3>
 
-          {results ? (
-            <div className="grid grid-cols-2 gap-6">
-              <motion.div
-                className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-6 border border-blue-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">💰</span>
-                  <h4 className="font-semibold text-base text-gray-700">Monthly EMI</h4>
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Summary */}
+            <div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Loan Amount:</span>
+                  <span className="font-semibold">{formatCurrency(results.principal)}</span>
                 </div>
-                <p className="text-2xl font-bold text-blue-600 leading-tight">
-                  {formatCurrency(results.emi)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">🏦</span>
-                  <h4 className="font-semibold text-base text-gray-700">Principal</h4>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Interest:</span>
+                  <span className="font-semibold text-red-600">{formatCurrency(results.totalInterest)}</span>
                 </div>
-                <p className="text-2xl font-bold text-green-600 leading-tight">
-                  {formatCurrency(results.principal)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-orange-50 to-amber-50 rounded-xl p-6 border border-orange-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">📈</span>
-                  <h4 className="font-semibold text-base text-gray-700">Total Interest</h4>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Total Amount:</span>
+                  <span className="font-semibold text-green-600">{formatCurrency(results.totalAmount)}</span>
                 </div>
-                <p className="text-2xl font-bold text-orange-600 leading-tight">
-                  {formatCurrency(results.totalInterest)}
-                </p>
-              </motion.div>
-
-              <motion.div
-                className="bg-gradient-to-br from-purple-50 to-violet-50 rounded-xl p-6 border border-purple-100"
-                whileHover={{ scale: 1.02 }}
-                transition={{ duration: 0.2 }}
-              >
-                <div className="flex items-center space-x-3 mb-3">
-                  <span className="text-2xl">💎</span>
-                  <h4 className="font-semibold text-base text-gray-700">Total Amount</h4>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Monthly EMI:</span>
+                  <span className="font-semibold text-blue-600">{formatCurrency(results.emi)}</span>
                 </div>
-                <p className="text-2xl font-bold text-purple-600 leading-tight">
-                  {formatCurrency(results.totalAmount)}
-                </p>
-              </motion.div>
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Loan Tenure:</span>
+                  <span className="font-semibold">{results.tenureInMonths} months</span>
+                </div>
+              </div>
             </div>
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">📊</div>
-              <p className="text-gray-500 text-lg">Enter loan details to see results</p>
+
+            {/* Pie Chart */}
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="value"
+                  >
+                    {pieData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                </PieChart>
+              </ResponsiveContainer>
+
+              {/* Legend */}
+              <div className="flex justify-center gap-4 mt-2">
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
+                  <span className="text-sm">Principal</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
+                  <span className="text-sm">Interest</span>
+                </div>
+              </div>
             </div>
-          )}
+          </div>
         </motion.div>
-      </div>
+      )}
 
-      {/* Detailed Charts and Information - Below Main Content */}
-      <AnimatePresence>
-        {results && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.5 }}
-            className="mt-4 space-y-4"
-          >
-
-            {/* Detailed Analysis Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-              {/* Detailed Breakdown */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  💼 Loan Summary
-                </h4>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Monthly EMI</span>
-                    <span className="font-semibold text-blue-600 text-sm">{formatCurrency(results.emi)}</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Total Payments</span>
-                    <span className="font-semibold text-sm">{parseInt(inputs.tenure) * 12} months</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                    <span className="text-gray-600 text-sm">Interest Rate</span>
-                    <span className="font-semibold text-sm">{inputs.interestRate}% p.a.</span>
-                  </div>
-                  <div className="flex justify-between items-center py-2">
-                    <span className="text-gray-600 text-sm">Interest vs Principal</span>
-                    <span className="font-semibold text-orange-600 text-sm">
-                      {((parseFloat(results.totalInterest) / parseFloat(results.principal)) * 100).toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Pie Chart */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  📊 Amount Breakdown
-                </h4>
-                <ResponsiveContainer width="100%" height={200}>
-                  <PieChart>
-                    <Pie
-                      data={pieChartData}
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      dataKey="value"
-                      label={({ percent }) => `${(percent * 100).toFixed(1)}%`}
-                    >
-                      {pieChartData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip formatter={(value) => formatCurrency(value)} />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex justify-center space-x-4 mt-3">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-green-500"></div>
-                    <span className="text-sm text-gray-600">Principal</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-                    <span className="text-sm text-gray-600">Interest</span>
-                  </div>
-                </div>
-              </motion.div>
-
-              {/* Actions & Export */}
-              <motion.div
-                className="bg-white rounded-xl p-6 shadow-lg border border-gray-100"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-              >
-                <h4 className="text-lg font-bold mb-4 text-gray-800">
-                  🎯 Quick Actions
-                </h4>
-                <div className="space-y-4">
-                  <PDFExport
-                    data={[{
-                      calculator: 'EMI Calculator',
-                      timestamp: new Date().toISOString(),
-                      inputs: {
-                        'Loan Amount': formatCurrency(inputs.principal),
-                        'Interest Rate': `${inputs.interestRate}%`,
-                        'Tenure': `${inputs.tenure} years`
-                      },
-                      results: {
-                        'Monthly EMI': formatCurrency(results.emi),
-                        'Total Amount': formatCurrency(results.totalAmount),
-                        'Total Interest': formatCurrency(results.totalInterest)
-                      }
-                    }]}
-                    title="EMI Calculator Results"
-                    calculatorType="EMI"
-                    className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 transform hover:scale-105 shadow-lg text-sm"
-                    style={{ backgroundColor: '#EF4444' }}
-                    buttonContent={
-                      <>
-                        <span className="text-lg mr-2">📄</span>
-                        <span>Export PDF</span>
-                      </>
-                    }
-                  />
-
-                  <div className="text-center pt-2">
-                    <p className="text-sm text-gray-500">
-                      💡 All calculations are approximate and for reference only
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+      {/* PDF Export */}
+      {results && (
+        <PDFExport
+          calculatorName="EMI Calculator"
+          inputs={inputs}
+          results={results}
+        />
+      )}
+    </CalculatorLayout>
   )
 }

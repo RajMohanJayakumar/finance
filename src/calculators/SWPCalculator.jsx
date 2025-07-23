@@ -107,7 +107,7 @@ export default function SWPCalculator({ onAddToComparison, categoryColor = 'purp
     if (inputs.initialInvestment && inputs.monthlyWithdrawal && inputs.annualReturn && inputs.withdrawalPeriodYears) {
       calculateSWP()
     }
-  }, [calculateSWP])
+  }, [inputs.initialInvestment, inputs.monthlyWithdrawal, inputs.annualReturn, inputs.withdrawalPeriodYears])
 
   const handleAddToComparison = () => {
     if (results) {

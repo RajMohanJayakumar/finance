@@ -1,13 +1,16 @@
 import { useState, useEffect, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import PDFExport from '../components/PDFExport'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
-import { generateShareableURL } from '../hooks/useURLState'
+import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
 import CurrencyInput from '../components/CurrencyInput'
+import UnifiedNumberInput from '../components/UnifiedNumberInput'
+import PercentageInput from '../components/PercentageInput'
+import StepUpInput from '../components/StepUpInput'
+import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientResultCard } from '../components/CalculatorLayout'
 
-export default function SIPCalculator({ onAddToComparison, categoryColor = 'purple' }) {
+export default function SIPCalculator({ onAddToComparison }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
 
@@ -24,137 +27,167 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     calculationType: 'monthly'
   }
 
-  // State management
-  const [inputs, setInputs] = useState(defaultInputs)
-  const [results, setResults] = useState(null)
+  // State management with URL synchronization
+  const {
+    inputs,
+    results,
+    setResults,
+    handleInputChange,
+    resetCalculator
+  } = useCalculatorState('sip_', defaultInputs)
+
   const [yearlyBreakdown, setYearlyBreakdown] = useState([])
-  const [deferredPrompt, setDeferredPrompt] = useState(null)
 
-  // URL parameter management
-  const updateURL = useCallback((newInputs) => {
-    const url = new URL(window.location)
-    
-    // Preserve calculator parameter
-    const calculatorParam = url.searchParams.get('calculator')
-    
-    // Remove existing sip_ parameters
-    const keysToRemove = []
-    for (const key of url.searchParams.keys()) {
-      if (key.startsWith('sip_')) {
-        keysToRemove.push(key)
+  // Handle input changes for SIP calculator with real-time calculation
+  const handleSIPInputChange = (field, value) => {
+    // Always update the field value first
+    handleInputChange(field, value)
+
+    // Set calculation type based on which field is being updated
+    if (field === 'monthlyInvestment') {
+      handleInputChange('calculationType', 'monthly')
+      // Trigger calculation of maturity amount after a short delay
+      if (value && parseFloat(value) > 0) {
+        setTimeout(() => {
+          calculateAndUpdateOtherField('monthly', value)
+        }, 200)
+      }
+    } else if (field === 'maturityAmount') {
+      handleInputChange('calculationType', 'maturity')
+      // Trigger calculation of monthly investment after a short delay
+      if (value && parseFloat(value) > 0) {
+        setTimeout(() => {
+          calculateAndUpdateOtherField('maturity', value)
+        }, 200)
       }
     }
-    keysToRemove.forEach(key => url.searchParams.delete(key))
-    
-    // Restore calculator parameter
-    if (calculatorParam) {
-      url.searchParams.set('calculator', calculatorParam)
-    }
-    
-    // Add new parameters (only non-empty values)
-    Object.entries(newInputs).forEach(([key, value]) => {
-      if (value && value !== '' && value !== '0') {
-        url.searchParams.set(`sip_${key}`, value)
+    // Note: Removed immediate recalculation for parameter changes to prevent interference
+    // These will be handled by the useEffect below
+  }
+
+  // Helper function to calculate and update the other field
+  const calculateAndUpdateOtherField = (calculationType, value) => {
+    const inputValue = parseFloat(value) || 0
+    if (inputValue <= 0) return
+
+    const annualRate = parseFloat(inputs.annualReturn) || 0
+    const years = parseInt(inputs.timePeriodYears) || 0
+    const months = parseInt(inputs.timePeriodMonths) || 0
+    const stepUpValue = parseFloat(inputs.stepUpPercentage) || 0
+    const stepUpType = inputs.stepUpType || 'percentage'
+    const totalMonths = (years * 12) + months
+
+    if (totalMonths <= 0 || annualRate <= 0) return
+
+    const monthlyRate = annualRate / 100 / 12
+
+    if (calculationType === 'monthly') {
+      // Calculate maturity amount from monthly investment
+      let calculatedMaturityAmount
+      if (stepUpValue > 0) {
+        calculatedMaturityAmount = calculateStepUpSIPMaturity(
+          inputValue, monthlyRate, totalMonths, stepUpValue, stepUpType
+        )
+      } else {
+        if (monthlyRate > 0) {
+          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+          calculatedMaturityAmount = inputValue * futureValueFactor
+        } else {
+          calculatedMaturityAmount = inputValue * totalMonths
+        }
       }
-    })
-    
-    window.history.replaceState({}, '', url.toString())
-  }, [])
+      handleInputChange('maturityAmount', Math.round(calculatedMaturityAmount).toString())
 
-  // Read URL parameters
-  const readURLParams = useCallback(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const params = {}
-    
-    for (const [key, value] of urlParams.entries()) {
-      if (key.startsWith('sip_')) {
-        const cleanKey = key.replace('sip_', '')
-        params[cleanKey] = value
+    } else if (calculationType === 'maturity') {
+      // Calculate monthly investment from maturity amount
+      let calculatedMonthlyInvestment
+      if (stepUpValue > 0) {
+        calculatedMonthlyInvestment = calculateRequiredMonthlyForStepUp(
+          inputValue, monthlyRate, totalMonths, stepUpValue, stepUpType
+        )
+      } else {
+        if (monthlyRate > 0) {
+          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+          calculatedMonthlyInvestment = inputValue / futureValueFactor
+        } else {
+          calculatedMonthlyInvestment = inputValue / totalMonths
+        }
       }
-    }
-    
-    return params
-  }, [])
-
-  // Initialize from URL on mount
-  useEffect(() => {
-    const urlParams = readURLParams()
-    if (Object.keys(urlParams).length > 0) {
-      const initialInputs = { ...defaultInputs, ...urlParams }
-      setInputs(initialInputs)
-    }
-  }, [])
-
-  // Listen for browser navigation
-  useEffect(() => {
-    const handlePopState = () => {
-      const urlParams = readURLParams()
-      if (Object.keys(urlParams).length > 0) {
-        const newInputs = { ...defaultInputs, ...urlParams }
-        setInputs(newInputs)
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [])
-
-  // PWA install prompt
-  useEffect(() => {
-    const handleBeforeInstallPrompt = (e) => {
-      e.preventDefault()
-      setDeferredPrompt(e)
-    }
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt)
-  }, [])
-
-  const handleInstallClick = async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt()
-      await deferredPrompt.userChoice
-      setDeferredPrompt(null)
+      handleInputChange('monthlyInvestment', Math.round(calculatedMonthlyInvestment).toString())
     }
   }
 
-  // Generate shareable URL
-  const getShareableURL = useCallback(() => {
-    return generateShareableURL('sip', inputs, results)
-  }, [inputs, results])
+  // Share calculation
+  const shareCalculation = () => {
+    const shareableURL = generateCalculatorShareURL('sip', inputs, results)
 
-  // Handle input changes with URL updates
-  const handleInputChange = (field, value) => {
-    const newInputs = { ...inputs, [field]: value }
-
-    // Handle calculation type switching
-    if (field === 'monthlyInvestment' && value) {
-      newInputs.maturityAmount = ''
-      newInputs.calculationType = 'monthly'
-    } else if (field === 'maturityAmount' && value) {
-      newInputs.monthlyInvestment = ''
-      newInputs.calculationType = 'maturity'
+    const shareData = {
+      title: 'finclamp.com - SIP Calculator Results',
+      text: `SIP Calculator Results - Monthly Investment: ${formatCurrency(inputs.monthlyInvestment)}, Maturity: ${formatCurrency(results?.maturityAmount)}`,
+      url: shareableURL
     }
 
-    // Handle step-up type switching - clear value when switching types
-    if (field === 'stepUpType') {
-      newInputs.stepUpPercentage = '0'
+    if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+      navigator.share(shareData)
+    } else {
+      navigator.clipboard.writeText(shareableURL)
+      alert('Link copied to clipboard!')
     }
-
-    // Update state and URL
-    setInputs(newInputs)
-    updateURL(newInputs)
   }
 
-  // SIP calculation function
+  // Helper function to calculate step-up SIP maturity amount
+  const calculateStepUpSIPMaturity = (initialMonthly, monthlyRate, totalMonths, stepUpValue, stepUpType) => {
+    let totalAmount = 0
+    let currentMonthlyInv = initialMonthly
+
+    for (let month = 1; month <= totalMonths; month++) {
+      // Add current month's investment with compound growth
+      const monthsToGrow = totalMonths - month + 1
+      totalAmount += currentMonthlyInv * ((1 + monthlyRate) ** monthsToGrow)
+
+      // Increase investment annually (at the end of each 12-month period)
+      if (month % 12 === 0 && month < totalMonths) {
+        if (stepUpType === 'percentage') {
+          currentMonthlyInv = currentMonthlyInv * (1 + stepUpValue / 100)
+        } else {
+          currentMonthlyInv = currentMonthlyInv + stepUpValue
+        }
+      }
+    }
+
+    return totalAmount
+  }
+
+  // Helper function to calculate required monthly investment for step-up SIP
+  const calculateRequiredMonthlyForStepUp = (targetAmount, monthlyRate, totalMonths, stepUpValue, stepUpType) => {
+    // Use binary search to find the required monthly investment
+    let low = 1
+    let high = targetAmount / 12
+    let tolerance = 1
+
+    while (high - low > tolerance) {
+      const mid = (low + high) / 2
+      const calculatedAmount = calculateStepUpSIPMaturity(mid, monthlyRate, totalMonths, stepUpValue, stepUpType)
+
+      if (calculatedAmount < targetAmount) {
+        low = mid
+      } else {
+        high = mid
+      }
+    }
+
+    return (low + high) / 2
+  }
+
+  // SIP calculation function with real-time updates
   const calculateSIP = useCallback(() => {
     const monthlyInv = parseFloat(inputs.monthlyInvestment) || 0
     const maturityAmt = parseFloat(inputs.maturityAmount) || 0
     const lumpSum = parseFloat(inputs.lumpSumAmount) || 0
-    const annualRate = parseFloat(inputs.annualReturn) || 12
+    const annualRate = parseFloat(inputs.annualReturn) || 0
     const years = parseInt(inputs.timePeriodYears) || 0
     const months = parseInt(inputs.timePeriodMonths) || 0
-    const stepUpPercent = parseFloat(inputs.stepUpPercentage) || 0
+    const stepUpValue = parseFloat(inputs.stepUpPercentage) || 0
     const stepUpType = inputs.stepUpType || 'percentage'
 
     // Calculate total months
@@ -170,42 +203,41 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
     let calculatedMonthlyInvestment = monthlyInv
     let calculatedMaturityAmount = maturityAmt
 
-    // Calculate based on type
-    if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
-      // Calculate required monthly investment for target maturity
-      if (stepUpPercent > 0) {
-        // Complex calculation for step-up SIP to reach target
-        calculatedMonthlyInvestment = maturityAmt / (totalMonths * (1 + monthlyRate) ** (totalMonths / 2))
-      } else {
-        // Simple SIP calculation
-        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-        calculatedMonthlyInvestment = maturityAmt / futureValueFactor
-      }
-    } else if (calculatedMonthlyInvestment > 0) {
+    // Real-time calculation based on which field was last updated
+    if (inputs.calculationType === 'monthly' && monthlyInv > 0) {
       // Calculate maturity amount from monthly investment
-      if (stepUpPercent > 0) {
-        // Step-up SIP calculation
-        let totalAmount = 0
-        let currentMonthlyInv = calculatedMonthlyInvestment
-        
-        for (let month = 1; month <= totalMonths; month++) {
-          totalAmount += currentMonthlyInv * ((1 + monthlyRate) ** (totalMonths - month + 1))
-          
-          // Increase investment annually
-          if (month % 12 === 0) {
-            if (stepUpType === 'percentage') {
-              currentMonthlyInv = currentMonthlyInv * (1 + stepUpPercent / 100)
-            } else {
-              currentMonthlyInv = currentMonthlyInv + stepUpPercent
-            }
-          }
-        }
-        calculatedMaturityAmount = totalAmount
+      if (stepUpValue > 0) {
+        calculatedMaturityAmount = calculateStepUpSIPMaturity(
+          monthlyInv, monthlyRate, totalMonths, stepUpValue, stepUpType
+        )
       } else {
-        // Simple SIP calculation
-        const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
-        calculatedMaturityAmount = calculatedMonthlyInvestment * futureValueFactor
+        if (monthlyRate > 0) {
+          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+          calculatedMaturityAmount = monthlyInv * futureValueFactor
+        } else {
+          calculatedMaturityAmount = monthlyInv * totalMonths
+        }
       }
+
+    } else if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
+      // Calculate required monthly investment for target maturity
+      if (stepUpValue > 0) {
+        calculatedMonthlyInvestment = calculateRequiredMonthlyForStepUp(
+          maturityAmt, monthlyRate, totalMonths, stepUpValue, stepUpType
+        )
+      } else {
+        if (monthlyRate > 0) {
+          const futureValueFactor = ((1 + monthlyRate) ** totalMonths - 1) / monthlyRate
+          calculatedMonthlyInvestment = maturityAmt / futureValueFactor
+        } else {
+          calculatedMonthlyInvestment = maturityAmt / totalMonths
+        }
+      }
+
+    } else if (monthlyInv === 0 && maturityAmt === 0) {
+      setResults(null)
+      setYearlyBreakdown([])
+      return
     }
 
     // Add lump sum if provided
@@ -213,120 +245,151 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
       calculatedMaturityAmount += lumpSum * ((1 + monthlyRate) ** totalMonths)
     }
 
-    const totalInvestment = calculatedMonthlyInvestment * totalMonths + lumpSum
+    // Calculate total investment considering step-up
+    let totalInvestment = lumpSum
+    if (stepUpValue > 0) {
+      let currentMonthlyInv = calculatedMonthlyInvestment
+      for (let month = 1; month <= totalMonths; month++) {
+        totalInvestment += currentMonthlyInv
+        if (month % 12 === 0 && month < totalMonths) {
+          if (stepUpType === 'percentage') {
+            currentMonthlyInv = currentMonthlyInv * (1 + stepUpValue / 100)
+          } else {
+            currentMonthlyInv = currentMonthlyInv + stepUpValue
+          }
+        }
+      }
+    } else {
+      totalInvestment += calculatedMonthlyInvestment * totalMonths
+    }
+
     const totalReturns = calculatedMaturityAmount - totalInvestment
     const absoluteReturn = totalReturns
-    const annualizedReturn = totalMonths > 0 ? 
+    const annualizedReturn = totalMonths > 0 ?
       (Math.pow(calculatedMaturityAmount / totalInvestment, 12 / totalMonths) - 1) * 100 : 0
 
-    // Generate yearly breakdown
+    // Generate yearly breakdown for visualization
     const breakdown = []
     let cumulativeInvestment = lumpSum
-    let cumulativeValue = lumpSum
     let currentMonthlyInv = calculatedMonthlyInvestment
 
-    for (let year = 1; year <= years + (months > 0 ? 1 : 0); year++) {
-      const monthsInThisYear = year <= years ? 12 : months
-      if (monthsInThisYear === 0) break
-
+    for (let year = 1; year <= years; year++) {
+      // Calculate yearly investment (considering step-up happens at year end)
       let yearlyInvestment = 0
-      for (let month = 1; month <= monthsInThisYear; month++) {
-        yearlyInvestment += currentMonthlyInv
-        cumulativeValue += currentMonthlyInv
-        cumulativeValue *= (1 + monthlyRate)
+      let tempMonthlyInv = currentMonthlyInv
+
+      for (let month = 1; month <= 12; month++) {
+        yearlyInvestment += tempMonthlyInv
+        // Step-up happens at the end of the year, not during
       }
 
       cumulativeInvestment += yearlyInvestment
 
-      // Step-up at year end
-      if (stepUpPercent > 0 && year < years + (months > 0 ? 1 : 0)) {
-        if (stepUpType === 'percentage') {
-          currentMonthlyInv = currentMonthlyInv * (1 + stepUpPercent / 100)
+      // Calculate value at end of year
+      const monthsFromStart = year * 12
+      let yearEndValue = 0
+
+      // Add lump sum growth
+      if (lumpSum > 0) {
+        yearEndValue += lumpSum * ((1 + monthlyRate) ** monthsFromStart)
+      }
+
+      // Add SIP value with step-up
+      if (stepUpValue > 0) {
+        yearEndValue += calculateStepUpSIPMaturity(
+          calculatedMonthlyInvestment, monthlyRate, monthsFromStart, stepUpValue, stepUpType
+        )
+      } else {
+        if (monthlyRate > 0) {
+          const futureValueFactor = ((1 + monthlyRate) ** monthsFromStart - 1) / monthlyRate
+          yearEndValue += calculatedMonthlyInvestment * futureValueFactor
         } else {
-          currentMonthlyInv = currentMonthlyInv + stepUpPercent
+          yearEndValue += calculatedMonthlyInvestment * monthsFromStart
         }
       }
 
       breakdown.push({
         year,
-        investment: cumulativeInvestment,
-        value: cumulativeValue,
-        returns: cumulativeValue - cumulativeInvestment
+        investment: Math.round(yearlyInvestment),
+        cumulativeInvestment: Math.round(cumulativeInvestment),
+        value: Math.round(yearEndValue),
+        returns: Math.round(yearEndValue - cumulativeInvestment)
       })
+
+      // Update monthly investment for next year if step-up
+      if (stepUpValue > 0) {
+        if (stepUpType === 'percentage') {
+          currentMonthlyInv = currentMonthlyInv * (1 + stepUpValue / 100)
+        } else {
+          currentMonthlyInv = currentMonthlyInv + stepUpValue
+        }
+      }
     }
 
     setResults({
-      monthlyInvestment: calculatedMonthlyInvestment,
-      maturityAmount: calculatedMaturityAmount,
-      totalInvestment,
-      totalReturns,
-      absoluteReturn,
-      annualizedReturn,
-      wealthGained: totalReturns
+      monthlyInvestment: Math.round(calculatedMonthlyInvestment),
+      maturityAmount: Math.round(calculatedMaturityAmount),
+      totalInvestment: Math.round(totalInvestment),
+      totalReturns: Math.round(totalReturns),
+      absoluteReturn: Math.round(absoluteReturn),
+      annualizedReturn: annualizedReturn.toFixed(2),
+      wealthGained: Math.round(totalReturns)
     })
 
     setYearlyBreakdown(breakdown)
-  }, [inputs])
+  }, [inputs, setResults])
+
+  // Handle updates to other parameters (rate, time, step-up) to recalculate the dependent field
+  useEffect(() => {
+    const monthlyInv = parseFloat(inputs.monthlyInvestment) || 0
+    const maturityAmt = parseFloat(inputs.maturityAmount) || 0
+
+    // Only recalculate if we have valid inputs and one of the main fields has a value
+    // AND we have all required parameters
+    if ((monthlyInv > 0 || maturityAmt > 0) &&
+        inputs.annualReturn && parseFloat(inputs.annualReturn) > 0 &&
+        ((inputs.timePeriodYears && parseInt(inputs.timePeriodYears) > 0) ||
+         (inputs.timePeriodMonths && parseInt(inputs.timePeriodMonths) > 0))) {
+
+      const timeoutId = setTimeout(() => {
+        // Only recalculate if we have a clear calculation direction
+        if (inputs.calculationType === 'monthly' && monthlyInv > 0) {
+          calculateAndUpdateOtherField('monthly', monthlyInv.toString())
+        } else if (inputs.calculationType === 'maturity' && maturityAmt > 0) {
+          calculateAndUpdateOtherField('maturity', maturityAmt.toString())
+        }
+      }, 300) // Increased delay to prevent interference
+
+      return () => clearTimeout(timeoutId)
+    }
+  }, [inputs.annualReturn, inputs.timePeriodYears, inputs.timePeriodMonths, inputs.stepUpPercentage, inputs.stepUpType])
 
   // Trigger calculation when inputs change
   useEffect(() => {
-    if ((inputs.monthlyInvestment || inputs.maturityAmount) &&
-        inputs.annualReturn &&
-        (inputs.timePeriodYears || inputs.timePeriodMonths)) {
-      const timeoutId = setTimeout(() => {
-        calculateSIP()
-      }, 100)
-      return () => clearTimeout(timeoutId)
-    }
-  }, [
-    inputs.monthlyInvestment,
-    inputs.maturityAmount,
-    inputs.lumpSumAmount,
-    inputs.annualReturn,
-    inputs.timePeriodYears,
-    inputs.timePeriodMonths,
-    inputs.stepUpPercentage,
-    inputs.stepUpType,
-    inputs.calculationType,
-    calculateSIP
-  ])
+    const hasValidInputs = (
+      (inputs.monthlyInvestment && parseFloat(inputs.monthlyInvestment) > 0) ||
+      (inputs.maturityAmount && parseFloat(inputs.maturityAmount) > 0)
+    ) &&
+    inputs.annualReturn &&
+    parseFloat(inputs.annualReturn) > 0 &&
+    (
+      (inputs.timePeriodYears && parseInt(inputs.timePeriodYears) > 0) ||
+      (inputs.timePeriodMonths && parseInt(inputs.timePeriodMonths) > 0)
+    )
 
-  // Share calculation
-  const shareCalculation = () => {
-    const shareableURL = getShareableURL()
-
-    // Calculate total time period for display
-    const totalYears = parseInt(inputs.timePeriodYears || 0)
-    const totalMonths = parseInt(inputs.timePeriodMonths || 0)
-    let timePeriodText = ''
-
-    if (totalYears > 0 && totalMonths > 0) {
-      timePeriodText = `${totalYears} years ${totalMonths} months`
-    } else if (totalYears > 0) {
-      timePeriodText = `${totalYears} years`
-    } else if (totalMonths > 0) {
-      timePeriodText = `${totalMonths} months`
-    }
-
-    const shareData = {
-      title: 'finclamp.com - SIP Calculator Results',
-      text: `SIP Calculation: Monthly Investment ${formatCurrency(inputs.monthlyInvestment)} for ${timePeriodText}. Maturity Amount: ${formatCurrency(results?.maturityAmount)}`,
-      url: shareableURL
-    }
-
-    if (navigator.share) {
-      navigator.share(shareData)
+    if (hasValidInputs) {
+      calculateSIP()
     } else {
-      navigator.clipboard.writeText(shareableURL)
-      alert('Shareable link copied to clipboard! Your friend can use this link to see the same calculation.')
+      setResults(null)
+      setYearlyBreakdown([])
     }
-  }
+  }, [calculateSIP])
 
   // Add to comparison
   const handleAddToComparison = () => {
-    if (results && addToComparison) {
+    if (results) {
       const comparisonData = {
-        calculator: 'SIP Calculator',
+        type: 'SIP',
         inputs: {
           monthlyInvestment: inputs.monthlyInvestment,
           annualReturn: inputs.annualReturn,
@@ -341,332 +404,215 @@ export default function SIPCalculator({ onAddToComparison, categoryColor = 'purp
       }
 
       addToComparison(comparisonData)
-
       if (onAddToComparison) {
         onAddToComparison(comparisonData)
       }
     }
   }
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
-  }
-
   return (
-    <div className="max-w-6xl mx-auto p-4 space-y-6">
-      {/* Header */}
-      <motion.div
-        className="text-center"
-        {...fadeInUp}
-      >
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">SIP Calculator</h1>
-        <p className="text-gray-600">Calculate your Systematic Investment Plan returns</p>
-      </motion.div>
+    <CalculatorLayout
+      title="SIP Calculator"
+      description="Calculate your Systematic Investment Plan returns"
+      icon="📈"
+    >
+      {/* Input Section */}
+      <InputSection title="Investment Details" icon="📊" onReset={resetCalculator}>
+        {/* Investment Inputs - Both Always Active */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Monthly Investment */}
+          <CurrencyInput
+            label="Monthly Investment"
+            value={inputs.monthlyInvestment}
+            onChange={(value) => handleSIPInputChange('monthlyInvestment', value)}
+            fieldName="monthlyInvestment"
+            icon="💰"
+            placeholder="Enter monthly investment amount"
+            min="0"
+            focusColor="#8B5CF6"
+          />
 
-      <div className="grid lg:grid-cols-2 gap-6">
-        {/* Input Section */}
-        <motion.div
-          className="bg-white rounded-xl shadow-lg p-6"
-          {...fadeInUp}
-        >
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            📊 Investment Details
-          </h2>
+          {/* Target Maturity Amount */}
+          <CurrencyInput
+            label="Target Maturity Amount"
+            value={inputs.maturityAmount}
+            onChange={(value) => handleSIPInputChange('maturityAmount', value)}
+            fieldName="maturityAmount"
+            icon="🎯"
+            placeholder="Enter target maturity amount"
+            min="0"
+            focusColor="#8B5CF6"
+          />
+        </div>
 
-          <div className="space-y-4">
-            {/* Monthly Investment */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Monthly Investment
-              </label>
-              <CurrencyInput
-                value={inputs.monthlyInvestment}
-                onChange={(value) => handleInputChange('monthlyInvestment', value)}
-                placeholder="Enter monthly investment amount"
-                disabled={inputs.calculationType === 'maturity'}
-              />
-            </div>
-
-            {/* Expected Annual Return */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Expected Annual Return (%)
-              </label>
-              <input
-                type="number"
-                value={inputs.annualReturn}
-                onChange={(e) => handleInputChange('annualReturn', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="12"
-                step="0.1"
-                min="0"
-                max="50"
-              />
-            </div>
-
-            {/* Time Period */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Investment Period
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Years</label>
-                  <input
-                    type="number"
-                    value={inputs.timePeriodYears}
-                    onChange={(e) => handleInputChange('timePeriodYears', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="10"
-                    min="0"
-                    max="50"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs text-gray-500 mb-1">Months</label>
-                  <input
-                    type="number"
-                    value={inputs.timePeriodMonths}
-                    onChange={(e) => handleInputChange('timePeriodMonths', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="0"
-                    min="0"
-                    max="11"
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* Lump Sum Amount */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Lump Sum Amount (Optional)
-              </label>
-              <CurrencyInput
-                value={inputs.lumpSumAmount}
-                onChange={(value) => handleInputChange('lumpSumAmount', value)}
-                placeholder="Enter lump sum amount"
-              />
-            </div>
-
-            {/* Step-up SIP */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Annual Step-up
-              </label>
-              <div className="space-y-2">
-                <select
-                  value={inputs.stepUpType}
-                  onChange={(e) => handleInputChange('stepUpType', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value="percentage">Percentage (%)</option>
-                  <option value="amount">Fixed Amount (₹)</option>
-                </select>
-
-                {inputs.stepUpType === 'percentage' ? (
-                  <input
-                    type="number"
-                    value={inputs.stepUpPercentage}
-                    onChange={(e) => handleInputChange('stepUpPercentage', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    placeholder="Enter step-up percentage"
-                    step="0.1"
-                    min="0"
-                    max="100"
-                  />
-                ) : (
-                  <CurrencyInput
-                    value={inputs.stepUpPercentage}
-                    onChange={(value) => handleInputChange('stepUpPercentage', value)}
-                    placeholder="Enter step-up amount"
-                  />
-                )}
-              </div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Results Section */}
-        <motion.div
-          className="bg-white rounded-xl shadow-lg p-6"
-          {...fadeInUp}
-        >
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 flex items-center">
-            📈 Results
-          </h2>
-
-          {results ? (
-            <div className="space-y-4">
-              {/* Key Results */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                  <p className="text-sm text-blue-600 font-medium">Monthly Amount</p>
-                  <p className="text-2xl font-bold text-blue-800">
-                    {formatCurrency(results.monthlyInvestment)}
-                  </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                  <p className="text-sm text-green-600 font-medium">Total Investment</p>
-                  <p className="text-2xl font-bold text-green-800">
-                    {formatCurrency(results.totalInvestment)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-purple-50 p-4 rounded-lg">
-                  <p className="text-sm text-purple-600 font-medium">Wealth Gained</p>
-                  <p className="text-2xl font-bold text-purple-800">
-                    {formatCurrency(results.wealthGained)}
-                  </p>
-                </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                  <p className="text-sm text-orange-600 font-medium">Monthly SIP</p>
-                  <p className="text-2xl font-bold text-orange-800">
-                    {formatCurrency(results.monthlyInvestment)}
-                  </p>
-                </div>
-              </div>
-
-              {/* Maturity Amount - Highlighted */}
-              <div className="bg-gradient-to-r from-green-500 to-blue-600 p-6 rounded-lg text-white text-center">
-                <p className="text-lg font-medium opacity-90">Maturity Amount</p>
-                <p className="text-4xl font-bold">
-                  {formatCurrency(results.maturityAmount)}
-                </p>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-3 mt-6">
-                <motion.button
-                  onClick={handleAddToComparison}
-                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
-                  style={{ backgroundColor: '#10B981' }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  📊 Compare
-                </motion.button>
-
-                <motion.button
-                  onClick={shareCalculation}
-                  className="w-full py-3 px-4 rounded-lg font-semibold text-white transition-all duration-300 cursor-pointer text-sm"
-                  style={{ backgroundColor: '#6366F1' }}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  🔗 Share
-                </motion.button>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-8">
-              <div className="text-6xl mb-4">📊</div>
-              <p className="text-gray-500">Enter investment details to see results</p>
-            </div>
-          )}
-        </motion.div>
-      </div>
-
-      {/* Investment Summary */}
-      {results && (
-        <motion.div
-          className="bg-white rounded-xl shadow-lg p-6"
-          {...fadeInUp}
-        >
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Investment Summary</h3>
-
-          <div className="grid md:grid-cols-4 gap-4 text-center">
-            <div>
-              <p className="text-sm text-gray-600">Monthly SIP</p>
-              <p className="text-xl font-bold text-blue-600">
-                {formatCurrency(results.monthlyInvestment)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Investment</p>
-              <p className="text-xl font-bold text-green-600">
-                {formatCurrency(results.totalInvestment)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Returns</p>
-              <p className="text-xl font-bold text-purple-600">
-                {formatCurrency(results.totalReturns)}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Wealth Gained</p>
-              <p className="text-xl font-bold text-orange-600">
-                {results.totalReturns > 0 ? '+' : ''}{((results.totalReturns / results.totalInvestment) * 100).toFixed(1)}%
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-
-      {/* Growth Visualization */}
-      {yearlyBreakdown.length > 0 && (
-        <motion.div
-          className="bg-white rounded-xl shadow-lg p-6"
-          {...fadeInUp}
-        >
-          <h3 className="text-lg font-semibold text-gray-800 mb-4">Growth Visualization</h3>
-
-          <div className="h-80">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={yearlyBreakdown}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="year" />
-                <YAxis tickFormatter={(value) => `₹${(value / 100000).toFixed(1)}L`} />
-                <Tooltip
-                  formatter={(value, name) => [formatCurrency(value), name]}
-                  labelFormatter={(label) => `Year ${label}`}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="investment"
-                  stroke="#3B82F6"
-                  strokeWidth={2}
-                  name="Total Investment"
-                />
-                <Line
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#10B981"
-                  strokeWidth={2}
-                  name="Portfolio Value"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </motion.div>
-      )}
-
-      {/* PDF Export */}
-      {results && (
-        <PDFExport
-          calculatorName="SIP Calculator"
-          inputs={inputs}
-          results={results}
-          yearlyBreakdown={yearlyBreakdown}
+        {/* Expected Annual Return */}
+        <PercentageInput
+          label="Expected Annual Return"
+          value={inputs.annualReturn}
+          onChange={(value) => handleInputChange('annualReturn', value)}
+          icon="📈"
+          placeholder="12"
         />
-      )}
 
-      {/* PWA Install Button */}
-      {deferredPrompt && (
-        <motion.button
-          onClick={handleInstallClick}
-          className="fixed bottom-4 right-4 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg"
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-        >
-          📱 Install App
-        </motion.button>
-      )}
-    </div>
+        {/* Investment Period */}
+        <div className="space-y-2">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <span className="text-lg">📅</span>
+            Investment Period
+          </label>
+          <div className="grid grid-cols-2 gap-3">
+            <UnifiedNumberInput
+              label="Years"
+              value={inputs.timePeriodYears}
+              onChange={(value) => handleInputChange('timePeriodYears', value)}
+              min={0}
+              max={50}
+              step={1}
+              showControls={true}
+            />
+            <UnifiedNumberInput
+              label="Months"
+              value={inputs.timePeriodMonths}
+              onChange={(value) => handleInputChange('timePeriodMonths', value)}
+              min={0}
+              max={11}
+              step={1}
+              showControls={true}
+            />
+          </div>
+        </div>
+
+        {/* Lump Sum Amount */}
+        <CurrencyInput
+          label="Lump Sum Amount (Optional)"
+          value={inputs.lumpSumAmount}
+          onChange={(value) => handleInputChange('lumpSumAmount', value)}
+          fieldName="lumpSumAmount"
+          icon="💎"
+          placeholder="Enter lump sum amount"
+          min="0"
+          focusColor="#8B5CF6"
+        />
+
+        {/* Annual Step-up */}
+        <StepUpInput
+          label="Annual Step-up"
+          value={inputs.stepUpPercentage}
+          stepUpType={inputs.stepUpType}
+          onChange={(value) => handleInputChange('stepUpPercentage', value)}
+          onTypeChange={(type) => handleInputChange('stepUpType', type)}
+          icon="📊"
+          placeholder="0"
+        />
+      </InputSection>
+
+      {/* Results Section */}
+      <ResultsSection
+        results={results}
+        onAddToComparison={handleAddToComparison}
+        onShare={shareCalculation}
+        comparisonData={{
+          type: 'SIP',
+          monthlyInvestment: inputs.monthlyInvestment,
+          maturityAmount: results?.maturityAmount
+        }}
+      >
+        {results && (
+          <>
+            {/* Main Result */}
+            <div className="mb-8">
+              <GradientResultCard
+                title="Maturity Amount"
+                value={formatCurrency(results.maturityAmount)}
+                gradient="from-purple-500 to-indigo-600"
+                icon="🎯"
+              />
+            </div>
+
+            {/* Key Metrics - 2 per row */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+              <ResultCard
+                title="Total Investment"
+                value={formatCurrency(results.totalInvestment)}
+                description="Total amount you will invest through SIP"
+                icon="💰"
+              />
+              <ResultCard
+                title="Total Returns"
+                value={formatCurrency(results.totalReturns)}
+                description="Wealth gained from your SIP investment"
+                icon="📈"
+              />
+              <ResultCard
+                title="Monthly Investment"
+                value={formatCurrency(results.monthlyInvestment)}
+                description="Amount to invest every month"
+                icon="📅"
+              />
+              <ResultCard
+                title="Annualized Return"
+                value={`${results.annualizedReturn}%`}
+                description="Expected annual return rate"
+                icon="🎯"
+              />
+            </div>
+
+            {/* Chart */}
+            {yearlyBreakdown.length > 0 && (
+              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                <h3 className="text-lg font-semibold text-gray-800 mb-4">Investment Growth</h3>
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={yearlyBreakdown}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="year" />
+                      <YAxis tickFormatter={(value) => `₹${(value/100000).toFixed(0)}L`} />
+                      <Tooltip
+                        formatter={(value, name) => [formatCurrency(value), name]}
+                        labelFormatter={(label) => `Year ${label}`}
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="cumulativeInvestment"
+                        stroke="#8B5CF6"
+                        strokeWidth={2}
+                        name="Total Investment"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="value"
+                        stroke="#10B981"
+                        strokeWidth={2}
+                        name="Portfolio Value"
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+            )}
+
+            {/* PDF Export */}
+            <div className="mt-6">
+              <PDFExport
+                calculatorType="SIP"
+                inputs={{
+                  monthlyInvestment: inputs.monthlyInvestment,
+                  annualReturn: inputs.annualReturn,
+                  timePeriod: `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
+                  stepUp: inputs.stepUpPercentage > 0 ? `${inputs.stepUpPercentage}${inputs.stepUpType === 'percentage' ? '%' : ' ₹'}` : 'None'
+                }}
+                results={{
+                  maturityAmount: results.maturityAmount,
+                  totalInvestment: results.totalInvestment,
+                  totalReturns: results.totalReturns,
+                  annualizedReturn: results.annualizedReturn
+                }}
+                yearlyBreakdown={yearlyBreakdown}
+              />
+            </div>
+          </>
+        )}
+      </ResultsSection>
+    </CalculatorLayout>
   )
 }

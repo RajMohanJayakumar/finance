@@ -75,6 +75,16 @@ export const DROPDOWN_CONFIGS = {
     ]
   },
 
+  // Step-up Types for SIP
+  STEP_UP_TYPE: {
+    label: "Annual Step-up Type",
+    icon: "📈",
+    options: [
+      { value: 'percentage', label: 'Percentage (%)', icon: '📊' },
+      { value: 'amount', label: 'Fixed Amount (₹)', icon: '💰' }
+    ]
+  },
+
   // SWP Countries with typical returns
   SWP_COUNTRIES: {
     label: "Country",

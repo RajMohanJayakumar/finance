@@ -25,7 +25,7 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
   // Initialize inputs with defaults if empty
   useEffect(() => {
     if (Object.keys(inputs).length === 0) {
-      setInputs(prev => ({ ...initialInputs, ...prev }))
+      setInputs(initialInputs)
     }
   }, [])
 
@@ -81,7 +81,7 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
     if (inputs.beginningValue && inputs.endingValue && inputs.numberOfYears) {
       calculate()
     }
-  }, [calculate])
+  }, [inputs.beginningValue, inputs.endingValue, inputs.numberOfYears, inputs.calculationType])
 
   const handleAddToComparison = () => {
     if (results) {
@@ -348,12 +348,12 @@ export default function CAGRCalculator({ onAddToComparison, categoryColor = 'pur
           transition={{ delay: 0.4 }}
         >
           <PDFExport
-            calculatorName={`${inputs.calculationType.toUpperCase()} Calculator`}
+            calculatorName={`${(inputs.calculationType || 'CAGR').toUpperCase()} Calculator`}
             inputs={{
               'Beginning Value': formatCurrency(inputs.beginningValue),
               'Ending Value': formatCurrency(inputs.endingValue),
               ...(inputs.calculationType === 'cagr' && { 'Number of Years': `${inputs.numberOfYears} years` }),
-              'Calculation Type': inputs.calculationType.toUpperCase()
+              'Calculation Type': (inputs.calculationType || 'CAGR').toUpperCase()
             }}
             results={inputs.calculationType === 'cagr' ? {
               'CAGR': `${results.cagr}% per annum`,
