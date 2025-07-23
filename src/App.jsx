@@ -25,10 +25,15 @@ import Header from './components/Header'
 import ComparisonPanel from './components/ComparisonPanel'
 import PDFExport from './components/PDFExport'
 import FloatingComparisonButton from './components/FloatingComparisonButton'
+import Breadcrumb from './components/Breadcrumb'
+import SEOAnalytics from './components/SEOAnalytics'
 
 // Context
 import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
+
+// SEO Hook
+import { useSEO } from './hooks/useSEO'
 
 const calculatorData = {
   loans: {
@@ -289,10 +294,17 @@ export default function App() {
   const currentCategory = calculatorData[activeMainTab]
   const currentCalculator = currentCategory?.calculators.find(calc => calc.id === activeSubTabs[activeMainTab])
 
+  // Use SEO hook to update meta tags when calculator changes
+  const currentCalculatorId = activeSubTabs[activeMainTab]
+  useSEO(currentCalculatorId)
+
   return (
     <CurrencyProvider>
       <ComparisonProvider>
         <div className="min-h-screen bg-gray-50">
+          {/* SEO Analytics Component */}
+          <SEOAnalytics calculatorId={currentCalculatorId} />
+
           <Header />
 
         <motion.div
@@ -301,6 +313,12 @@ export default function App() {
           animate="animate"
           variants={staggerContainer}
         >
+          {/* Breadcrumb Navigation */}
+          <Breadcrumb
+            currentCalculator={currentCalculator}
+            currentCategory={currentCategory}
+          />
+
           {/* Main Category Tabs */}
           <motion.div
             className="mb-6 sm:mb-8"
