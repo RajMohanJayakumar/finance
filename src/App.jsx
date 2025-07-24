@@ -33,10 +33,11 @@ import MonthlyExpenseCalculator from './calculators/MonthlyExpenseCalculator'
 import UPISpendingCalculator from './calculators/UPISpendingCalculator'
 import GroceryBudgetCalculator from './calculators/GroceryBudgetCalculator'
 import CommuteCostCalculator from './calculators/CommuteCostCalculator'
-import MobilePlanCalculator from './calculators/MobilePlanCalculator'
+
 import WFHSavingsCalculator from './calculators/WFHSavingsCalculator'
 import HabitCostCalculator from './calculators/HabitCostCalculator'
 import FreelancerTaxCalculator from './calculators/FreelancerTaxCalculator'
+
 
 // Components
 import Header from './components/Header'
@@ -130,7 +131,7 @@ const calculatorData = {
       { id: 'upi-spending', name: 'UPI Spending Tracker', icon: '📱', component: UPISpendingCalculator, description: 'Track UPI/digital wallet spending habits' },
       { id: 'grocery-budget', name: 'Grocery Budget Calculator', icon: '🛒', component: GroceryBudgetCalculator, description: 'Estimate monthly grocery needs based on family size' },
       { id: 'commute-cost', name: 'Commute Cost Calculator', icon: '🚗', component: CommuteCostCalculator, description: 'Calculate daily/weekly fuel or public transport cost' },
-      { id: 'mobile-plan', name: 'Mobile Plan Calculator', icon: '📱', component: MobilePlanCalculator, description: 'Choose best mobile/data plan for your needs' },
+
       { id: 'wfh-savings', name: 'WFH Savings Calculator', icon: '🏠', component: WFHSavingsCalculator, description: 'Calculate work-from-home cost savings' },
       { id: 'habit-cost', name: 'Coffee/Smoking Cost Tracker', icon: '☕', component: HabitCostCalculator, description: 'See how small habits affect your wallet over time' }
     ]
@@ -209,7 +210,7 @@ export default function App() {
         'upi-spending': { mainTab: 'lifestyle', subTab: 'upi-spending' },
         'grocery-budget': { mainTab: 'lifestyle', subTab: 'grocery-budget' },
         'commute-cost': { mainTab: 'lifestyle', subTab: 'commute-cost' },
-        'mobile-plan': { mainTab: 'lifestyle', subTab: 'mobile-plan' },
+
         'wfh-savings': { mainTab: 'lifestyle', subTab: 'wfh-savings' },
         'habit-cost': { mainTab: 'lifestyle', subTab: 'habit-cost' },
         'freelancer-tax': { mainTab: 'business', subTab: 'freelancer-tax' },
@@ -271,6 +272,8 @@ export default function App() {
   })
   const [comparisonData, setComparisonData] = useState([])
 
+
+
   const updateCalculatorInURL = useCallback((calculatorId) => {
     const url = new URL(window.location)
 
@@ -318,7 +321,7 @@ export default function App() {
   const handlePWAInstall = async () => {
     if (deferredPrompt) {
       deferredPrompt.prompt()
-      const { outcome } = await deferredPrompt.userChoice
+      await deferredPrompt.userChoice
       setDeferredPrompt(null)
     }
   }
@@ -459,6 +462,7 @@ export default function App() {
 
           {/* Calculator Content */}
           <AnimatePresence mode="wait">
+            {/* Calculator Content */}
             {currentCalculator && (
               <motion.div
                 key={`${activeMainTab}-${activeSubTabs[activeMainTab]}`}

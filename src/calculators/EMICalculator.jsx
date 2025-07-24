@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
+
 import PDFExport from '../components/PDFExport'
 import CurrencyInput from '../components/CurrencyInput'
 import UnifiedNumberInput from '../components/UnifiedNumberInput'
@@ -15,6 +16,8 @@ import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientRes
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
+
+
 
   // Default values
   const defaultInputs = {
@@ -32,6 +35,8 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
     handleInputChange,
     resetCalculator
   } = useCalculatorState('emi_', defaultInputs)
+
+
 
   // EMI calculation function
   const calculateEMI = useCallback(() => {
@@ -71,6 +76,8 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
       principal,
       tenureInMonths
     })
+
+
   }, [inputs, setResults])
 
   // Trigger calculation when inputs change

@@ -1755,63 +1755,7 @@ export const calculatorDescriptions = {
     }
   },
 
-  "mobile-plan": {
-    title: "Mobile Data Plan Cost Estimator - Choose Best Mobile Plan | Data Plan Calculator",
-    description: "Free Mobile Data Plan Cost Estimator to choose the best mobile plan for your needs. Compare Jio, Airtel, Vi, BSNL plans based on data usage, calls, and budget with smart recommendations.",
-    seoKeywords: "mobile plan calculator, data plan calculator, mobile plan comparison, best mobile plan, data usage calculator, mobile plan cost estimator, telecom plan calculator",
-    searchQueries: [
-      "mobile plan calculator",
-      "data plan calculator",
-      "mobile plan comparison",
-      "best mobile plan calculator",
-      "data usage calculator",
-      "mobile plan cost estimator",
-      "telecom plan calculator",
-      "Jio vs Airtel calculator",
-      "mobile plan finder",
-      "data plan comparison"
-    ],
-    formula: {
-      name: "Mobile Plan Value Formula",
-      equation: "Value Score = (Data + Validity + Features) ÷ Price",
-      variables: {
-        "Value Score": "Overall plan value rating",
-        "Data": "Data allowance in GB",
-        "Validity": "Plan validity in days",
-        "Features": "Additional features like OTT subscriptions",
-        "Price": "Plan cost"
-      }
-    },
-    keyFeatures: [
-      "Compare plans from all major providers",
-      "Usage-based recommendations",
-      "Cost per day and per GB analysis",
-      "OTT subscription considerations",
-      "Best value plan identification"
-    ],
-    howItWorks: [
-      "Enter your monthly data usage",
-      "Set call and SMS requirements",
-      "Choose preferred provider or compare all",
-      "Get personalized plan recommendations",
-      "Compare costs and features"
-    ],
-    benefits: [
-      "Choose optimal mobile plan",
-      "Save money on mobile bills",
-      "Avoid overpaying for unused data",
-      "Find plans with best value"
-    ],
-    example: {
-      scenario: "10GB Monthly Usage",
-      inputs: {
-        "Data": "10GB per month",
-        "Calls": "Unlimited",
-        "Provider": "All providers"
-      },
-      result: "Best plan: Jio ₹399 (6GB, 28 days)"
-    }
-  },
+
 
   "wfh-savings": {
     title: "Work-from-Home Savings Calculator - Calculate WFH Cost Savings | Remote Work Calculator",
