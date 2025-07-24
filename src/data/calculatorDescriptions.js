@@ -1524,6 +1524,235 @@ export const calculatorDescriptions = {
       },
       result: "Daily interest: ₹22, Total: ₹658"
     }
+  },
+
+  "monthly-expense": {
+    title: "Monthly Expense Split Calculator - Categorize Analyze Monthly Expenses | Budget Tracker",
+    description: "Free Monthly Expense Split Calculator to categorize and analyze your monthly expenses by rent, food, utilities, and more. Track spending patterns with budget recommendations and expense optimization tips.",
+    seoKeywords: "monthly expense calculator, expense split calculator, expense categorizer, monthly budget tracker, expense analyzer, spending tracker, budget breakdown calculator",
+    searchQueries: [
+      "monthly expense calculator",
+      "expense split calculator",
+      "expense categorizer online",
+      "monthly budget tracker",
+      "expense analyzer calculator",
+      "spending tracker calculator",
+      "budget breakdown calculator",
+      "expense category calculator",
+      "monthly spending calculator",
+      "expense budget planner"
+    ],
+    formula: {
+      name: "Expense Analysis Formula",
+      equation: "Category % = (Category Expense ÷ Total Expenses) × 100",
+      variables: {
+        "Category %": "Percentage of total expenses for each category",
+        "Category Expense": "Amount spent in specific category",
+        "Total Expenses": "Sum of all monthly expenses"
+      }
+    },
+    keyFeatures: [
+      "Categorize expenses by type (rent, food, utilities)",
+      "Budget recommendations based on 50/30/20 rule",
+      "Expense percentage breakdown",
+      "Visual progress indicators",
+      "Money-saving optimization tips"
+    ],
+    howItWorks: [
+      "Add your monthly expenses by category",
+      "Set amounts for rent, food, transportation, etc.",
+      "View percentage breakdown of spending",
+      "Get budget recommendations",
+      "Identify areas for cost optimization"
+    ],
+    benefits: [
+      "Understand spending patterns",
+      "Optimize budget allocation",
+      "Identify overspending categories",
+      "Plan better financial habits"
+    ],
+    example: {
+      scenario: "Monthly Expense Analysis",
+      inputs: {
+        "Rent": "₹25,000 (50%)",
+        "Food": "₹8,000 (16%)",
+        "Transport": "₹5,000 (10%)"
+      },
+      result: "Total: ₹50,000, Budget status: Balanced"
+    }
+  },
+
+  "upi-spending": {
+    title: "UPI Daily Spending Calculator - Track Digital Wallet Spending Habits | UPI Tracker",
+    description: "Free UPI Daily Spending Calculator to track your UPI and digital wallet spending habits. Monitor daily expenses, categorize transactions, and control your digital payment spending with smart insights.",
+    seoKeywords: "UPI spending calculator, digital wallet tracker, UPI expense tracker, daily spending calculator, digital payment tracker, UPI transaction tracker, mobile payment calculator",
+    searchQueries: [
+      "UPI spending calculator",
+      "digital wallet spending tracker",
+      "UPI expense calculator",
+      "daily UPI spending tracker",
+      "digital payment calculator",
+      "UPI transaction tracker",
+      "mobile payment spending",
+      "PhonePe spending tracker",
+      "Google Pay expense tracker",
+      "Paytm spending calculator"
+    ],
+    formula: {
+      name: "UPI Spending Analysis",
+      equation: "Daily Budget Status = Daily Spending ÷ Daily Budget × 100",
+      variables: {
+        "Daily Budget Status": "Percentage of daily budget used",
+        "Daily Spending": "Total UPI transactions for the day",
+        "Daily Budget": "Set daily spending limit"
+      }
+    },
+    keyFeatures: [
+      "Track daily UPI transactions",
+      "Categorize digital payments",
+      "Set daily spending budgets",
+      "Time-based spending analysis",
+      "Popular UPI app integration"
+    ],
+    howItWorks: [
+      "Add your daily UPI transactions",
+      "Categorize by food, transport, shopping, etc.",
+      "Set daily spending budget",
+      "Track spending by time of day",
+      "Get spending insights and tips"
+    ],
+    benefits: [
+      "Control digital spending",
+      "Understand payment patterns",
+      "Avoid overspending",
+      "Track small expenses"
+    ],
+    example: {
+      scenario: "Daily UPI Spending",
+      inputs: {
+        "Food": "₹200 (lunch)",
+        "Transport": "₹50 (auto)",
+        "Shopping": "₹300 (groceries)"
+      },
+      result: "Daily total: ₹550, Weekly: ₹3,850"
+    }
+  },
+
+  "grocery-budget": {
+    title: "Grocery Budget Calculator - Estimate Monthly Grocery Needs | Family Food Budget",
+    description: "Free Grocery Budget Calculator to estimate monthly grocery needs based on family size, diet preferences, and location. Plan your food budget with category-wise breakdown and money-saving tips.",
+    seoKeywords: "grocery budget calculator, family food budget calculator, monthly grocery calculator, food budget planner, grocery expense calculator, family meal budget calculator",
+    searchQueries: [
+      "grocery budget calculator",
+      "family food budget calculator",
+      "monthly grocery budget",
+      "food budget calculator",
+      "grocery expense calculator",
+      "family meal budget",
+      "grocery cost calculator",
+      "food budget planner",
+      "monthly food expense",
+      "grocery shopping budget"
+    ],
+    formula: {
+      name: "Grocery Budget Formula",
+      equation: "Monthly Budget = (Family Size × Base Cost × Location × Diet × Preferences)",
+      variables: {
+        "Monthly Budget": "Estimated monthly grocery expense",
+        "Family Size": "Number of adults, children, and infants",
+        "Base Cost": "Base daily cost per person",
+        "Location": "City tier multiplier",
+        "Diet": "Vegetarian/non-vegetarian multiplier",
+        "Preferences": "Organic, brand, and shopping preferences"
+      }
+    },
+    keyFeatures: [
+      "Family size-based calculations",
+      "Diet type considerations (veg/non-veg)",
+      "Location-based cost adjustments",
+      "Organic and brand preferences",
+      "Category-wise budget breakdown"
+    ],
+    howItWorks: [
+      "Enter family details (adults, children, infants)",
+      "Select diet type and location",
+      "Set preferences for organic, brands, eating out",
+      "Get monthly grocery budget estimate",
+      "View category-wise breakdown and tips"
+    ],
+    benefits: [
+      "Plan monthly food budget",
+      "Optimize grocery spending",
+      "Compare different scenarios",
+      "Get money-saving tips"
+    ],
+    example: {
+      scenario: "Family of 4 Grocery Budget",
+      inputs: {
+        "Family": "2 adults, 2 children",
+        "Diet": "Mixed (veg + non-veg)",
+        "Location": "Metro city"
+      },
+      result: "Monthly budget: ₹18,000"
+    }
+  },
+
+  "commute-cost": {
+    title: "Commute Cost Calculator - Daily Weekly Fuel Public Transport Cost | Travel Calculator",
+    description: "Free Commute Cost Calculator to calculate daily, weekly, and monthly commute costs for fuel, public transport, and mixed travel. Compare different transport modes and find the most cost-effective option.",
+    seoKeywords: "commute cost calculator, daily travel cost calculator, fuel cost calculator, public transport cost calculator, travel expense calculator, commute budget calculator",
+    searchQueries: [
+      "commute cost calculator",
+      "daily travel cost calculator",
+      "fuel commute calculator",
+      "public transport cost calculator",
+      "travel expense calculator",
+      "commute budget calculator",
+      "daily fuel cost calculator",
+      "metro bus cost calculator",
+      "car vs public transport cost",
+      "commute savings calculator"
+    ],
+    formula: {
+      name: "Commute Cost Formula",
+      equation: "Daily Cost = (Distance × 2 × Cost per KM) + Parking + Tolls",
+      variables: {
+        "Daily Cost": "Total daily commute expense",
+        "Distance": "One-way distance to work",
+        "Cost per KM": "Fuel cost per km or transport rate",
+        "Parking": "Daily parking charges",
+        "Tolls": "Daily toll charges"
+      }
+    },
+    keyFeatures: [
+      "Multiple transport mode calculations",
+      "Car, bike, bus, metro, auto rickshaw options",
+      "Fuel cost and mileage considerations",
+      "Parking and toll cost inclusion",
+      "Transport mode comparison"
+    ],
+    howItWorks: [
+      "Enter commute distance and working days",
+      "Select primary transport mode",
+      "Input relevant costs (fuel, passes, rates)",
+      "Get daily, weekly, monthly cost breakdown",
+      "Compare with other transport options"
+    ],
+    benefits: [
+      "Choose most economical transport",
+      "Plan commute budget",
+      "Compare transport options",
+      "Identify cost-saving opportunities"
+    ],
+    example: {
+      scenario: "25km Daily Commute",
+      inputs: {
+        "Distance": "25 km one-way",
+        "Mode": "Personal car",
+        "Fuel": "₹100/L, 15 km/L"
+      },
+      result: "Daily: ₹433, Monthly: ₹9,533"
+    }
   }
 }
 

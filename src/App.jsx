@@ -29,6 +29,10 @@ import BillSplitCalculator from './calculators/BillSplitCalculator'
 import TipCalculator from './calculators/TipCalculator'
 import SubscriptionCalculator from './calculators/SubscriptionCalculator'
 import DailyInterestCalculator from './calculators/DailyInterestCalculator'
+import MonthlyExpenseCalculator from './calculators/MonthlyExpenseCalculator'
+import UPISpendingCalculator from './calculators/UPISpendingCalculator'
+import GroceryBudgetCalculator from './calculators/GroceryBudgetCalculator'
+import CommuteCostCalculator from './calculators/CommuteCostCalculator'
 
 // Components
 import Header from './components/Header'
@@ -117,7 +121,11 @@ const calculatorData = {
       { id: 'bill-split', name: 'Bill Split Calculator', icon: '🧾', component: BillSplitCalculator, description: 'Split bills among friends or roommates' },
       { id: 'tip-calculator', name: 'Tip Calculator', icon: '💰', component: TipCalculator, description: 'Calculate tips and split bills with tip per person' },
       { id: 'subscription-tracker', name: 'Subscription Tracker', icon: '📱', component: SubscriptionCalculator, description: 'Track monthly/yearly cost of all subscriptions' },
-      { id: 'daily-interest', name: 'Daily Interest Calculator', icon: '📅', component: DailyInterestCalculator, description: 'Calculate daily interest on short-term savings/loans' }
+      { id: 'daily-interest', name: 'Daily Interest Calculator', icon: '📅', component: DailyInterestCalculator, description: 'Calculate daily interest on short-term savings/loans' },
+      { id: 'monthly-expense', name: 'Monthly Expense Split', icon: '📊', component: MonthlyExpenseCalculator, description: 'Categorize and analyze monthly expenses' },
+      { id: 'upi-spending', name: 'UPI Spending Tracker', icon: '📱', component: UPISpendingCalculator, description: 'Track UPI/digital wallet spending habits' },
+      { id: 'grocery-budget', name: 'Grocery Budget Calculator', icon: '🛒', component: GroceryBudgetCalculator, description: 'Estimate monthly grocery needs based on family size' },
+      { id: 'commute-cost', name: 'Commute Cost Calculator', icon: '🚗', component: CommuteCostCalculator, description: 'Calculate daily/weekly fuel or public transport cost' }
     ]
   },
   general: {
@@ -182,6 +190,10 @@ export default function App() {
         'tip-calculator': { mainTab: 'lifestyle', subTab: 'tip-calculator' },
         'subscription-tracker': { mainTab: 'lifestyle', subTab: 'subscription-tracker' },
         'daily-interest': { mainTab: 'lifestyle', subTab: 'daily-interest' },
+        'monthly-expense': { mainTab: 'lifestyle', subTab: 'monthly-expense' },
+        'upi-spending': { mainTab: 'lifestyle', subTab: 'upi-spending' },
+        'grocery-budget': { mainTab: 'lifestyle', subTab: 'grocery-budget' },
+        'commute-cost': { mainTab: 'lifestyle', subTab: 'commute-cost' },
         'discount': { mainTab: 'general', subTab: 'discount' },
         'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
