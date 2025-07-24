@@ -959,6 +959,62 @@ export const calculatorDescriptions = {
       },
       result: "Future Cost: ₹1,79,085"
     }
+  },
+
+  "net-worth": {
+    title: "Net Worth Calculator - Calculate Your Net Worth Online | Personal Finance",
+    description: "Free Net Worth Calculator to calculate your total net worth by listing all assets and liabilities. Track your financial progress, understand your wealth position, and plan for financial goals with our comprehensive net worth calculator.",
+    seoKeywords: "net worth calculator, personal net worth calculator, calculate net worth online, wealth calculator, financial net worth calculator, assets liabilities calculator, personal finance calculator, wealth tracking calculator",
+    searchQueries: [
+      "net worth calculator online",
+      "personal net worth calculator",
+      "calculate my net worth",
+      "wealth calculator online",
+      "assets and liabilities calculator",
+      "financial net worth calculator",
+      "personal finance net worth",
+      "net worth tracking calculator",
+      "how to calculate net worth",
+      "wealth assessment calculator"
+    ],
+    formula: {
+      name: "Net Worth Formula",
+      equation: "Net Worth = Total Assets - Total Liabilities",
+      variables: {
+        "Net Worth": "Your total financial worth",
+        "Total Assets": "Sum of all valuable possessions (cash, investments, property, etc.)",
+        "Total Liabilities": "Sum of all debts and obligations (loans, credit cards, etc.)"
+      }
+    },
+    keyFeatures: [
+      "Calculate comprehensive net worth",
+      "Track assets and liabilities separately",
+      "Categorize different types of assets",
+      "Monitor financial progress over time",
+      "Understand wealth distribution"
+    ],
+    howItWorks: [
+      "List all your assets (cash, investments, property, vehicles)",
+      "Enter all your liabilities (loans, credit cards, debts)",
+      "Calculator automatically computes your net worth",
+      "View detailed breakdown of assets vs liabilities",
+      "Track your financial health category"
+    ],
+    benefits: [
+      "Clear picture of your financial position",
+      "Track wealth building progress",
+      "Identify areas for financial improvement",
+      "Set realistic financial goals"
+    ],
+    example: {
+      scenario: "Net Worth Calculation Example",
+      inputs: {
+        "Total Assets": "₹50,00,000 (House + Investments + Cash)",
+        "Total Liabilities": "₹20,00,000 (Home Loan + Car Loan)",
+        "Calculation": "Assets - Liabilities"
+      },
+      result: "Net Worth: ₹30,00,000"
+    }
   }
 }
 

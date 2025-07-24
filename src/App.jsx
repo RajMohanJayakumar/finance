@@ -19,6 +19,7 @@ import GratuityCalculator from './calculators/GratuityCalculator'
 import CompoundInterestCalculator from './calculators/CompoundInterestCalculator'
 import SimpleInterestCalculator from './calculators/SimpleInterestCalculator'
 import InflationCalculator from './calculators/InflationCalculator'
+import NetWorthCalculator from './calculators/NetWorthCalculator'
 
 // Components
 import Header from './components/Header'
@@ -93,6 +94,7 @@ const calculatorData = {
     icon: "🧮",
     color: "gray",
     calculators: [
+      { id: 'net-worth', name: 'Net Worth Calculator', icon: '💎', component: NetWorthCalculator, description: 'Calculate your total net worth and financial position' },
       { id: 'compound-interest', name: 'Compound Interest', icon: '🧮', component: CompoundInterestCalculator, description: 'Calculate compound interest and growth' },
       { id: 'simple-interest', name: 'Simple Interest', icon: '📊', component: SimpleInterestCalculator, description: 'Calculate simple interest' },
       { id: 'inflation', name: 'Inflation Calculator', icon: '📈', component: InflationCalculator, description: 'Calculate inflation impact over time' }
@@ -140,6 +142,7 @@ export default function App() {
         'nps': { mainTab: 'retirement', subTab: 'nps' },
         'epf': { mainTab: 'retirement', subTab: 'epf' },
         'gratuity': { mainTab: 'retirement', subTab: 'gratuity' },
+        'net-worth': { mainTab: 'general', subTab: 'net-worth' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
         'simple-interest': { mainTab: 'general', subTab: 'simple-interest' },
         'inflation': { mainTab: 'general', subTab: 'inflation' }
@@ -189,7 +192,7 @@ export default function App() {
     mutual_funds: detectedCalculator?.mainTab === 'mutual_funds' ? detectedCalculator.subTab : 'sip',
     tax: detectedCalculator?.mainTab === 'tax' ? detectedCalculator.subTab : 'income-tax',
     retirement: detectedCalculator?.mainTab === 'retirement' ? detectedCalculator.subTab : 'nps',
-    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'compound-interest'
+    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'net-worth'
   })
   const [comparisonData, setComparisonData] = useState([])
 

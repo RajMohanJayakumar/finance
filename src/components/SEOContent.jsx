@@ -30,13 +30,18 @@ const getRelatedCalculators = (currentCalculatorId) => {
       { id: 'nps', name: 'NPS Calculator', description: 'Retirement planning', icon: '🏛️' },
       { id: 'epf', name: 'EPF Calculator', description: 'Provident fund', icon: '🏢' },
       { id: 'income-tax', name: 'Tax Calculator', description: 'Tax planning', icon: '📋' }
+    ],
+    'net-worth': [
+      { id: 'sip', name: 'SIP Calculator', description: 'Build wealth systematically', icon: '📈' },
+      { id: 'fd', name: 'FD Calculator', description: 'Safe investments', icon: '🏦' },
+      { id: 'ppf', name: 'PPF Calculator', description: 'Long-term savings', icon: '🛡️' }
     ]
   }
 
   return relatedCalculators[currentCalculatorId] || [
+    { id: 'net-worth', name: 'Net Worth Calculator', description: 'Financial position', icon: '💎' },
     { id: 'emi', name: 'EMI Calculator', description: 'Loan payments', icon: '🏠' },
-    { id: 'sip', name: 'SIP Calculator', description: 'Investment planning', icon: '📈' },
-    { id: 'income-tax', name: 'Tax Calculator', description: 'Tax calculation', icon: '📋' }
+    { id: 'sip', name: 'SIP Calculator', description: 'Investment planning', icon: '📈' }
   ]
 }
 
