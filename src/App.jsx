@@ -33,6 +33,10 @@ import MonthlyExpenseCalculator from './calculators/MonthlyExpenseCalculator'
 import UPISpendingCalculator from './calculators/UPISpendingCalculator'
 import GroceryBudgetCalculator from './calculators/GroceryBudgetCalculator'
 import CommuteCostCalculator from './calculators/CommuteCostCalculator'
+import MobilePlanCalculator from './calculators/MobilePlanCalculator'
+import WFHSavingsCalculator from './calculators/WFHSavingsCalculator'
+import HabitCostCalculator from './calculators/HabitCostCalculator'
+import FreelancerTaxCalculator from './calculators/FreelancerTaxCalculator'
 
 // Components
 import Header from './components/Header'
@@ -125,7 +129,18 @@ const calculatorData = {
       { id: 'monthly-expense', name: 'Monthly Expense Split', icon: '📊', component: MonthlyExpenseCalculator, description: 'Categorize and analyze monthly expenses' },
       { id: 'upi-spending', name: 'UPI Spending Tracker', icon: '📱', component: UPISpendingCalculator, description: 'Track UPI/digital wallet spending habits' },
       { id: 'grocery-budget', name: 'Grocery Budget Calculator', icon: '🛒', component: GroceryBudgetCalculator, description: 'Estimate monthly grocery needs based on family size' },
-      { id: 'commute-cost', name: 'Commute Cost Calculator', icon: '🚗', component: CommuteCostCalculator, description: 'Calculate daily/weekly fuel or public transport cost' }
+      { id: 'commute-cost', name: 'Commute Cost Calculator', icon: '🚗', component: CommuteCostCalculator, description: 'Calculate daily/weekly fuel or public transport cost' },
+      { id: 'mobile-plan', name: 'Mobile Plan Calculator', icon: '📱', component: MobilePlanCalculator, description: 'Choose best mobile/data plan for your needs' },
+      { id: 'wfh-savings', name: 'WFH Savings Calculator', icon: '🏠', component: WFHSavingsCalculator, description: 'Calculate work-from-home cost savings' },
+      { id: 'habit-cost', name: 'Coffee/Smoking Cost Tracker', icon: '☕', component: HabitCostCalculator, description: 'See how small habits affect your wallet over time' }
+    ]
+  },
+  business: {
+    title: "Business",
+    icon: "💼",
+    color: "indigo",
+    calculators: [
+      { id: 'freelancer-tax', name: 'Freelancer Tax Estimator', icon: '📋', component: FreelancerTaxCalculator, description: 'Calculate income tax for freelancers and self-employed' }
     ]
   },
   general: {
@@ -194,6 +209,10 @@ export default function App() {
         'upi-spending': { mainTab: 'lifestyle', subTab: 'upi-spending' },
         'grocery-budget': { mainTab: 'lifestyle', subTab: 'grocery-budget' },
         'commute-cost': { mainTab: 'lifestyle', subTab: 'commute-cost' },
+        'mobile-plan': { mainTab: 'lifestyle', subTab: 'mobile-plan' },
+        'wfh-savings': { mainTab: 'lifestyle', subTab: 'wfh-savings' },
+        'habit-cost': { mainTab: 'lifestyle', subTab: 'habit-cost' },
+        'freelancer-tax': { mainTab: 'business', subTab: 'freelancer-tax' },
         'discount': { mainTab: 'general', subTab: 'discount' },
         'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
@@ -247,6 +266,7 @@ export default function App() {
     retirement: detectedCalculator?.mainTab === 'retirement' ? detectedCalculator.subTab : 'nps',
     personal_finance: detectedCalculator?.mainTab === 'personal_finance' ? detectedCalculator.subTab : 'budget-planner',
     lifestyle: detectedCalculator?.mainTab === 'lifestyle' ? detectedCalculator.subTab : 'bill-split',
+    business: detectedCalculator?.mainTab === 'business' ? detectedCalculator.subTab : 'freelancer-tax',
     general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'discount'
   })
   const [comparisonData, setComparisonData] = useState([])

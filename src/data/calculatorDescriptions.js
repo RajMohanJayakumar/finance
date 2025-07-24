@@ -1753,6 +1753,238 @@ export const calculatorDescriptions = {
       },
       result: "Daily: ₹433, Monthly: ₹9,533"
     }
+  },
+
+  "mobile-plan": {
+    title: "Mobile Data Plan Cost Estimator - Choose Best Mobile Plan | Data Plan Calculator",
+    description: "Free Mobile Data Plan Cost Estimator to choose the best mobile plan for your needs. Compare Jio, Airtel, Vi, BSNL plans based on data usage, calls, and budget with smart recommendations.",
+    seoKeywords: "mobile plan calculator, data plan calculator, mobile plan comparison, best mobile plan, data usage calculator, mobile plan cost estimator, telecom plan calculator",
+    searchQueries: [
+      "mobile plan calculator",
+      "data plan calculator",
+      "mobile plan comparison",
+      "best mobile plan calculator",
+      "data usage calculator",
+      "mobile plan cost estimator",
+      "telecom plan calculator",
+      "Jio vs Airtel calculator",
+      "mobile plan finder",
+      "data plan comparison"
+    ],
+    formula: {
+      name: "Mobile Plan Value Formula",
+      equation: "Value Score = (Data + Validity + Features) ÷ Price",
+      variables: {
+        "Value Score": "Overall plan value rating",
+        "Data": "Data allowance in GB",
+        "Validity": "Plan validity in days",
+        "Features": "Additional features like OTT subscriptions",
+        "Price": "Plan cost"
+      }
+    },
+    keyFeatures: [
+      "Compare plans from all major providers",
+      "Usage-based recommendations",
+      "Cost per day and per GB analysis",
+      "OTT subscription considerations",
+      "Best value plan identification"
+    ],
+    howItWorks: [
+      "Enter your monthly data usage",
+      "Set call and SMS requirements",
+      "Choose preferred provider or compare all",
+      "Get personalized plan recommendations",
+      "Compare costs and features"
+    ],
+    benefits: [
+      "Choose optimal mobile plan",
+      "Save money on mobile bills",
+      "Avoid overpaying for unused data",
+      "Find plans with best value"
+    ],
+    example: {
+      scenario: "10GB Monthly Usage",
+      inputs: {
+        "Data": "10GB per month",
+        "Calls": "Unlimited",
+        "Provider": "All providers"
+      },
+      result: "Best plan: Jio ₹399 (6GB, 28 days)"
+    }
+  },
+
+  "wfh-savings": {
+    title: "Work-from-Home Savings Calculator - Calculate WFH Cost Savings | Remote Work Calculator",
+    description: "Free Work-from-Home Savings Calculator to calculate savings on commute, food, and clothing when working remotely. Analyze WFH financial benefits and additional costs.",
+    seoKeywords: "work from home savings calculator, WFH savings calculator, remote work savings, commute savings calculator, work from home cost calculator, remote work financial benefits",
+    searchQueries: [
+      "work from home savings calculator",
+      "WFH savings calculator",
+      "remote work savings calculator",
+      "commute savings calculator",
+      "work from home cost calculator",
+      "remote work financial benefits",
+      "WFH cost analysis",
+      "telecommute savings",
+      "home office savings",
+      "remote work expenses"
+    ],
+    formula: {
+      name: "WFH Savings Formula",
+      equation: "Net Savings = (Commute + Food + Clothing Savings) - Additional WFH Costs",
+      variables: {
+        "Net Savings": "Total monthly savings from working from home",
+        "Commute Savings": "Fuel, parking, public transport costs saved",
+        "Food Savings": "Lunch, coffee, snacks costs saved",
+        "Clothing Savings": "Formal wear and dry cleaning costs saved",
+        "Additional WFH Costs": "Internet, electricity, home office setup"
+      }
+    },
+    keyFeatures: [
+      "Comprehensive cost analysis",
+      "Commute, food, and clothing savings",
+      "Additional WFH cost considerations",
+      "Net savings calculation",
+      "Investment opportunity analysis"
+    ],
+    howItWorks: [
+      "Enter work schedule and commute details",
+      "Add daily food and clothing expenses",
+      "Include additional WFH costs",
+      "Get net monthly savings breakdown",
+      "See investment opportunities with saved money"
+    ],
+    benefits: [
+      "Understand true WFH financial impact",
+      "Plan budget for remote work",
+      "Identify major cost savings",
+      "Make informed work arrangement decisions"
+    ],
+    example: {
+      scenario: "5 Days WFH per Week",
+      inputs: {
+        "Commute": "25km, ₹400/day",
+        "Food": "₹350/day",
+        "WFH Costs": "₹1,300/month"
+      },
+      result: "Net monthly savings: ₹15,200"
+    }
+  },
+
+  "habit-cost": {
+    title: "Coffee Smoking Cost Tracker - Calculate Habit Costs Over Time | Addiction Cost Calculator",
+    description: "Free Coffee/Smoking Cost Tracker to see how small habits affect your wallet over time. Calculate daily, monthly, yearly costs of coffee, cigarettes, and other habits with investment alternatives.",
+    seoKeywords: "coffee cost calculator, smoking cost calculator, habit cost tracker, addiction cost calculator, cigarette cost calculator, daily habit calculator, lifestyle cost calculator",
+    searchQueries: [
+      "coffee cost calculator",
+      "smoking cost calculator",
+      "habit cost tracker",
+      "cigarette cost calculator",
+      "daily habit cost",
+      "addiction cost calculator",
+      "lifestyle cost calculator",
+      "smoking expense calculator",
+      "coffee expense tracker",
+      "habit financial impact"
+    ],
+    formula: {
+      name: "Habit Cost Formula",
+      equation: "Total Cost = Daily Quantity × Unit Cost × Time Period",
+      variables: {
+        "Total Cost": "Total money spent on habit over time",
+        "Daily Quantity": "Number of units consumed daily",
+        "Unit Cost": "Cost per unit (cup, cigarette, etc.)",
+        "Time Period": "Days, months, or years for calculation"
+      }
+    },
+    keyFeatures: [
+      "Track multiple habits simultaneously",
+      "Long-term cost projections",
+      "Investment alternative calculations",
+      "Health impact awareness",
+      "Habit replacement suggestions"
+    ],
+    howItWorks: [
+      "Add your daily habits (coffee, smoking, etc.)",
+      "Set daily quantity and unit costs",
+      "Choose projection timeframe",
+      "See total costs and investment alternatives",
+      "Get health impact and replacement suggestions"
+    ],
+    benefits: [
+      "Understand true cost of habits",
+      "Motivate habit changes",
+      "See investment opportunities",
+      "Plan healthier alternatives"
+    ],
+    example: {
+      scenario: "Daily Coffee & Smoking",
+      inputs: {
+        "Coffee": "2 cups × ₹150",
+        "Cigarettes": "10 × ₹15",
+        "Timeframe": "5 years"
+      },
+      result: "Total cost: ₹8,21,250, SIP alternative: ₹12,45,000"
+    }
+  },
+
+  "freelancer-tax": {
+    title: "Freelancer Tax Estimator - Calculate Income Tax for Freelancers | Self-Employed Tax Calculator",
+    description: "Free Freelancer Tax Estimator to calculate income tax for freelancers and self-employed professionals. Compare old vs new tax regime with business expense deductions and advance tax planning.",
+    seoKeywords: "freelancer tax calculator, self employed tax calculator, freelancer income tax, business tax calculator, advance tax calculator, freelancer tax estimator, independent contractor tax",
+    searchQueries: [
+      "freelancer tax calculator",
+      "self employed tax calculator",
+      "freelancer income tax",
+      "business tax calculator",
+      "advance tax calculator",
+      "freelancer tax estimator",
+      "independent contractor tax",
+      "freelance tax planning",
+      "self employment tax",
+      "business income tax"
+    ],
+    formula: {
+      name: "Freelancer Tax Formula",
+      equation: "Tax = (Gross Income - Business Expenses - Deductions) × Tax Rate + Cess",
+      variables: {
+        "Tax": "Total income tax liability",
+        "Gross Income": "Total freelance and other income",
+        "Business Expenses": "Deductible business expenses",
+        "Deductions": "Section 80C, 80D and other deductions",
+        "Tax Rate": "Applicable tax slab rate",
+        "Cess": "4% health and education cess"
+      }
+    },
+    keyFeatures: [
+      "Old vs new tax regime comparison",
+      "Business expense deductions",
+      "Advance tax calculation",
+      "Section-wise deduction planning",
+      "Effective tax rate analysis"
+    ],
+    howItWorks: [
+      "Choose tax regime (old or new)",
+      "Enter freelance income and business expenses",
+      "Add applicable deductions",
+      "Get tax liability and advance tax schedule",
+      "Compare regime benefits"
+    ],
+    benefits: [
+      "Accurate tax planning",
+      "Optimize tax savings",
+      "Plan advance tax payments",
+      "Understand deduction benefits"
+    ],
+    example: {
+      scenario: "Freelancer with ₹12L Income",
+      inputs: {
+        "Income": "₹12,00,000",
+        "Expenses": "₹2,00,000",
+        "Regime": "Old with deductions"
+      },
+      result: "Tax liability: ₹1,45,600, Quarterly: ₹36,400"
+    }
   }
 }
 
