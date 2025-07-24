@@ -22,6 +22,9 @@ import InflationCalculator from './calculators/InflationCalculator'
 import NetWorthCalculator from './calculators/NetWorthCalculator'
 import DiscountCalculator from './calculators/DiscountCalculator'
 import FuelCostCalculator from './calculators/FuelCostCalculator'
+import StockAverageCalculator from './calculators/StockAverageCalculator'
+import BudgetPlannerCalculator from './calculators/BudgetPlannerCalculator'
+import SavingsGoalCalculator from './calculators/SavingsGoalCalculator'
 
 // Components
 import Header from './components/Header'
@@ -91,12 +94,22 @@ const calculatorData = {
       { id: 'gratuity', name: 'Gratuity Calculator', icon: '🎁', component: GratuityCalculator, description: 'Gratuity calculation for employees' }
     ]
   },
+  personal_finance: {
+    title: "Personal Finance",
+    icon: "💰",
+    color: "emerald",
+    calculators: [
+      { id: 'budget-planner', name: 'Budget Planner', icon: '📊', component: BudgetPlannerCalculator, description: 'Track income vs expenses and plan monthly budget' },
+      { id: 'savings-goal', name: 'Savings Goal Tracker', icon: '🎯', component: SavingsGoalCalculator, description: 'Calculate daily/monthly savings to meet goals' },
+      { id: 'stock-average', name: 'Stock Average Calculator', icon: '📈', component: StockAverageCalculator, description: 'Calculate average stock price over multiple purchases' },
+      { id: 'net-worth', name: 'Net Worth Calculator', icon: '💎', component: NetWorthCalculator, description: 'Calculate your total net worth and financial position' }
+    ]
+  },
   general: {
     title: "General",
     icon: "🧮",
     color: "gray",
     calculators: [
-      { id: 'net-worth', name: 'Net Worth Calculator', icon: '💎', component: NetWorthCalculator, description: 'Calculate your total net worth and financial position' },
       { id: 'discount', name: 'Discount Calculator', icon: '🏷️', component: DiscountCalculator, description: 'Calculate final price after percentage discounts' },
       { id: 'fuel-cost', name: 'Fuel Cost Calculator', icon: '⛽', component: FuelCostCalculator, description: 'Calculate daily/monthly fuel expenses based on mileage' },
       { id: 'compound-interest', name: 'Compound Interest', icon: '🧮', component: CompoundInterestCalculator, description: 'Calculate compound interest and growth' },
@@ -146,7 +159,10 @@ export default function App() {
         'nps': { mainTab: 'retirement', subTab: 'nps' },
         'epf': { mainTab: 'retirement', subTab: 'epf' },
         'gratuity': { mainTab: 'retirement', subTab: 'gratuity' },
-        'net-worth': { mainTab: 'general', subTab: 'net-worth' },
+        'budget-planner': { mainTab: 'personal_finance', subTab: 'budget-planner' },
+        'savings-goal': { mainTab: 'personal_finance', subTab: 'savings-goal' },
+        'stock-average': { mainTab: 'personal_finance', subTab: 'stock-average' },
+        'net-worth': { mainTab: 'personal_finance', subTab: 'net-worth' },
         'discount': { mainTab: 'general', subTab: 'discount' },
         'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
@@ -198,7 +214,8 @@ export default function App() {
     mutual_funds: detectedCalculator?.mainTab === 'mutual_funds' ? detectedCalculator.subTab : 'sip',
     tax: detectedCalculator?.mainTab === 'tax' ? detectedCalculator.subTab : 'income-tax',
     retirement: detectedCalculator?.mainTab === 'retirement' ? detectedCalculator.subTab : 'nps',
-    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'net-worth'
+    personal_finance: detectedCalculator?.mainTab === 'personal_finance' ? detectedCalculator.subTab : 'budget-planner',
+    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'discount'
   })
   const [comparisonData, setComparisonData] = useState([])
 

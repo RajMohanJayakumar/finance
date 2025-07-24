@@ -1129,6 +1129,175 @@ export const calculatorDescriptions = {
       },
       result: "Daily Cost: ₹333, Monthly: ₹10,000"
     }
+  },
+
+  "stock-average": {
+    title: "Stock Average Calculator - Calculate Average Stock Price | Portfolio Average Calculator",
+    description: "Free Stock Average Calculator to calculate average stock price over multiple purchases. Track your stock portfolio, calculate average buying price, and monitor profit/loss with our comprehensive stock averaging calculator for smart investment decisions.",
+    seoKeywords: "stock average calculator, average stock price calculator, portfolio average calculator, stock cost averaging calculator, share average price calculator, investment average calculator, stock portfolio calculator",
+    searchQueries: [
+      "stock average calculator online",
+      "average stock price calculator",
+      "portfolio average calculator",
+      "stock cost averaging calculator",
+      "share average price calculator",
+      "calculate average stock price",
+      "investment average calculator",
+      "stock portfolio calculator",
+      "stock buying average calculator",
+      "equity average price calculator"
+    ],
+    formula: {
+      name: "Stock Average Price Formula",
+      equation: "Average Price = Total Investment ÷ Total Shares",
+      variables: {
+        "Average Price": "Average cost per share across all purchases",
+        "Total Investment": "Sum of all money invested in the stock",
+        "Total Shares": "Total number of shares purchased across all transactions"
+      }
+    },
+    keyFeatures: [
+      "Calculate average stock price across multiple purchases",
+      "Track total investment and shares",
+      "Monitor current profit/loss",
+      "Add unlimited purchase transactions",
+      "Real-time portfolio valuation"
+    ],
+    howItWorks: [
+      "Add each stock purchase with quantity and price",
+      "Calculator computes average price automatically",
+      "Enter current market price to see profit/loss",
+      "Track your investment performance",
+      "Plan future investment decisions"
+    ],
+    benefits: [
+      "Make informed investment decisions",
+      "Track portfolio performance",
+      "Calculate profit/loss accurately",
+      "Plan dollar-cost averaging strategy"
+    ],
+    example: {
+      scenario: "Stock Average Calculation Example",
+      inputs: {
+        "Purchase 1": "100 shares @ ₹150",
+        "Purchase 2": "50 shares @ ₹120",
+        "Current Price": "₹160"
+      },
+      result: "Average Price: ₹140, Profit: ₹3,000 (14.3%)"
+    }
+  },
+
+  "budget-planner": {
+    title: "Budget Planner Calculator - Monthly Budget Tracker | Income vs Expense Calculator",
+    description: "Free Budget Planner Calculator to track monthly income vs expenses. Plan your personal budget, categorize expenses, monitor savings rate, and achieve financial goals with our comprehensive budget planning tool.",
+    seoKeywords: "budget planner calculator, monthly budget calculator, income expense calculator, personal budget planner, budget tracker calculator, expense tracker calculator, savings rate calculator",
+    searchQueries: [
+      "budget planner calculator online",
+      "monthly budget calculator",
+      "income vs expense calculator",
+      "personal budget planner",
+      "budget tracker calculator",
+      "expense tracker calculator",
+      "savings rate calculator",
+      "family budget calculator",
+      "household budget planner",
+      "budget planning tool"
+    ],
+    formula: {
+      name: "Budget Planning Formula",
+      equation: "Net Income = Total Income - Total Expenses",
+      variables: {
+        "Net Income": "Amount left after all expenses (savings potential)",
+        "Total Income": "Sum of all income sources (salary, freelance, etc.)",
+        "Total Expenses": "Sum of all monthly expenses and bills"
+      }
+    },
+    keyFeatures: [
+      "Track multiple income sources",
+      "Categorize all expenses",
+      "Calculate savings rate",
+      "Budget surplus/deficit analysis",
+      "Expense breakdown by category"
+    ],
+    howItWorks: [
+      "Add all your income sources",
+      "List all monthly expenses by category",
+      "Calculator shows net income automatically",
+      "View savings rate and budget status",
+      "Get personalized budget recommendations"
+    ],
+    benefits: [
+      "Control your finances",
+      "Identify spending patterns",
+      "Increase savings rate",
+      "Achieve financial goals"
+    ],
+    example: {
+      scenario: "Monthly Budget Example",
+      inputs: {
+        "Income": "₹80,000 (Salary + Freelance)",
+        "Expenses": "₹65,000 (Rent, Food, etc.)",
+        "Net Income": "₹15,000"
+      },
+      result: "Savings Rate: 18.75%, Budget Surplus"
+    }
+  },
+
+  "savings-goal": {
+    title: "Savings Goal Calculator - Daily Monthly Savings Tracker | Financial Goal Planner",
+    description: "Free Savings Goal Calculator to plan how much to save daily/monthly to reach your financial goals. Set savings targets, track progress, and calculate the exact amount needed to achieve your dreams with our goal planning tool.",
+    seoKeywords: "savings goal calculator, daily savings calculator, monthly savings calculator, financial goal calculator, savings target calculator, goal planning calculator, savings tracker calculator",
+    searchQueries: [
+      "savings goal calculator online",
+      "daily savings calculator",
+      "monthly savings calculator",
+      "financial goal calculator",
+      "savings target calculator",
+      "goal planning calculator",
+      "savings tracker calculator",
+      "how much to save calculator",
+      "savings plan calculator",
+      "financial goal planner"
+    ],
+    formula: {
+      name: "Savings Goal Formula",
+      equation: "Daily Savings = (Goal Amount - Current Savings) ÷ Days Remaining",
+      variables: {
+        "Daily Savings": "Amount to save each day to reach goal",
+        "Goal Amount": "Target amount you want to save",
+        "Current Savings": "Amount already saved towards goal",
+        "Days Remaining": "Number of days until target date"
+      }
+    },
+    keyFeatures: [
+      "Calculate daily/weekly/monthly savings needed",
+      "Track progress towards goal",
+      "Set realistic target dates",
+      "Visual progress indicator",
+      "Goal achievability assessment"
+    ],
+    howItWorks: [
+      "Set your savings goal amount",
+      "Enter current savings (if any)",
+      "Choose your target date",
+      "Get daily/monthly savings plan",
+      "Track progress with visual indicators"
+    ],
+    benefits: [
+      "Achieve financial goals faster",
+      "Stay motivated with progress tracking",
+      "Plan realistic savings targets",
+      "Build consistent saving habits"
+    ],
+    example: {
+      scenario: "Vacation Savings Goal",
+      inputs: {
+        "Goal": "₹1,00,000 for vacation",
+        "Current Savings": "₹25,000",
+        "Target Date": "12 months"
+      },
+      result: "Save ₹208/day or ₹6,250/month"
+    }
   }
 }
 
