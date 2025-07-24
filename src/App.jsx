@@ -25,6 +25,10 @@ import FuelCostCalculator from './calculators/FuelCostCalculator'
 import StockAverageCalculator from './calculators/StockAverageCalculator'
 import BudgetPlannerCalculator from './calculators/BudgetPlannerCalculator'
 import SavingsGoalCalculator from './calculators/SavingsGoalCalculator'
+import BillSplitCalculator from './calculators/BillSplitCalculator'
+import TipCalculator from './calculators/TipCalculator'
+import SubscriptionCalculator from './calculators/SubscriptionCalculator'
+import DailyInterestCalculator from './calculators/DailyInterestCalculator'
 
 // Components
 import Header from './components/Header'
@@ -105,6 +109,17 @@ const calculatorData = {
       { id: 'net-worth', name: 'Net Worth Calculator', icon: '💎', component: NetWorthCalculator, description: 'Calculate your total net worth and financial position' }
     ]
   },
+  lifestyle: {
+    title: "Lifestyle",
+    icon: "🎯",
+    color: "pink",
+    calculators: [
+      { id: 'bill-split', name: 'Bill Split Calculator', icon: '🧾', component: BillSplitCalculator, description: 'Split bills among friends or roommates' },
+      { id: 'tip-calculator', name: 'Tip Calculator', icon: '💰', component: TipCalculator, description: 'Calculate tips and split bills with tip per person' },
+      { id: 'subscription-tracker', name: 'Subscription Tracker', icon: '📱', component: SubscriptionCalculator, description: 'Track monthly/yearly cost of all subscriptions' },
+      { id: 'daily-interest', name: 'Daily Interest Calculator', icon: '📅', component: DailyInterestCalculator, description: 'Calculate daily interest on short-term savings/loans' }
+    ]
+  },
   general: {
     title: "General",
     icon: "🧮",
@@ -163,6 +178,10 @@ export default function App() {
         'savings-goal': { mainTab: 'personal_finance', subTab: 'savings-goal' },
         'stock-average': { mainTab: 'personal_finance', subTab: 'stock-average' },
         'net-worth': { mainTab: 'personal_finance', subTab: 'net-worth' },
+        'bill-split': { mainTab: 'lifestyle', subTab: 'bill-split' },
+        'tip-calculator': { mainTab: 'lifestyle', subTab: 'tip-calculator' },
+        'subscription-tracker': { mainTab: 'lifestyle', subTab: 'subscription-tracker' },
+        'daily-interest': { mainTab: 'lifestyle', subTab: 'daily-interest' },
         'discount': { mainTab: 'general', subTab: 'discount' },
         'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
@@ -215,6 +234,7 @@ export default function App() {
     tax: detectedCalculator?.mainTab === 'tax' ? detectedCalculator.subTab : 'income-tax',
     retirement: detectedCalculator?.mainTab === 'retirement' ? detectedCalculator.subTab : 'nps',
     personal_finance: detectedCalculator?.mainTab === 'personal_finance' ? detectedCalculator.subTab : 'budget-planner',
+    lifestyle: detectedCalculator?.mainTab === 'lifestyle' ? detectedCalculator.subTab : 'bill-split',
     general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'discount'
   })
   const [comparisonData, setComparisonData] = useState([])

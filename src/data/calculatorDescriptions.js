@@ -1298,6 +1298,232 @@ export const calculatorDescriptions = {
       },
       result: "Save ₹208/day or ₹6,250/month"
     }
+  },
+
+  "bill-split": {
+    title: "Bill Split Calculator - Split Bills Among Friends | Group Bill Calculator",
+    description: "Free Bill Split Calculator to split bills fairly among friends, roommates, or group outings. Calculate individual shares, handle custom amounts, and include tips for restaurants, parties, and shared expenses.",
+    seoKeywords: "bill split calculator, split bill calculator, group bill calculator, restaurant bill split, roommate bill split, party bill calculator, expense split calculator",
+    searchQueries: [
+      "bill split calculator online",
+      "split bill calculator",
+      "group bill calculator",
+      "restaurant bill split calculator",
+      "roommate bill split",
+      "party expense calculator",
+      "expense split calculator",
+      "divide bill calculator",
+      "shared bill calculator",
+      "group expense calculator"
+    ],
+    formula: {
+      name: "Bill Split Formula",
+      equation: "Per Person = (Total Bill + Tip) ÷ Number of People",
+      variables: {
+        "Per Person": "Amount each person needs to pay",
+        "Total Bill": "Original bill amount before tip",
+        "Tip": "Tip amount (percentage of bill)",
+        "Number of People": "Total people sharing the bill"
+      }
+    },
+    keyFeatures: [
+      "Split bills equally among any number of people",
+      "Handle custom amounts for specific individuals",
+      "Include tip calculations",
+      "Support different payment scenarios",
+      "Real-time calculation updates"
+    ],
+    howItWorks: [
+      "Enter the total bill amount",
+      "Set tip percentage",
+      "Add number of people",
+      "Customize individual amounts if needed",
+      "Get per-person breakdown instantly"
+    ],
+    benefits: [
+      "Fair bill splitting",
+      "Avoid payment disputes",
+      "Handle complex scenarios",
+      "Quick group calculations"
+    ],
+    example: {
+      scenario: "Restaurant Bill Split",
+      inputs: {
+        "Total Bill": "₹2,000",
+        "Tip": "18%",
+        "People": "4 friends"
+      },
+      result: "Each person pays: ₹590"
+    }
+  },
+
+  "tip-calculator": {
+    title: "Tip Calculator - Calculate Tips and Split Bills | Restaurant Tip Calculator",
+    description: "Free Tip Calculator to calculate tips based on service quality and split bills with tips per person. Perfect for restaurants, bars, delivery, and service industries with customizable tip percentages.",
+    seoKeywords: "tip calculator, restaurant tip calculator, tip calculator with split, service tip calculator, delivery tip calculator, bar tip calculator, gratuity calculator",
+    searchQueries: [
+      "tip calculator online",
+      "restaurant tip calculator",
+      "tip calculator with split",
+      "service tip calculator",
+      "delivery tip calculator",
+      "bar tip calculator",
+      "gratuity calculator",
+      "tip percentage calculator",
+      "dining tip calculator",
+      "bill tip calculator"
+    ],
+    formula: {
+      name: "Tip Calculation Formula",
+      equation: "Tip Amount = Bill Amount × Tip Percentage",
+      variables: {
+        "Tip Amount": "Amount to tip based on service",
+        "Bill Amount": "Total bill before tip",
+        "Tip Percentage": "Percentage based on service quality"
+      }
+    },
+    keyFeatures: [
+      "Service quality-based tip suggestions",
+      "Customizable tip percentages",
+      "Split bill with tip per person",
+      "Quick tip percentage buttons",
+      "Comprehensive tipping guide"
+    ],
+    howItWorks: [
+      "Enter your bill amount",
+      "Select service quality or custom tip %",
+      "Add number of people if splitting",
+      "Get tip amount and total per person",
+      "Follow tipping guidelines for different services"
+    ],
+    benefits: [
+      "Fair tipping based on service",
+      "Easy bill splitting with tips",
+      "Learn proper tipping etiquette",
+      "Quick calculations for any scenario"
+    ],
+    example: {
+      scenario: "Restaurant Dinner",
+      inputs: {
+        "Bill": "₹1,500",
+        "Service": "Good (18%)",
+        "People": "2"
+      },
+      result: "Tip: ₹270, Total per person: ₹885"
+    }
+  },
+
+  "subscription-tracker": {
+    title: "Subscription Cost Tracker - Track Monthly Yearly Subscription Costs | Streaming Calculator",
+    description: "Free Subscription Cost Tracker to calculate total monthly and yearly costs of all your streaming, app, and digital subscriptions. Manage Netflix, Spotify, and other recurring services efficiently.",
+    seoKeywords: "subscription cost tracker, subscription calculator, streaming cost calculator, monthly subscription tracker, app subscription calculator, recurring payment calculator",
+    searchQueries: [
+      "subscription cost tracker",
+      "subscription calculator online",
+      "streaming cost calculator",
+      "monthly subscription tracker",
+      "app subscription calculator",
+      "recurring payment calculator",
+      "subscription expense tracker",
+      "digital subscription calculator",
+      "subscription budget calculator",
+      "subscription cost analyzer"
+    ],
+    formula: {
+      name: "Subscription Cost Formula",
+      equation: "Total Cost = Σ(Individual Subscription × Billing Frequency)",
+      variables: {
+        "Total Cost": "Combined cost of all subscriptions",
+        "Individual Subscription": "Cost of each service",
+        "Billing Frequency": "How often you're charged (monthly, yearly, etc.)"
+      }
+    },
+    keyFeatures: [
+      "Track unlimited subscriptions",
+      "Multiple billing cycles (weekly, monthly, yearly)",
+      "Category-wise breakdown",
+      "Popular service quick-add",
+      "Cost optimization suggestions"
+    ],
+    howItWorks: [
+      "Add all your subscriptions",
+      "Set cost and billing frequency",
+      "Categorize by service type",
+      "View total monthly/yearly costs",
+      "Identify savings opportunities"
+    ],
+    benefits: [
+      "Control subscription spending",
+      "Identify unused services",
+      "Budget recurring expenses",
+      "Optimize subscription portfolio"
+    ],
+    example: {
+      scenario: "Digital Subscriptions",
+      inputs: {
+        "Netflix": "₹649/month",
+        "Spotify": "₹119/month",
+        "Amazon Prime": "₹1,499/year"
+      },
+      result: "Monthly total: ₹893, Yearly: ₹10,715"
+    }
+  },
+
+  "daily-interest": {
+    title: "Daily Interest Calculator - Calculate Daily Simple Compound Interest | Short Term Interest",
+    description: "Free Daily Interest Calculator for simple and compound interest on short-term savings, loans, and investments. Calculate daily interest earnings and total returns for any time period.",
+    seoKeywords: "daily interest calculator, daily compound interest calculator, short term interest calculator, daily simple interest calculator, daily savings calculator, daily loan interest calculator",
+    searchQueries: [
+      "daily interest calculator online",
+      "daily compound interest calculator",
+      "short term interest calculator",
+      "daily simple interest calculator",
+      "daily savings interest calculator",
+      "daily loan interest calculator",
+      "calculate daily interest",
+      "daily interest rate calculator",
+      "short term investment calculator",
+      "daily earnings calculator"
+    ],
+    formula: {
+      name: "Daily Interest Formula",
+      equation: "Daily Interest = Principal × (Annual Rate ÷ 365) ÷ 100",
+      variables: {
+        "Daily Interest": "Interest earned or charged per day",
+        "Principal": "Initial amount invested or borrowed",
+        "Annual Rate": "Yearly interest rate percentage",
+        "Days": "Number of days for calculation"
+      }
+    },
+    keyFeatures: [
+      "Simple and compound interest calculations",
+      "Flexible time periods (days to years)",
+      "Daily interest rate breakdown",
+      "Comparison between interest types",
+      "Quick preset buttons for common periods"
+    ],
+    howItWorks: [
+      "Enter principal amount",
+      "Set annual interest rate",
+      "Choose number of days",
+      "Select simple or compound interest",
+      "Get daily and total interest breakdown"
+    ],
+    benefits: [
+      "Plan short-term investments",
+      "Calculate loan interest costs",
+      "Compare investment options",
+      "Understand daily earnings"
+    ],
+    example: {
+      scenario: "30-Day Fixed Deposit",
+      inputs: {
+        "Principal": "₹1,00,000",
+        "Annual Rate": "8%",
+        "Period": "30 days"
+      },
+      result: "Daily interest: ₹22, Total: ₹658"
+    }
   }
 }
 
