@@ -27,6 +27,7 @@ import PDFExport from './components/PDFExport'
 import FloatingComparisonButton from './components/FloatingComparisonButton'
 import Breadcrumb from './components/Breadcrumb'
 import SEOAnalytics from './components/SEOAnalytics'
+import CalculatorDescription from './components/CalculatorDescription'
 
 // Context
 import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
@@ -410,6 +411,14 @@ export default function App() {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Calculator Description Section */}
+          {currentCalculator && (
+            <CalculatorDescription
+              calculatorId={currentCalculator.id}
+              categoryColor={currentCategory.color}
+            />
+          )}
         </motion.div>
         {/* Floating Action Buttons */}
         <motion.div
