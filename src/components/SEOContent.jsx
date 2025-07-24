@@ -35,6 +35,16 @@ const getRelatedCalculators = (currentCalculatorId) => {
       { id: 'sip', name: 'SIP Calculator', description: 'Build wealth systematically', icon: '📈' },
       { id: 'fd', name: 'FD Calculator', description: 'Safe investments', icon: '🏦' },
       { id: 'ppf', name: 'PPF Calculator', description: 'Long-term savings', icon: '🛡️' }
+    ],
+    discount: [
+      { id: 'income-tax', name: 'Tax Calculator', description: 'Calculate tax savings', icon: '📋' },
+      { id: 'simple-interest', name: 'Simple Interest', description: 'Basic calculations', icon: '📊' },
+      { id: 'compound-interest', name: 'Compound Interest', description: 'Investment growth', icon: '🧮' }
+    ],
+    'fuel-cost': [
+      { id: 'emi', name: 'EMI Calculator', description: 'Vehicle loan EMI', icon: '🏠' },
+      { id: 'simple-interest', name: 'Simple Interest', description: 'Loan calculations', icon: '📊' },
+      { id: 'inflation', name: 'Inflation Calculator', description: 'Cost impact over time', icon: '📈' }
     ]
   }
 

@@ -20,6 +20,8 @@ import CompoundInterestCalculator from './calculators/CompoundInterestCalculator
 import SimpleInterestCalculator from './calculators/SimpleInterestCalculator'
 import InflationCalculator from './calculators/InflationCalculator'
 import NetWorthCalculator from './calculators/NetWorthCalculator'
+import DiscountCalculator from './calculators/DiscountCalculator'
+import FuelCostCalculator from './calculators/FuelCostCalculator'
 
 // Components
 import Header from './components/Header'
@@ -95,6 +97,8 @@ const calculatorData = {
     color: "gray",
     calculators: [
       { id: 'net-worth', name: 'Net Worth Calculator', icon: '💎', component: NetWorthCalculator, description: 'Calculate your total net worth and financial position' },
+      { id: 'discount', name: 'Discount Calculator', icon: '🏷️', component: DiscountCalculator, description: 'Calculate final price after percentage discounts' },
+      { id: 'fuel-cost', name: 'Fuel Cost Calculator', icon: '⛽', component: FuelCostCalculator, description: 'Calculate daily/monthly fuel expenses based on mileage' },
       { id: 'compound-interest', name: 'Compound Interest', icon: '🧮', component: CompoundInterestCalculator, description: 'Calculate compound interest and growth' },
       { id: 'simple-interest', name: 'Simple Interest', icon: '📊', component: SimpleInterestCalculator, description: 'Calculate simple interest' },
       { id: 'inflation', name: 'Inflation Calculator', icon: '📈', component: InflationCalculator, description: 'Calculate inflation impact over time' }
@@ -143,6 +147,8 @@ export default function App() {
         'epf': { mainTab: 'retirement', subTab: 'epf' },
         'gratuity': { mainTab: 'retirement', subTab: 'gratuity' },
         'net-worth': { mainTab: 'general', subTab: 'net-worth' },
+        'discount': { mainTab: 'general', subTab: 'discount' },
+        'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
         'simple-interest': { mainTab: 'general', subTab: 'simple-interest' },
         'inflation': { mainTab: 'general', subTab: 'inflation' }

@@ -1015,6 +1015,120 @@ export const calculatorDescriptions = {
       },
       result: "Net Worth: ₹30,00,000"
     }
+  },
+
+  discount: {
+    title: "Discount Calculator - Calculate Final Price After Percentage Discounts",
+    description: "Free Discount Calculator to calculate final price after applying percentage discounts and taxes. Calculate multiple discounts, additional offers, and tax calculations for shopping, sales, and business pricing decisions.",
+    seoKeywords: "discount calculator, percentage discount calculator, sale price calculator, discount percentage calculator, price after discount calculator, shopping discount calculator, final price calculator",
+    searchQueries: [
+      "discount calculator online",
+      "percentage discount calculator",
+      "sale price calculator",
+      "calculate discount percentage",
+      "price after discount calculator",
+      "shopping discount calculator",
+      "final price after discount",
+      "multiple discount calculator",
+      "discount and tax calculator",
+      "retail discount calculator"
+    ],
+    formula: {
+      name: "Discount Calculation Formula",
+      equation: "Final Price = (Original Price - Discount) + Tax",
+      variables: {
+        "Final Price": "Price after applying discounts and adding taxes",
+        "Original Price": "Initial price before any discounts",
+        "Discount": "Amount reduced from original price (percentage-based)",
+        "Tax": "Additional charges applied on discounted price"
+      }
+    },
+    keyFeatures: [
+      "Calculate single and multiple discounts",
+      "Apply additional discount offers",
+      "Include tax calculations",
+      "Show total savings amount",
+      "Display savings percentage"
+    ],
+    howItWorks: [
+      "Enter the original price of the item",
+      "Add primary discount percentage",
+      "Include additional discounts if applicable",
+      "Add tax percentage if required",
+      "Get final price and total savings"
+    ],
+    benefits: [
+      "Smart shopping decisions",
+      "Compare different offers",
+      "Calculate actual savings",
+      "Business pricing strategies"
+    ],
+    example: {
+      scenario: "Shopping Discount Example",
+      inputs: {
+        "Original Price": "₹1,000",
+        "Discount": "20% + 5% additional",
+        "Tax": "18% GST"
+      },
+      result: "Final Price: ₹944, Savings: ₹240"
+    }
+  },
+
+  "fuel-cost": {
+    title: "Fuel Cost Calculator - Calculate Daily Monthly Fuel Expenses | Mileage Calculator",
+    description: "Free Fuel Cost Calculator to calculate daily, monthly, and yearly fuel expenses based on fuel price and vehicle mileage. Plan your transportation budget and track fuel consumption for cars, bikes, and commercial vehicles.",
+    seoKeywords: "fuel cost calculator, fuel expense calculator, mileage calculator, petrol cost calculator, diesel cost calculator, fuel consumption calculator, transportation cost calculator, vehicle running cost calculator",
+    searchQueries: [
+      "fuel cost calculator online",
+      "daily fuel cost calculator",
+      "monthly fuel expense calculator",
+      "petrol cost calculator",
+      "diesel cost calculator",
+      "vehicle mileage calculator",
+      "fuel consumption calculator",
+      "transportation cost calculator",
+      "car running cost calculator",
+      "fuel budget calculator"
+    ],
+    formula: {
+      name: "Fuel Cost Calculation Formula",
+      equation: "Fuel Cost = (Distance ÷ Mileage) × Fuel Price",
+      variables: {
+        "Fuel Cost": "Total cost of fuel for the given distance",
+        "Distance": "Total distance to be traveled (in km)",
+        "Mileage": "Vehicle's fuel efficiency (km per liter)",
+        "Fuel Price": "Current price of fuel per liter"
+      }
+    },
+    keyFeatures: [
+      "Calculate daily and monthly fuel costs",
+      "Track fuel consumption patterns",
+      "Compare different vehicles",
+      "Budget transportation expenses",
+      "Analyze cost per kilometer"
+    ],
+    howItWorks: [
+      "Enter current fuel price per liter",
+      "Input your vehicle's mileage (km/L)",
+      "Choose daily or monthly calculation",
+      "Enter distance traveled",
+      "Get detailed cost breakdown"
+    ],
+    benefits: [
+      "Budget transportation costs",
+      "Compare vehicle efficiency",
+      "Plan travel expenses",
+      "Track fuel consumption"
+    ],
+    example: {
+      scenario: "Daily Commute Fuel Cost",
+      inputs: {
+        "Fuel Price": "₹100/liter",
+        "Vehicle Mileage": "15 km/L",
+        "Daily Distance": "50 km"
+      },
+      result: "Daily Cost: ₹333, Monthly: ₹10,000"
+    }
   }
 }
 

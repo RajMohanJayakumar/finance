@@ -91,7 +91,7 @@ export const generateSEOSitemap = () => {
 }
 
 const getPriorityByCalculator = (calculatorId) => {
-  const highPriorityCalculators = ['emi', 'sip', 'income-tax', 'fd', 'ppf', 'net-worth']
+  const highPriorityCalculators = ['emi', 'sip', 'income-tax', 'fd', 'ppf', 'net-worth', 'discount', 'fuel-cost']
   const mediumPriorityCalculators = ['mortgage', 'personal-loan', 'cagr', 'swp', 'nps']
 
   if (highPriorityCalculators.includes(calculatorId)) return '0.9'
@@ -107,7 +107,7 @@ const getChangeFreqByCalculator = (calculatorId) => {
 }
 
 const isHighTrafficCalculator = (calculatorId) => {
-  const highTrafficCalculators = ['emi', 'sip', 'income-tax', 'fd', 'ppf', 'mortgage', 'net-worth']
+  const highTrafficCalculators = ['emi', 'sip', 'income-tax', 'fd', 'ppf', 'mortgage', 'net-worth', 'discount', 'fuel-cost']
   return highTrafficCalculators.includes(calculatorId)
 }
 
