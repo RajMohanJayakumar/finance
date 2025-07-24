@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 
   <!-- Homepage -->
   <url>
@@ -7,14 +7,37 @@
     <lastmod>2024-01-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://finclamp.com/og-image.svg</image:loc>
+      <image:title>FinClamp - Complete Financial Calculator Suite</image:title>
+    </image:image>
   </url>
 
-  <!-- Loan Calculators -->
+  <!-- High-Traffic Loan Calculators -->
   <url>
     <loc>https://finclamp.com/?calculator=emi</loc>
     <lastmod>2024-01-22</lastmod>
-    <changefreq>monthly</changefreq>
+    <changefreq>weekly</changefreq>
     <priority>0.9</priority>
+    <image:image>
+      <image:loc>https://finclamp.com/og-calculator-emi.jpg</image:loc>
+      <image:title>EMI Calculator - Calculate Loan EMI Online</image:title>
+    </image:image>
+  </url>
+
+  <!-- EMI Calculator Search Variations -->
+  <url>
+    <loc>https://finclamp.com/?calculator=emi&amp;q=home-loan-emi-calculator</loc>
+    <lastmod>2024-01-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://finclamp.com/?calculator=emi&amp;q=personal-loan-emi-calculator</loc>
+    <lastmod>2024-01-22</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
   </url>
 
   <url>

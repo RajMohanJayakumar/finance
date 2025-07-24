@@ -2,8 +2,21 @@
 export const calculatorDescriptions = {
   // Loan Calculators
   emi: {
-    title: "EMI Calculator - Equated Monthly Installment",
-    description: "An EMI (Equated Monthly Installment) calculator helps you determine the fixed monthly payment amount for any loan. Whether it's a home loan, personal loan, or car loan, this calculator provides accurate EMI calculations along with a detailed amortization schedule.",
+    title: "EMI Calculator - Calculate Loan EMI Online | Home Loan, Personal Loan EMI Calculator",
+    description: "Free EMI Calculator to calculate loan EMI for home loans, personal loans, car loans, and business loans. Get instant EMI calculation with detailed amortization schedule, total interest, and monthly payment breakdown. Calculate EMI online with our accurate loan EMI calculator and plan your finances better.",
+    seoKeywords: "EMI calculator, loan EMI calculator, home loan EMI, personal loan EMI, car loan EMI, calculate EMI online, loan calculator, monthly EMI calculator, EMI calculation formula, loan payment calculator",
+    searchQueries: [
+      "EMI calculator online",
+      "home loan EMI calculator",
+      "personal loan EMI calculator",
+      "car loan EMI calculator",
+      "calculate EMI for loan",
+      "monthly EMI calculation",
+      "loan EMI formula",
+      "EMI calculator with interest rate",
+      "housing loan EMI calculator",
+      "business loan EMI calculator"
+    ],
     formula: {
       name: "EMI Formula",
       equation: "EMI = [P × R × (1+R)^N] / [(1+R)^N - 1]",
@@ -44,8 +57,21 @@ export const calculatorDescriptions = {
   },
 
   sip: {
-    title: "SIP Calculator - Systematic Investment Plan Calculator",
-    description: "A SIP (Systematic Investment Plan) calculator helps you calculate the potential returns from your mutual fund investments through systematic monthly contributions. It demonstrates the power of compounding and rupee cost averaging in wealth creation.",
+    title: "SIP Calculator - Mutual Fund SIP Calculator | Calculate SIP Returns Online",
+    description: "Free SIP Calculator to calculate mutual fund SIP returns and maturity amount. Plan your systematic investment plan with our online SIP calculator. Calculate SIP returns, understand the power of compounding, and plan your wealth creation journey with accurate SIP calculations for mutual funds.",
+    seoKeywords: "SIP calculator, mutual fund SIP calculator, SIP returns calculator, systematic investment plan calculator, SIP maturity calculator, mutual fund calculator, SIP investment calculator, calculate SIP returns, SIP planning calculator",
+    searchQueries: [
+      "SIP calculator online",
+      "mutual fund SIP calculator",
+      "SIP returns calculator",
+      "calculate SIP maturity amount",
+      "systematic investment plan calculator",
+      "SIP calculator with returns",
+      "mutual fund SIP planning",
+      "SIP investment calculator",
+      "monthly SIP calculator",
+      "SIP wealth calculator"
+    ],
     formula: {
       name: "SIP Future Value Formula",
       equation: "FV = P × [((1 + R)^N - 1) / R] × (1 + R)",
@@ -87,8 +113,21 @@ export const calculatorDescriptions = {
   },
 
   fd: {
-    title: "Fixed Deposit Calculator - FD Maturity Calculator",
-    description: "A Fixed Deposit (FD) calculator helps you determine the maturity amount and interest earned on your fixed deposit investment. It considers the principal amount, interest rate, and tenure to provide accurate calculations for both simple and compound interest scenarios.",
+    title: "FD Calculator - Fixed Deposit Calculator | Calculate FD Maturity & Interest Online",
+    description: "Free FD Calculator to calculate fixed deposit maturity amount and interest earnings. Compare FD rates from different banks, calculate FD returns, and plan your fixed deposit investments. Get accurate FD maturity calculations with our online fixed deposit calculator for all major banks in India.",
+    seoKeywords: "FD calculator, fixed deposit calculator, FD maturity calculator, FD interest calculator, bank FD calculator, fixed deposit maturity, FD returns calculator, calculate FD interest, FD investment calculator",
+    searchQueries: [
+      "FD calculator online",
+      "fixed deposit calculator",
+      "FD maturity calculator",
+      "bank FD calculator",
+      "calculate FD interest",
+      "FD returns calculator",
+      "fixed deposit maturity calculator",
+      "FD interest rate calculator",
+      "SBI FD calculator",
+      "HDFC FD calculator"
+    ],
     formula: {
       name: "FD Maturity Formula",
       equation: "A = P × (1 + R/100)^T",
@@ -131,8 +170,21 @@ export const calculatorDescriptions = {
   },
 
   ppf: {
-    title: "PPF Calculator - Public Provident Fund Calculator",
-    description: "A PPF (Public Provident Fund) calculator helps you calculate the maturity amount for your PPF investments. PPF is a 15-year tax-saving investment scheme with attractive returns and complete tax exemption under EEE (Exempt-Exempt-Exempt) status.",
+    title: "PPF Calculator - Public Provident Fund Calculator | Calculate PPF Maturity Online",
+    description: "Free PPF Calculator to calculate Public Provident Fund maturity amount and returns. Plan your 15-year PPF investment with tax benefits under Section 80C. Calculate PPF interest, maturity value, and tax savings with our accurate PPF calculator for long-term wealth creation.",
+    seoKeywords: "PPF calculator, public provident fund calculator, PPF maturity calculator, PPF interest calculator, PPF investment calculator, PPF tax benefit calculator, PPF returns calculator, calculate PPF maturity",
+    searchQueries: [
+      "PPF calculator online",
+      "public provident fund calculator",
+      "PPF maturity calculator",
+      "PPF interest calculator",
+      "calculate PPF returns",
+      "PPF investment calculator",
+      "PPF tax benefit calculator",
+      "PPF 15 year calculator",
+      "PPF contribution calculator",
+      "PPF withdrawal calculator"
+    ],
     formula: {
       name: "PPF Maturity Formula",
       equation: "A = P × [((1 + R)^N - 1) / R]",
@@ -174,8 +226,21 @@ export const calculatorDescriptions = {
   },
 
   mortgage: {
-    title: "Mortgage Calculator - Home Loan Calculator",
-    description: "A mortgage calculator is specifically designed for home loans, helping you calculate monthly payments, total interest, and understand the complete cost of your home purchase. It includes advanced features like property taxes, insurance, and PMI calculations.",
+    title: "Mortgage Calculator - Home Loan Calculator | Calculate Monthly Mortgage Payment",
+    description: "Free Mortgage Calculator to calculate home loan EMI, monthly mortgage payments, and total interest cost. Compare mortgage rates, analyze different loan terms, and plan your home purchase with our comprehensive mortgage calculator. Get accurate home loan calculations instantly.",
+    seoKeywords: "mortgage calculator, home loan calculator, mortgage payment calculator, home loan EMI calculator, mortgage rate calculator, housing loan calculator, property loan calculator, home mortgage calculator",
+    searchQueries: [
+      "mortgage calculator online",
+      "home loan calculator",
+      "mortgage payment calculator",
+      "home loan EMI calculator",
+      "mortgage rate calculator",
+      "housing loan calculator",
+      "property loan calculator",
+      "home mortgage payment calculator",
+      "mortgage affordability calculator",
+      "home loan interest calculator"
+    ],
     formula: {
       name: "Mortgage Payment Formula",
       equation: "M = P × [r(1+r)^n] / [(1+r)^n - 1]",
@@ -219,8 +284,21 @@ export const calculatorDescriptions = {
   },
 
   "personal-loan": {
-    title: "Personal Loan Calculator",
-    description: "A personal loan calculator helps you determine the EMI for unsecured personal loans. These loans typically have higher interest rates but offer flexibility in usage for various personal needs like medical expenses, travel, or debt consolidation.",
+    title: "Personal Loan Calculator - Calculate Personal Loan EMI Online | Instant Approval",
+    description: "Free Personal Loan Calculator to calculate EMI for unsecured personal loans. Get instant personal loan EMI calculation for medical expenses, travel, debt consolidation, and emergency needs. Compare personal loan rates and plan your finances with our accurate personal loan EMI calculator.",
+    seoKeywords: "personal loan calculator, personal loan EMI calculator, unsecured loan calculator, instant personal loan calculator, personal loan EMI, calculate personal loan EMI, personal loan interest calculator",
+    searchQueries: [
+      "personal loan calculator online",
+      "personal loan EMI calculator",
+      "calculate personal loan EMI",
+      "unsecured loan calculator",
+      "instant personal loan calculator",
+      "personal loan interest calculator",
+      "personal loan eligibility calculator",
+      "personal loan rate calculator",
+      "quick personal loan calculator",
+      "personal loan payment calculator"
+    ],
     formula: {
       name: "Personal Loan EMI Formula",
       equation: "EMI = [P × R × (1+R)^N] / [(1+R)^N - 1]",
@@ -261,8 +339,21 @@ export const calculatorDescriptions = {
   },
 
   rd: {
-    title: "Recurring Deposit Calculator - RD Maturity Calculator",
-    description: "A Recurring Deposit (RD) calculator helps you calculate the maturity amount for your monthly recurring deposit investments. It's perfect for systematic savings with a fixed monthly contribution over a specified period.",
+    title: "RD Calculator - Recurring Deposit Calculator | Calculate RD Maturity Online",
+    description: "Free RD Calculator to calculate recurring deposit maturity amount and monthly savings plan. Plan your systematic monthly deposits with our accurate RD calculator. Calculate RD returns, interest earnings, and maturity value for all major banks in India.",
+    seoKeywords: "RD calculator, recurring deposit calculator, RD maturity calculator, monthly deposit calculator, RD interest calculator, bank RD calculator, recurring deposit maturity, calculate RD returns",
+    searchQueries: [
+      "RD calculator online",
+      "recurring deposit calculator",
+      "RD maturity calculator",
+      "monthly deposit calculator",
+      "calculate RD interest",
+      "RD returns calculator",
+      "bank RD calculator",
+      "recurring deposit maturity calculator",
+      "RD investment calculator",
+      "SBI RD calculator"
+    ],
     formula: {
       name: "RD Maturity Formula",
       equation: "A = P × [(1 + R/400)^(4T) - 1] / (1/400)",
@@ -304,8 +395,21 @@ export const calculatorDescriptions = {
   },
 
   "income-tax": {
-    title: "Income Tax Calculator - Tax Liability Calculator",
-    description: "An Income Tax calculator helps you calculate your tax liability under both old and new tax regimes. It considers various deductions, exemptions, and tax slabs to provide accurate tax calculations and help you choose the most beneficial regime.",
+    title: "Income Tax Calculator 2024-25 | Calculate Tax Online | Old vs New Tax Regime",
+    description: "Free Income Tax Calculator for FY 2024-25 to calculate your tax liability under old and new tax regimes. Compare tax savings, calculate take-home salary, and optimize your tax planning. Get accurate income tax calculation with latest tax slabs, deductions, and exemptions for AY 2025-26.",
+    seoKeywords: "income tax calculator, tax calculator 2024-25, income tax calculator India, old vs new tax regime calculator, tax liability calculator, salary tax calculator, take home salary calculator, tax saving calculator",
+    searchQueries: [
+      "income tax calculator 2024-25",
+      "tax calculator India",
+      "old vs new tax regime calculator",
+      "salary tax calculator",
+      "income tax calculator online",
+      "tax liability calculator",
+      "take home salary calculator",
+      "tax saving calculator",
+      "income tax calculation FY 2024-25",
+      "tax calculator with new regime"
+    ],
     formula: {
       name: "Tax Calculation Formula",
       equation: "Tax = (Taxable Income × Tax Rate) - Tax Rebates",
@@ -346,8 +450,21 @@ export const calculatorDescriptions = {
   },
 
   swp: {
-    title: "SWP Calculator - Systematic Withdrawal Plan Calculator",
-    description: "A SWP (Systematic Withdrawal Plan) calculator helps you plan regular withdrawals from your mutual fund investments while keeping the remaining corpus invested for continued growth. It's ideal for retirement planning and creating regular income streams.",
+    title: "SWP Calculator - Systematic Withdrawal Plan Calculator | Retirement Income Planning",
+    description: "Free SWP Calculator to plan systematic withdrawals from mutual funds for retirement income. Calculate optimal withdrawal amounts, remaining corpus, and create sustainable income streams. Plan your retirement with our comprehensive SWP calculator for mutual fund investments.",
+    seoKeywords: "SWP calculator, systematic withdrawal plan calculator, retirement income calculator, mutual fund withdrawal calculator, SWP planning calculator, retirement withdrawal calculator, pension calculator",
+    searchQueries: [
+      "SWP calculator online",
+      "systematic withdrawal plan calculator",
+      "retirement income calculator",
+      "mutual fund withdrawal calculator",
+      "SWP planning calculator",
+      "retirement withdrawal calculator",
+      "pension withdrawal calculator",
+      "SWP vs SIP calculator",
+      "retirement corpus calculator",
+      "monthly income calculator"
+    ],
     formula: {
       name: "SWP Remaining Value Formula",
       equation: "RV = IV × (1 + R)^N - W × [((1 + R)^N - 1) / R]",
@@ -392,8 +509,21 @@ export const calculatorDescriptions = {
   },
 
   cagr: {
-    title: "CAGR Calculator - Compound Annual Growth Rate Calculator",
-    description: "A CAGR (Compound Annual Growth Rate) calculator helps you determine the annual growth rate of your investments over a specific period. It's a key metric for comparing investment performance and understanding true returns.",
+    title: "CAGR Calculator - Compound Annual Growth Rate Calculator | Investment Returns",
+    description: "Free CAGR Calculator to calculate Compound Annual Growth Rate of your investments. Analyze investment performance, compare mutual funds, stocks, and portfolio returns. Calculate CAGR for accurate investment analysis and decision making.",
+    seoKeywords: "CAGR calculator, compound annual growth rate calculator, investment returns calculator, mutual fund CAGR calculator, stock returns calculator, portfolio performance calculator, investment growth calculator",
+    searchQueries: [
+      "CAGR calculator online",
+      "compound annual growth rate calculator",
+      "investment returns calculator",
+      "mutual fund CAGR calculator",
+      "stock returns calculator",
+      "calculate CAGR formula",
+      "investment performance calculator",
+      "portfolio CAGR calculator",
+      "annual return calculator",
+      "growth rate calculator"
+    ],
     formula: {
       name: "CAGR Formula",
       equation: "CAGR = (Ending Value / Beginning Value)^(1/N) - 1",
@@ -435,8 +565,21 @@ export const calculatorDescriptions = {
   },
 
   "capital-gains": {
-    title: "Capital Gains Tax Calculator - STCG & LTCG Calculator",
-    description: "A Capital Gains Tax calculator helps you calculate the tax liability on your investment gains. It considers both Short-Term Capital Gains (STCG) and Long-Term Capital Gains (LTCG) with different tax rates and exemptions.",
+    title: "Capital Gains Tax Calculator 2024-25 | STCG & LTCG Calculator India",
+    description: "Free Capital Gains Tax Calculator for FY 2024-25 to calculate STCG and LTCG tax on stocks, mutual funds, and property. Calculate capital gains tax liability, exemptions, and optimize your investment tax planning with our comprehensive calculator.",
+    seoKeywords: "capital gains tax calculator, STCG calculator, LTCG calculator, capital gains tax calculator India, stock capital gains calculator, mutual fund tax calculator, property capital gains calculator",
+    searchQueries: [
+      "capital gains tax calculator 2024-25",
+      "STCG calculator India",
+      "LTCG calculator India",
+      "stock capital gains calculator",
+      "mutual fund capital gains calculator",
+      "property capital gains calculator",
+      "capital gains tax calculator online",
+      "equity capital gains calculator",
+      "debt capital gains calculator",
+      "capital gains exemption calculator"
+    ],
     formula: {
       name: "Capital Gains Tax Formula",
       equation: "Tax = (Sale Price - Purchase Price - Expenses) × Tax Rate",
@@ -481,8 +624,21 @@ export const calculatorDescriptions = {
 
   // Retirement Calculators
   nps: {
-    title: "NPS Calculator - National Pension Scheme Calculator",
-    description: "An NPS (National Pension Scheme) calculator helps you calculate the pension corpus and monthly pension amount under the National Pension Scheme. It considers your contributions, expected returns, and annuity rates to provide comprehensive retirement planning insights.",
+    title: "NPS Calculator - National Pension Scheme Calculator | Retirement Planning 2024",
+    description: "Free NPS Calculator to calculate National Pension Scheme corpus, monthly pension, and tax benefits. Plan your retirement with NPS Tier-I and Tier-II calculations. Calculate NPS maturity amount, annuity, and lump sum withdrawal with our comprehensive NPS calculator.",
+    seoKeywords: "NPS calculator, national pension scheme calculator, NPS maturity calculator, NPS pension calculator, retirement planning calculator, NPS tax benefit calculator, NPS corpus calculator",
+    searchQueries: [
+      "NPS calculator online",
+      "national pension scheme calculator",
+      "NPS maturity calculator",
+      "NPS pension calculator",
+      "NPS tax benefit calculator",
+      "retirement planning calculator",
+      "NPS corpus calculator",
+      "NPS Tier 1 calculator",
+      "NPS Tier 2 calculator",
+      "NPS withdrawal calculator"
+    ],
     formula: {
       name: "NPS Maturity Formula",
       equation: "Corpus = P × [((1 + R)^N - 1) / R] × (1 + R)",
@@ -525,8 +681,21 @@ export const calculatorDescriptions = {
   },
 
   epf: {
-    title: "EPF Calculator - Employee Provident Fund Calculator",
-    description: "An EPF (Employee Provident Fund) calculator helps you calculate the maturity amount of your provident fund contributions. It considers both employee and employer contributions along with the applicable interest rates to provide accurate EPF projections.",
+    title: "EPF Calculator - Employee Provident Fund Calculator | PF Balance Calculator",
+    description: "Free EPF Calculator to calculate Employee Provident Fund maturity amount and balance. Calculate EPF corpus with employee and employer contributions, interest rates, and salary increments. Plan your retirement with our accurate PF calculator.",
+    seoKeywords: "EPF calculator, employee provident fund calculator, PF calculator, PF balance calculator, provident fund calculator, EPF maturity calculator, PF corpus calculator, EPF withdrawal calculator",
+    searchQueries: [
+      "EPF calculator online",
+      "employee provident fund calculator",
+      "PF calculator India",
+      "PF balance calculator",
+      "EPF maturity calculator",
+      "provident fund calculator",
+      "EPF corpus calculator",
+      "PF withdrawal calculator",
+      "EPF interest calculator",
+      "PF pension calculator"
+    ],
     formula: {
       name: "EPF Maturity Formula",
       equation: "EPF = (Employee Contribution + Employer Contribution) × Compound Interest",
@@ -568,8 +737,21 @@ export const calculatorDescriptions = {
   },
 
   gratuity: {
-    title: "Gratuity Calculator - Employee Gratuity Calculator",
-    description: "A Gratuity calculator helps you calculate the gratuity amount payable to employees based on their last drawn salary and years of service. Gratuity is a retirement benefit paid to employees who have completed at least 5 years of continuous service.",
+    title: "Gratuity Calculator - Calculate Gratuity Amount Online | Employee Benefits",
+    description: "Free Gratuity Calculator to calculate employee gratuity amount based on salary and years of service. Calculate gratuity as per Payment of Gratuity Act 1972. Understand gratuity eligibility, tax implications, and retirement benefits with our accurate calculator.",
+    seoKeywords: "gratuity calculator, employee gratuity calculator, gratuity amount calculator, gratuity calculation formula, gratuity calculator India, retirement gratuity calculator, gratuity tax calculator",
+    searchQueries: [
+      "gratuity calculator online",
+      "employee gratuity calculator",
+      "calculate gratuity amount",
+      "gratuity calculator India",
+      "gratuity formula calculator",
+      "retirement gratuity calculator",
+      "gratuity eligibility calculator",
+      "gratuity tax calculator",
+      "gratuity payment calculator",
+      "service gratuity calculator"
+    ],
     formula: {
       name: "Gratuity Formula",
       equation: "Gratuity = (Last Salary × 15 × Years of Service) / 26",
@@ -611,8 +793,21 @@ export const calculatorDescriptions = {
 
   // General Calculators
   "compound-interest": {
-    title: "Compound Interest Calculator",
-    description: "A Compound Interest calculator helps you understand how your money grows when interest is calculated on both the principal amount and previously earned interest. It demonstrates the power of compounding in wealth creation over time.",
+    title: "Compound Interest Calculator - Calculate Compound Interest Online | Investment Growth",
+    description: "Free Compound Interest Calculator to calculate investment growth with compounding. Understand the power of compound interest for long-term wealth creation. Calculate compound interest with different compounding frequencies and investment periods.",
+    seoKeywords: "compound interest calculator, compound interest formula calculator, investment compound calculator, compound growth calculator, compound interest calculation, compounding calculator, investment growth calculator",
+    searchQueries: [
+      "compound interest calculator online",
+      "compound interest formula calculator",
+      "calculate compound interest",
+      "investment compound calculator",
+      "compound growth calculator",
+      "compounding calculator",
+      "compound interest calculation formula",
+      "investment growth calculator",
+      "compound interest vs simple interest",
+      "power of compounding calculator"
+    ],
     formula: {
       name: "Compound Interest Formula",
       equation: "A = P(1 + R/100)^T",
@@ -655,8 +850,21 @@ export const calculatorDescriptions = {
   },
 
   "simple-interest": {
-    title: "Simple Interest Calculator",
-    description: "A Simple Interest calculator helps you calculate interest earned on the principal amount only. Unlike compound interest, simple interest doesn't include interest on previously earned interest, making it straightforward to understand and calculate.",
+    title: "Simple Interest Calculator - Calculate Simple Interest Online | SI Formula",
+    description: "Free Simple Interest Calculator to calculate interest on principal amount. Learn simple interest formula, calculate SI for loans and investments. Compare simple vs compound interest with our easy-to-use simple interest calculator.",
+    seoKeywords: "simple interest calculator, simple interest formula calculator, SI calculator, calculate simple interest, simple interest calculation, loan interest calculator, simple interest vs compound interest",
+    searchQueries: [
+      "simple interest calculator online",
+      "simple interest formula calculator",
+      "calculate simple interest",
+      "SI calculator",
+      "simple interest calculation formula",
+      "loan simple interest calculator",
+      "simple interest vs compound interest",
+      "simple interest rate calculator",
+      "basic interest calculator",
+      "simple interest math calculator"
+    ],
     formula: {
       name: "Simple Interest Formula",
       equation: "SI = (P × R × T) / 100",
@@ -698,8 +906,21 @@ export const calculatorDescriptions = {
   },
 
   inflation: {
-    title: "Inflation Calculator - Purchasing Power Calculator",
-    description: "An Inflation calculator helps you understand how inflation affects the purchasing power of money over time. It shows how much money you'll need in the future to buy the same goods and services that you can buy today.",
+    title: "Inflation Calculator - Calculate Inflation Impact | Purchasing Power Calculator",
+    description: "Free Inflation Calculator to calculate inflation impact on purchasing power over time. Understand how inflation affects money value, plan inflation-adjusted investments, and calculate future costs with our comprehensive inflation calculator.",
+    seoKeywords: "inflation calculator, purchasing power calculator, inflation impact calculator, inflation rate calculator, money value calculator, inflation adjusted calculator, cost of living calculator, future value inflation calculator",
+    searchQueries: [
+      "inflation calculator online",
+      "purchasing power calculator",
+      "inflation impact calculator",
+      "calculate inflation rate",
+      "money value calculator",
+      "inflation adjusted calculator",
+      "cost of living calculator",
+      "future value inflation calculator",
+      "inflation erosion calculator",
+      "real vs nominal calculator"
+    ],
     formula: {
       name: "Inflation Adjusted Value Formula",
       equation: "Future Value = Present Value × (1 + Inflation Rate)^Years",

@@ -28,6 +28,8 @@ import FloatingComparisonButton from './components/FloatingComparisonButton'
 import Breadcrumb from './components/Breadcrumb'
 import SEOAnalytics from './components/SEOAnalytics'
 import CalculatorDescription from './components/CalculatorDescription'
+import SEOEnhancer from './components/SEOEnhancer'
+import SEOContent from './components/SEOContent'
 
 // Context
 import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
@@ -303,7 +305,8 @@ export default function App() {
     <CurrencyProvider>
       <ComparisonProvider>
         <div className="min-h-screen bg-gray-50">
-          {/* SEO Analytics Component */}
+          {/* SEO Components */}
+          <SEOEnhancer calculatorId={currentCalculatorId} />
           <SEOAnalytics calculatorId={currentCalculatorId} />
 
           <Header />
@@ -414,10 +417,18 @@ export default function App() {
 
           {/* Calculator Description Section */}
           {currentCalculator && (
-            <CalculatorDescription
-              calculatorId={currentCalculator.id}
-              categoryColor={currentCategory.color}
-            />
+            <>
+              <CalculatorDescription
+                calculatorId={currentCalculator.id}
+                categoryColor={currentCategory.color}
+              />
+
+              {/* SEO Content Section */}
+              <SEOContent
+                calculatorId={currentCalculator.id}
+                categoryColor={currentCategory.color}
+              />
+            </>
           )}
         </motion.div>
         {/* Floating Action Buttons */}
