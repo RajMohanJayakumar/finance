@@ -1,14 +1,13 @@
 import { useState, useEffect, useCallback } from 'react'
+import { motion } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Calculator, TrendingUp, Target } from 'lucide-react'
 import PDFExport from '../components/PDFExport'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
 import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
-import CurrencyInput from '../components/CurrencyInput'
-import UnifiedNumberInput from '../components/UnifiedNumberInput'
-import PercentageInput from '../components/PercentageInput'
-import StepUpInput from '../components/StepUpInput'
-import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientResultCard } from '../components/CalculatorLayout'
+import ModernInputSection, { ModernInputField, ModernButtonGroup } from '../components/ModernInputSection'
+import ModernResultsSection, { ModernResultGrid, ModernSummaryCard } from '../components/ModernResultsSection'
 
 export default function SIPCalculator({ onAddToComparison }) {
   const { addToComparison } = useComparison()
@@ -349,209 +348,217 @@ export default function SIPCalculator({ onAddToComparison }) {
     }
   }
 
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5 }
+  }
+
   return (
-    <CalculatorLayout
-      title="SIP Calculator"
-      description="Calculate your Systematic Investment Plan returns"
-      icon="📈"
-    >
-      {/* Input Section */}
-      <InputSection title="Investment Details" icon="📊" onReset={resetCalculator}>
-        {/* Investment Inputs - Both Always Active */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Monthly Investment */}
-          <CurrencyInput
-            label="Monthly Investment"
-            value={inputs.monthlyInvestment}
-            onChange={(value) => handleFieldChange('monthlyInvestment', value)}
-            fieldName="monthlyInvestment"
-            icon="💰"
-            placeholder="Enter monthly investment amount"
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <motion.div className="text-center" {...fadeInUp}>
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+          <Target className="w-8 h-8 text-purple-600" />
+          SIP Calculator
+        </h1>
+        <p className="text-gray-600">Calculate your Systematic Investment Plan returns</p>
+      </motion.div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Input Section */}
+        <ModernInputSection
+          title="Investment Details"
+          icon={Calculator}
+          onReset={resetCalculator}
+          categoryColor="purple"
+        >
+          {/* Investment Inputs */}
+          <div className="grid grid-cols-1 gap-6">
+            <ModernInputField
+              label="Monthly Investment"
+              value={inputs.monthlyInvestment}
+              onChange={(value) => handleFieldChange('monthlyInvestment', value)}
+              type="currency"
+              placeholder="Enter monthly investment amount"
+              min="0"
+              categoryColor="purple"
+            />
+
+            <ModernInputField
+              label="Target Maturity Amount"
+              value={inputs.maturityAmount}
+              onChange={(value) => handleFieldChange('maturityAmount', value)}
+              type="currency"
+              placeholder="Enter target maturity amount"
+              min="0"
+              categoryColor="purple"
+            />
+          </div>
+
+          <ModernInputField
+            label="Expected Annual Return"
+            value={inputs.annualReturn}
+            onChange={(value) => handleInputChange('annualReturn', value)}
+            type="number"
+            placeholder="12"
+            suffix="%"
             min="0"
-            focusColor="#8B5CF6"
+            max="50"
+            step="0.1"
+            categoryColor="purple"
           />
 
-          {/* Target Maturity Amount */}
-          <CurrencyInput
-            label="Target Maturity Amount"
-            value={inputs.maturityAmount}
-            onChange={(value) => handleFieldChange('maturityAmount', value)}
-            fieldName="maturityAmount"
-            icon="🎯"
-            placeholder="Enter target maturity amount"
-            min="0"
-            focusColor="#8B5CF6"
-          />
-        </div>
-
-        {/* Expected Annual Return */}
-        <PercentageInput
-          label="Expected Annual Return"
-          value={inputs.annualReturn}
-          onChange={(value) => handleInputChange('annualReturn', value)}
-          icon="📈"
-          placeholder="12"
-        />
-
-        {/* Investment Period */}
-        <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
-            <span className="text-lg">📅</span>
-            Investment Period
-          </label>
-          <div className="grid grid-cols-2 gap-3">
-            <UnifiedNumberInput
+          {/* Investment Period */}
+          <div className="grid grid-cols-2 gap-4">
+            <ModernInputField
               label="Years"
               value={inputs.timePeriodYears}
               onChange={(value) => handleInputChange('timePeriodYears', value)}
-              min={0}
-              max={50}
-              step={1}
-              showControls={true}
+              type="number"
+              placeholder="10"
+              min="0"
+              max="50"
+              categoryColor="purple"
             />
-            <UnifiedNumberInput
+
+            <ModernInputField
               label="Months"
               value={inputs.timePeriodMonths}
               onChange={(value) => handleInputChange('timePeriodMonths', value)}
-              min={0}
-              max={11}
-              step={1}
-              showControls={true}
+              type="number"
+              placeholder="0"
+              min="0"
+              max="11"
+              categoryColor="purple"
             />
           </div>
-        </div>
 
-        {/* Lump Sum Amount */}
-        <CurrencyInput
-          label="Lump Sum Amount (Optional)"
-          value={inputs.lumpSumAmount}
-          onChange={(value) => handleInputChange('lumpSumAmount', value)}
-          fieldName="lumpSumAmount"
-          icon="💎"
-          placeholder="Enter lump sum amount"
-          min="0"
-          focusColor="#8B5CF6"
-        />
+          <ModernInputField
+            label="Lump Sum Amount (Optional)"
+            value={inputs.lumpSumAmount}
+            onChange={(value) => handleInputChange('lumpSumAmount', value)}
+            type="currency"
+            placeholder="Enter lump sum amount"
+            min="0"
+            categoryColor="purple"
+          />
 
-        {/* Annual Step-up */}
-        <StepUpInput
-          label="Annual Step-up"
-          value={inputs.stepUpPercentage}
-          stepUpType={inputs.stepUpType}
-          onChange={(value) => handleInputChange('stepUpPercentage', value)}
-          onTypeChange={(type) => handleInputChange('stepUpType', type)}
-          icon="📊"
-          placeholder="0"
-        />
-      </InputSection>
+          <ModernButtonGroup
+            label="Annual Step-up Type"
+            value={inputs.stepUpType}
+            onChange={(value) => handleInputChange('stepUpType', value)}
+            options={[
+              { value: 'percentage', label: 'Percentage' },
+              { value: 'amount', label: 'Fixed Amount' }
+            ]}
+            categoryColor="purple"
+          />
 
-      {/* Results Section */}
-      <ResultsSection
-        results={results}
-        onAddToComparison={handleAddToComparison}
-        onShare={shareCalculation}
-        comparisonData={{
-          type: 'SIP',
-          monthlyInvestment: inputs.monthlyInvestment,
-          maturityAmount: results?.maturityAmount
-        }}
-      >
-        {results && (
-          <>
-            {/* Main Result */}
-            <div className="mb-8">
-              <GradientResultCard
-                title="Maturity Amount"
-                value={formatCurrency(results.maturityAmount)}
-                gradient="from-purple-500 to-indigo-600"
-                icon="🎯"
-              />
-            </div>
+          <ModernInputField
+            label="Annual Step-up"
+            value={inputs.stepUpPercentage}
+            onChange={(value) => handleInputChange('stepUpPercentage', value)}
+            type="number"
+            placeholder="0"
+            suffix={inputs.stepUpType === 'percentage' ? '%' : ''}
+            min="0"
+            categoryColor="purple"
+          />
+        </ModernInputSection>
 
-            {/* Key Metrics - 2 per row */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <ResultCard
-                title="Total Investment"
-                value={formatCurrency(results.totalInvestment)}
-                description="Total amount you will invest through SIP"
-                icon="💰"
-              />
-              <ResultCard
-                title="Total Returns"
-                value={formatCurrency(results.totalReturns)}
-                description="Wealth gained from your SIP investment"
-                icon="📈"
-              />
-              <ResultCard
-                title="Monthly Investment"
-                value={formatCurrency(results.monthlyInvestment)}
-                description="Amount to invest every month"
-                icon="📅"
-              />
-              <ResultCard
-                title="Annualized Return"
-                value={`${results.annualizedReturn}%`}
-                description="Expected annual return rate"
-                icon="🎯"
-              />
-            </div>
+        {/* Results Section */}
+        <ModernResultsSection
+          title="Results"
+          icon={TrendingUp}
+          results={results}
+          onShare={shareCalculation}
+          onAddToComparison={handleAddToComparison}
+          categoryColor="purple"
+          emptyStateMessage="Enter investment details to see SIP calculation"
+        >
+          {/* Main Result */}
+          <ModernSummaryCard
+            title="Maturity Amount"
+            items={[
+              { label: 'Final Value', value: results?.maturityAmount, type: 'currency' }
+            ]}
+            categoryColor="purple"
+            className="mb-6"
+          />
 
-            {/* Chart */}
-            {yearlyBreakdown.length > 0 && (
-              <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
-                <h3 className="text-lg font-semibold text-gray-800 mb-4">Investment Growth</h3>
-                <div className="h-80">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={yearlyBreakdown}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="year" />
-                      <YAxis tickFormatter={(value) => `₹${(value/100000).toFixed(0)}L`} />
-                      <Tooltip
-                        formatter={(value, name) => [formatCurrency(value), name]}
-                        labelFormatter={(label) => `Year ${label}`}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="cumulativeInvestment"
-                        stroke="#8B5CF6"
-                        strokeWidth={2}
-                        name="Total Investment"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="value"
-                        stroke="#10B981"
-                        strokeWidth={2}
-                        name="Portfolio Value"
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
+          {/* Key Metrics */}
+          <ModernResultGrid
+            results={[
+              { label: 'Total Investment', value: results?.totalInvestment, type: 'currency' },
+              { label: 'Total Returns', value: results?.totalReturns, type: 'currency', highlight: true },
+              { label: 'Monthly Investment', value: results?.monthlyInvestment, type: 'currency' },
+              { label: 'Annualized Return', value: results?.annualizedReturn, type: 'percentage' }
+            ]}
+            categoryColor="purple"
+          />
+
+
+          {/* Chart */}
+          {results && yearlyBreakdown.length > 0 && (
+            <motion.div
+              className="bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg p-6 mt-6"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <h3 className="text-lg font-bold text-purple-800 mb-4">Investment Growth</h3>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart data={yearlyBreakdown}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="year" />
+                    <YAxis tickFormatter={(value) => `₹${(value/100000).toFixed(0)}L`} />
+                    <Tooltip
+                      formatter={(value, name) => [formatCurrency(value), name]}
+                      labelFormatter={(label) => `Year ${label}`}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="cumulativeInvestment"
+                      stroke="#8B5CF6"
+                      strokeWidth={2}
+                      name="Total Investment"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="value"
+                      stroke="#10B981"
+                      strokeWidth={2}
+                      name="Portfolio Value"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
               </div>
-            )}
+            </motion.div>
+          )}
+        </ModernResultsSection>
+      </div>
 
-            {/* PDF Export */}
-            <div className="mt-6">
-              <PDFExport
-                calculatorType="SIP"
-                inputs={{
-                  monthlyInvestment: inputs.monthlyInvestment,
-                  annualReturn: inputs.annualReturn,
-                  timePeriod: `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
-                  stepUp: inputs.stepUpPercentage > 0 ? `${inputs.stepUpPercentage}${inputs.stepUpType === 'percentage' ? '%' : ' ₹'}` : 'None'
-                }}
-                results={{
-                  maturityAmount: results.maturityAmount,
-                  totalInvestment: results.totalInvestment,
-                  totalReturns: results.totalReturns,
-                  annualizedReturn: results.annualizedReturn
-                }}
-                yearlyBreakdown={yearlyBreakdown}
-              />
-            </div>
-          </>
-        )}
-      </ResultsSection>
-    </CalculatorLayout>
+      {/* PDF Export */}
+      {results && (
+        <PDFExport
+          calculatorType="SIP"
+          inputs={{
+            monthlyInvestment: inputs.monthlyInvestment,
+            annualReturn: inputs.annualReturn,
+            timePeriod: `${inputs.timePeriodYears} years ${inputs.timePeriodMonths} months`,
+            stepUp: inputs.stepUpPercentage > 0 ? `${inputs.stepUpPercentage}${inputs.stepUpType === 'percentage' ? '%' : ' ₹'}` : 'None'
+          }}
+          results={{
+            maturityAmount: results.maturityAmount,
+            totalInvestment: results.totalInvestment,
+            totalReturns: results.totalReturns,
+            annualizedReturn: results.annualizedReturn
+          }}
+          yearlyBreakdown={yearlyBreakdown}
+        />
+      )}
+    </div>
   )
 }
