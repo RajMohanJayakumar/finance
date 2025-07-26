@@ -1929,6 +1929,63 @@ export const calculatorDescriptions = {
       },
       result: "Tax liability: ₹1,45,600, Quarterly: ₹36,400"
     }
+  },
+
+  "finance-quest": {
+    title: "Finance Quest - Interactive Financial Knowledge Game | Learn Finance Through Gaming",
+    description: "Test your financial knowledge with Finance Quest, an interactive quiz game covering EMI calculations, investments, taxes, and financial planning. Learn while you play!",
+    seoKeywords: "finance game, financial quiz, money game, investment quiz, financial education game, finance learning game, interactive finance, financial knowledge test",
+    searchQueries: [
+      "finance game",
+      "financial quiz game",
+      "money learning game",
+      "investment quiz",
+      "financial education game",
+      "finance knowledge test",
+      "interactive finance learning",
+      "financial planning game",
+      "money management quiz",
+      "finance trivia game"
+    ],
+    formula: {
+      name: "Scoring System",
+      equation: "Score = (Level × 100) + (Streak × 50) + (Time Bonus × 2)",
+      variables: {
+        "Score": "Total points earned",
+        "Level": "Current difficulty level",
+        "Streak": "Consecutive correct answers",
+        "Time Bonus": "Remaining time when answered correctly"
+      }
+    },
+    keyFeatures: [
+      "Multiple difficulty levels",
+      "Real financial scenarios",
+      "Time-based scoring system",
+      "Streak multipliers",
+      "Interactive learning experience"
+    ],
+    howItWorks: [
+      "Choose your difficulty level",
+      "Answer financial questions quickly",
+      "Build streaks for bonus points",
+      "Progress through levels",
+      "Beat your high score"
+    ],
+    benefits: [
+      "Learn financial concepts interactively",
+      "Test your money knowledge",
+      "Improve financial decision making",
+      "Fun way to learn finance"
+    ],
+    example: {
+      scenario: "Level 1 Question",
+      inputs: {
+        "Question": "EMI calculation for ₹5L loan",
+        "Time": "30 seconds",
+        "Difficulty": "Beginner"
+      },
+      result: "Score: 250 points (Level 1 × 100 + Time bonus)"
+    }
   }
 }
 

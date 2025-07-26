@@ -37,6 +37,7 @@ import CommuteCostCalculator from './calculators/CommuteCostCalculator'
 import WFHSavingsCalculator from './calculators/WFHSavingsCalculator'
 import HabitCostCalculator from './calculators/HabitCostCalculator'
 import FreelancerTaxCalculator from './calculators/FreelancerTaxCalculator'
+import FinanceGame from './components/FinanceGame'
 
 
 // Components
@@ -155,6 +156,14 @@ const calculatorData = {
       { id: 'simple-interest', name: 'Simple Interest', icon: '📊', component: SimpleInterestCalculator, description: 'Calculate simple interest' },
       { id: 'inflation', name: 'Inflation Calculator', icon: '📈', component: InflationCalculator, description: 'Calculate inflation impact over time' }
     ]
+  },
+  games: {
+    title: "Games",
+    icon: "🎮",
+    color: "purple",
+    calculators: [
+      { id: 'finance-quest', name: 'Finance Quest', icon: '💰', component: FinanceGame, description: 'Test your financial knowledge in this interactive quiz game' }
+    ]
   }
 }
 
@@ -218,7 +227,8 @@ export default function App() {
         'fuel-cost': { mainTab: 'general', subTab: 'fuel-cost' },
         'compound-interest': { mainTab: 'general', subTab: 'compound-interest' },
         'simple-interest': { mainTab: 'general', subTab: 'simple-interest' },
-        'inflation': { mainTab: 'general', subTab: 'inflation' }
+        'inflation': { mainTab: 'general', subTab: 'inflation' },
+        'finance-quest': { mainTab: 'games', subTab: 'finance-quest' }
       }
 
       if (calculatorNameMap[calculatorParam]) {
@@ -268,7 +278,8 @@ export default function App() {
     personal_finance: detectedCalculator?.mainTab === 'personal_finance' ? detectedCalculator.subTab : 'budget-planner',
     lifestyle: detectedCalculator?.mainTab === 'lifestyle' ? detectedCalculator.subTab : 'bill-split',
     business: detectedCalculator?.mainTab === 'business' ? detectedCalculator.subTab : 'freelancer-tax',
-    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'discount'
+    general: detectedCalculator?.mainTab === 'general' ? detectedCalculator.subTab : 'discount',
+    games: detectedCalculator?.mainTab === 'games' ? detectedCalculator.subTab : 'finance-quest'
   })
   const [comparisonData, setComparisonData] = useState([])
 
