@@ -15,7 +15,7 @@
 
   <!-- High-Traffic Loan Calculators -->
   <url>
-    <loc>https://finclamp.com/?calculator=emi</loc>
+    <loc>https://finclamp.com/?category=loans&amp;in=emi</loc>
     <lastmod>2024-01-22</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
@@ -27,7 +27,7 @@
 
   <!-- EMI Calculator Search Variations -->
   <url>
-    <loc>https://finclamp.com/?calculator=emi&amp;q=home-loan-emi-calculator</loc>
+    <loc>https://finclamp.com/?category=loans&amp;in=emi&amp;q=home-loan-emi-calculator</loc>
     <lastmod>2024-01-22</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>

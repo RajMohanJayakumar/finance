@@ -6,7 +6,7 @@ export const calculatorSEOData = {
     title: "EMI Calculator - Calculate Loan EMI & Repayment Schedule | FinClamp",
     description: "Calculate your loan EMI with our free EMI calculator. Get detailed amortization schedule, total interest, and compare different loan options. Easy to use and accurate.",
     keywords: "EMI calculator, loan calculator, home loan EMI, personal loan EMI, car loan calculator, equated monthly installment",
-    canonical: "/calculators/emi-calculator",
+    canonical: "/?category=loans&in=emi",
     structuredData: {
       "@type": "WebApplication",
       "name": "EMI Calculator",
@@ -24,7 +24,7 @@ export const calculatorSEOData = {
     title: "Mortgage Calculator - Home Loan EMI Calculator | FinClamp",
     description: "Calculate your home loan EMI, total interest, and monthly payments with our advanced mortgage calculator. Compare different loan terms and interest rates.",
     keywords: "mortgage calculator, home loan calculator, housing loan EMI, property loan calculator, mortgage payment",
-    canonical: "/calculators/mortgage-calculator",
+    canonical: "/?category=loans&in=mortgage",
     structuredData: {
       "@type": "WebApplication",
       "name": "Mortgage Calculator",
@@ -36,7 +36,7 @@ export const calculatorSEOData = {
     title: "Personal Loan Calculator - Calculate EMI & Interest | FinClamp",
     description: "Calculate personal loan EMI, total interest, and repayment schedule. Compare different personal loan options and find the best rates.",
     keywords: "personal loan calculator, personal loan EMI, unsecured loan calculator, instant loan calculator",
-    canonical: "/calculators/personal-loan-calculator",
+    canonical: "/?category=loans&in=personal-loan",
     structuredData: {
       "@type": "WebApplication",
       "name": "Personal Loan Calculator",
@@ -408,10 +408,65 @@ export const updateSEO = (calculatorId) => {
   updateStructuredData(calculatorId)
 }
 
-// Function to generate breadcrumb structured data
+// Function to generate breadcrumb structured data with new URL structure
 export const generateBreadcrumbData = (calculatorId) => {
   const seoData = getSEOData(calculatorId)
   const baseURL = window.location.origin
+
+  // Map calculator to category for breadcrumb
+  const calculatorCategoryMap = {
+    'emi': 'loans',
+    'mortgage': 'loans',
+    'personal-loan': 'loans',
+    'fd': 'savings',
+    'rd': 'savings',
+    'ppf': 'savings',
+    'sip': 'mutual_funds',
+    'swp': 'mutual_funds',
+    'cagr': 'mutual_funds',
+    'income-tax': 'tax',
+    'capital-gains': 'tax',
+    'nps': 'retirement',
+    'epf': 'retirement',
+    'gratuity': 'retirement',
+    'budget-planner': 'personal_finance',
+    'savings-goal': 'personal_finance',
+    'stock-average': 'personal_finance',
+    'net-worth': 'personal_finance',
+    'bill-split': 'lifestyle',
+    'tip': 'lifestyle',
+    'subscription': 'lifestyle',
+    'daily-interest': 'lifestyle',
+    'monthly-expense': 'lifestyle',
+    'upi-spending': 'lifestyle',
+    'grocery-budget': 'lifestyle',
+    'commute-cost': 'lifestyle',
+    'wfh-savings': 'lifestyle',
+    'habit-cost': 'lifestyle',
+    'freelancer-tax': 'business',
+    'discount': 'general',
+    'fuel-cost': 'general',
+    'compound-interest': 'general',
+    'simple-interest': 'general',
+    'inflation': 'general',
+    'finance-quest': 'games'
+  }
+
+  const categoryNames = {
+    'loans': 'Loan Calculators',
+    'savings': 'Savings Calculators',
+    'mutual_funds': 'Mutual Fund Calculators',
+    'tax': 'Tax Calculators',
+    'retirement': 'Retirement Calculators',
+    'personal_finance': 'Personal Finance Calculators',
+    'lifestyle': 'Lifestyle Calculators',
+    'business': 'Business Calculators',
+    'general': 'General Calculators',
+    'games': 'Financial Games'
+  }
+
+  const category = calculatorCategoryMap[calculatorId] || 'general'
+  const categoryName = categoryNames[category] || 'Calculators'
 
   return {
     "@context": "https://schema.org",
@@ -426,14 +481,14 @@ export const generateBreadcrumbData = (calculatorId) => {
       {
         "@type": "ListItem",
         "position": 2,
-        "name": "Calculators",
-        "item": `${baseURL}/calculators`
+        "name": categoryName,
+        "item": `${baseURL}/?category=${category}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": seoData.title.split(' - ')[0],
-        "item": `${baseURL}${seoData.canonical}`
+        "item": `${baseURL}/?category=${category}&in=${calculatorId}`
       }
     ]
   }

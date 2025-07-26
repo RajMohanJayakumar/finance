@@ -32,18 +32,62 @@ export const useDynamicSEO = (calculatorId, inputs = {}) => {
   useEffect(() => {
     if (calculatorId) {
       updateSEO(calculatorId)
-      
-      // Update URL for better sharing
+
+      // Map calculator types to categories for new URL format
+      const calculatorCategoryMap = {
+        'emi': 'loans',
+        'mortgage': 'loans',
+        'personal-loan': 'loans',
+        'fd': 'savings',
+        'rd': 'savings',
+        'ppf': 'savings',
+        'sip': 'mutual_funds',
+        'swp': 'mutual_funds',
+        'cagr': 'mutual_funds',
+        'income-tax': 'tax',
+        'capital-gains': 'tax',
+        'nps': 'retirement',
+        'epf': 'retirement',
+        'gratuity': 'retirement',
+        'budget-planner': 'personal_finance',
+        'savings-goal': 'personal_finance',
+        'stock-average': 'personal_finance',
+        'net-worth': 'personal_finance',
+        'bill-split': 'lifestyle',
+        'tip': 'lifestyle',
+        'subscription': 'lifestyle',
+        'daily-interest': 'lifestyle',
+        'monthly-expense': 'lifestyle',
+        'upi-spending': 'lifestyle',
+        'grocery-budget': 'lifestyle',
+        'commute-cost': 'lifestyle',
+        'wfh-savings': 'lifestyle',
+        'habit-cost': 'lifestyle',
+        'freelancer-tax': 'business',
+        'discount': 'general',
+        'fuel-cost': 'general',
+        'compound-interest': 'general',
+        'simple-interest': 'general',
+        'inflation': 'general',
+        'finance-quest': 'games'
+      }
+
+      // Update URL for better sharing using new format
       const url = new URL(window.location)
-      url.searchParams.set('calculator', calculatorId)
-      
+      const category = calculatorCategoryMap[calculatorId] || 'general'
+
+      // Clear old parameters and set new format
+      url.searchParams.delete('calculator')
+      url.searchParams.set('category', category)
+      url.searchParams.set('in', calculatorId)
+
       // Add input parameters for sharing
       Object.entries(inputs).forEach(([key, value]) => {
         if (value && value !== '') {
           url.searchParams.set(`${calculatorId}_${key}`, value)
         }
       })
-      
+
       // Update URL without page reload
       window.history.replaceState({}, '', url.toString())
     }
