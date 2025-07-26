@@ -1,6 +1,6 @@
 import { useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+
 import { Calculator, Home, TrendingUp } from 'lucide-react'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
@@ -10,6 +10,7 @@ import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalc
 import PDFExport from '../components/PDFExport'
 import ModernInputSection, { ModernInputField, ModernSelectField } from '../components/ModernInputSection'
 import ModernResultsSection, { ModernResultGrid, ModernSummaryCard } from '../components/ModernResultsSection'
+import BreakdownSection from '../components/BreakdownSection'
 
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
@@ -288,70 +289,13 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
 
           {/* Loan Breakdown Chart */}
           {results && (
-            <motion.div
-              className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-lg p-6 mt-6"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <h3 className="text-lg font-bold text-blue-800 mb-4">Loan Breakdown</h3>
-
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Summary */}
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-blue-700">Loan Amount:</span>
-                    <span className="font-semibold text-blue-800">{formatCurrency(results.principal)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-blue-700">Total Interest:</span>
-                    <span className="font-semibold text-blue-800">{formatCurrency(results.totalInterest)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-blue-700">Total Amount:</span>
-                    <span className="font-semibold text-blue-800">{formatCurrency(results.totalAmount)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-blue-700">Monthly EMI:</span>
-                    <span className="font-semibold text-blue-800">{formatCurrency(results.emi)}</span>
-                  </div>
-                </div>
-
-                {/* Pie Chart */}
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <PieChart>
-                      <Pie
-                        data={pieData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={60}
-                        outerRadius={100}
-                        paddingAngle={5}
-                        dataKey="value"
-                      >
-                        {pieData.map((entry, index) => (
-                          <Cell key={`cell-${index}`} fill={entry.color} />
-                        ))}
-                      </Pie>
-                      <Tooltip formatter={(value) => formatCurrency(value)} />
-                    </PieChart>
-                  </ResponsiveContainer>
-
-                  {/* Legend */}
-                  <div className="flex justify-center gap-4 mt-2">
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-blue-500 rounded mr-2"></div>
-                      <span className="text-sm text-blue-700">Principal</span>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="w-3 h-3 bg-red-500 rounded mr-2"></div>
-                      <span className="text-sm text-blue-700">Interest</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
+            <BreakdownSection
+              title="Loan Breakdown"
+              data={pieData}
+              summaryCards={[]}
+              chartType="pie"
+              categoryColor="blue"
+            />
           )}
         </ModernResultsSection>
       </div>

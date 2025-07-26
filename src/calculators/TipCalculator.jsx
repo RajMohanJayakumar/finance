@@ -310,7 +310,7 @@ const TipCalculator = ({ categoryColor = 'green' }) => {
             )}
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-2 gap-3 mt-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
               <button
                 onClick={() => {
                   const roundedTotal = Math.ceil(results.totalAmount)

@@ -304,7 +304,7 @@ export default function EPFCalculator({ onAddToComparison, categoryColor = 'gree
           </h3>
 
           {results ? (
-            <div className="grid grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <motion.div
                 className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100"
                 whileHover={{ scale: 1.02 }}

@@ -513,7 +513,7 @@ const WFHSavingsCalculator = ({ categoryColor = 'green' }) => {
             </div>
 
             {/* Time Period Breakdown */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="text-center p-3 bg-blue-50 rounded-lg">
                 <div className="text-sm text-blue-700">Daily Savings</div>
                 <div className="text-lg font-bold text-blue-600">

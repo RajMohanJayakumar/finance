@@ -8,7 +8,9 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
   
   const [billDetails, setBillDetails] = useState({
     totalBill: '',
+    tipAmount: '',
     tipPercent: '15',
+    tipMode: 'amount', // 'amount' or 'percent'
     numberOfPeople: '2'
   })
 
@@ -34,10 +36,19 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
 
   const calculateBillSplit = () => {
     const totalBill = parseFloat(billDetails.totalBill) || 0
-    const tipPercent = parseFloat(billDetails.tipPercent) || 0
     const numberOfPeople = parseInt(billDetails.numberOfPeople) || 1
 
-    const tipAmount = (totalBill * tipPercent) / 100
+    let tipAmount = 0
+    let tipPercent = 0
+
+    if (billDetails.tipMode === 'amount') {
+      tipAmount = parseFloat(billDetails.tipAmount) || 0
+      tipPercent = totalBill > 0 ? (tipAmount / totalBill) * 100 : 0
+    } else {
+      tipPercent = parseFloat(billDetails.tipPercent) || 0
+      tipAmount = (totalBill * tipPercent) / 100
+    }
+
     const totalWithTip = totalBill + tipAmount
 
     // Calculate custom amounts
@@ -53,6 +64,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
     setResults({
       subtotal: totalBill,
       tipAmount,
+      tipPercent,
       totalWithTip,
       perPersonAmount,
       customTotal,
@@ -176,40 +188,85 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
               </div>
             </div>
 
-            {/* Tip Percentage */}
+            {/* Tip Input */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tip Percentage
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Tip
               </label>
-              <div className="relative">
-                <input
-                  type="number"
-                  value={billDetails.tipPercent}
-                  onChange={(e) => handleBillChange('tipPercent', e.target.value)}
-                  className="w-full pl-4 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="15"
-                  min="0"
-                  max="100"
-                />
-                <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
-                  %
-                </span>
+
+              {/* Tip Mode Toggle */}
+              <div className="flex bg-gray-100 rounded-lg p-1 mb-3">
+                <button
+                  onClick={() => handleBillChange('tipMode', 'amount')}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    billDetails.tipMode === 'amount'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Amount
+                </button>
+                <button
+                  onClick={() => handleBillChange('tipMode', 'percent')}
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                    billDetails.tipMode === 'percent'
+                      ? 'bg-blue-600 text-white shadow-sm'
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  Percentage
+                </button>
               </div>
-              <div className="flex gap-2 mt-2">
-                {[10, 15, 18, 20, 25].map(percent => (
-                  <button
-                    key={percent}
-                    onClick={() => handleBillChange('tipPercent', percent.toString())}
-                    className={`px-3 py-1 rounded text-sm transition-colors ${
-                      billDetails.tipPercent === percent.toString()
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                    }`}
-                  >
-                    {percent}%
-                  </button>
-                ))}
-              </div>
+
+              {/* Tip Input Field */}
+              {billDetails.tipMode === 'amount' ? (
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                    {currentFormat.symbol}
+                  </span>
+                  <input
+                    type="number"
+                    value={billDetails.tipAmount}
+                    onChange={(e) => handleBillChange('tipAmount', e.target.value)}
+                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="50"
+                    min="0"
+                    step="0.01"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={billDetails.tipPercent}
+                      onChange={(e) => handleBillChange('tipPercent', e.target.value)}
+                      className="w-full pl-4 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      placeholder="15"
+                      min="0"
+                      max="100"
+                    />
+                    <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500">
+                      %
+                    </span>
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    {[10, 15, 18, 20, 25].map(percent => (
+                      <button
+                        key={percent}
+                        onClick={() => handleBillChange('tipPercent', percent.toString())}
+                        className={`px-3 py-1 rounded text-sm transition-colors ${
+                          billDetails.tipPercent === percent.toString()
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {percent}%
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Number of People */}
@@ -270,7 +327,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                     />
                     <label className="text-xs text-gray-600">Custom amount</label>
                   </div>
-                  
+
                   {person.payCustom && (
                     <div className="mt-2 relative">
                       <span className="absolute left-2 top-1/2 transform -translate-y-1/2 text-gray-500 text-xs">
@@ -314,7 +371,9 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                   <span className="font-medium">{formatCurrency(results.subtotal)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Tip ({billDetails.tipPercent}%):</span>
+                  <span className="text-gray-600">
+                    Tip ({billDetails.tipMode === 'amount' ? formatCurrency(results.tipAmount) : `${results.tipPercent.toFixed(1)}%`}):
+                  </span>
                   <span className="font-medium">{formatCurrency(results.tipAmount)}</span>
                 </div>
                 <div className="flex justify-between font-bold text-lg border-t pt-2">

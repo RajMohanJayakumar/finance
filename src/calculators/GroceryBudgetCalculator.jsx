@@ -354,7 +354,7 @@ const GroceryBudgetCalculator = ({ categoryColor = 'green' }) => {
 
           <div className="space-y-4">
             {/* Budget Summary */}
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="p-3 bg-green-50 rounded-lg text-center">
                 <div className="text-sm text-green-700">Weekly</div>
                 <div className="text-lg font-bold text-green-600">
