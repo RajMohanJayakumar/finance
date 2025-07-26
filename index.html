@@ -97,16 +97,15 @@
     <!-- GitHub Pages SPA redirect handler -->
     <script type="text/javascript">
       // Check if we're being redirected from 404.html
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) {
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
+      (function() {
+        var urlParams = new URLSearchParams(window.location.search);
+        var redirectPath = urlParams.get('p');
+
+        if (redirectPath) {
+          // Remove the 'p' parameter and redirect to the original path
+          window.history.replaceState(null, null, decodeURIComponent(redirectPath));
         }
-      }(window.location))
+      })();
     </script>
 
     <script type="module" src="/src/index.jsx"></script>

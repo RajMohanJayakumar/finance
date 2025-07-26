@@ -76,6 +76,12 @@ The app supports these URL patterns:
 - Clear browser cache and try again
 - The 404.html redirect may take a moment to process
 
+### Infinite URL Loop (Fixed)
+
+- Previous versions had an infinite redirect loop issue
+- This has been fixed with a simpler redirect mechanism
+- If you still see loops, clear browser cache completely
+
 ### Build Errors
 
 - Run `npm ci` to ensure clean dependencies
