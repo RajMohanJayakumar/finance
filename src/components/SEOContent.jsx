@@ -2,61 +2,11 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Search, TrendingUp, Users, Star } from 'lucide-react'
 import { getCalculatorDescription } from '../data/calculatorDescriptions'
+import { getRelatedCalculators } from '../utils/relatedCalculators'
 
-// Helper function to get related calculators
-const getRelatedCalculators = (currentCalculatorId) => {
-  const relatedCalculators = {
-    emi: [
-      { id: 'mortgage', name: 'Mortgage Calculator', description: 'Home loan payments', icon: '🏠' },
-      { id: 'personal-loan', name: 'Personal Loan', description: 'Unsecured loan EMI', icon: '💳' },
-      { id: 'compound-interest', name: 'Compound Interest', description: 'Investment growth', icon: '📈' }
-    ],
-    sip: [
-      { id: 'swp', name: 'SWP Calculator', description: 'Withdrawal planning', icon: '💰' },
-      { id: 'cagr', name: 'CAGR Calculator', description: 'Growth rate analysis', icon: '📊' },
-      { id: 'ppf', name: 'PPF Calculator', description: 'Tax-saving investment', icon: '🛡️' }
-    ],
-    fd: [
-      { id: 'rd', name: 'RD Calculator', description: 'Monthly deposits', icon: '🏦' },
-      { id: 'ppf', name: 'PPF Calculator', description: 'Long-term savings', icon: '🛡️' },
-      { id: 'compound-interest', name: 'Compound Interest', description: 'Interest calculation', icon: '📈' }
-    ],
-    'income-tax': [
-      { id: 'capital-gains', name: 'Capital Gains Tax', description: 'Investment tax', icon: '📋' },
-      { id: 'nps', name: 'NPS Calculator', description: 'Tax-saving pension', icon: '🏛️' },
-      { id: 'ppf', name: 'PPF Calculator', description: 'Tax-free returns', icon: '🛡️' }
-    ],
-    ppf: [
-      { id: 'nps', name: 'NPS Calculator', description: 'Retirement planning', icon: '🏛️' },
-      { id: 'epf', name: 'EPF Calculator', description: 'Provident fund', icon: '🏢' },
-      { id: 'income-tax', name: 'Tax Calculator', description: 'Tax planning', icon: '📋' }
-    ],
-    'net-worth': [
-      { id: 'sip', name: 'SIP Calculator', description: 'Build wealth systematically', icon: '📈' },
-      { id: 'fd', name: 'FD Calculator', description: 'Safe investments', icon: '🏦' },
-      { id: 'ppf', name: 'PPF Calculator', description: 'Long-term savings', icon: '🛡️' }
-    ],
-    discount: [
-      { id: 'income-tax', name: 'Tax Calculator', description: 'Calculate tax savings', icon: '📋' },
-      { id: 'simple-interest', name: 'Simple Interest', description: 'Basic calculations', icon: '📊' },
-      { id: 'compound-interest', name: 'Compound Interest', description: 'Investment growth', icon: '🧮' }
-    ],
-    'fuel-cost': [
-      { id: 'emi', name: 'EMI Calculator', description: 'Vehicle loan EMI', icon: '🏠' },
-      { id: 'simple-interest', name: 'Simple Interest', description: 'Loan calculations', icon: '📊' },
-      { id: 'inflation', name: 'Inflation Calculator', description: 'Cost impact over time', icon: '📈' }
-    ]
-  }
-
-  return relatedCalculators[currentCalculatorId] || [
-    { id: 'net-worth', name: 'Net Worth Calculator', description: 'Financial position', icon: '💎' },
-    { id: 'emi', name: 'EMI Calculator', description: 'Loan payments', icon: '🏠' },
-    { id: 'sip', name: 'SIP Calculator', description: 'Investment planning', icon: '📈' }
-  ]
-}
-
-const SEOContent = ({ calculatorId, categoryColor = 'indigo' }) => {
+const SEOContent = ({ calculatorId, categoryColor = 'indigo', calculatorData }) => {
   const description = getCalculatorDescription(calculatorId)
+  const relatedCalculators = getRelatedCalculators(calculatorId, calculatorData, 3)
   
   if (!description || !description.searchQueries) {
     return null
@@ -81,7 +31,7 @@ const SEOContent = ({ calculatorId, categoryColor = 'indigo' }) => {
       transition={{ duration: 0.5, delay: 0.3 }}
     >
       {/* Related Calculators Section - Only show if we have related calculators */}
-      {getRelatedCalculators(calculatorId).length > 0 && (
+      {relatedCalculators.length > 0 && (
         <div className="mb-6">
           <div className="flex items-center gap-3 mb-4">
             <div className="p-2 rounded-lg bg-white shadow-sm">
@@ -91,7 +41,7 @@ const SEOContent = ({ calculatorId, categoryColor = 'indigo' }) => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-            {getRelatedCalculators(calculatorId).map((calc, index) => (
+            {relatedCalculators.map((calc, index) => (
               <motion.div
                 key={index}
                 className="bg-white rounded-lg p-4 border border-gray-200 hover:shadow-md transition-all duration-200 cursor-pointer"
@@ -104,6 +54,11 @@ const SEOContent = ({ calculatorId, categoryColor = 'indigo' }) => {
                   <div>
                     <div className="text-sm font-semibold text-gray-800">{calc.name}</div>
                     <div className="text-xs text-gray-600">{calc.description}</div>
+                    {calc.category && (
+                      <div className="text-xs text-gray-500 mt-1">
+                        {calc.category}
+                      </div>
+                    )}
                   </div>
                 </div>
               </motion.div>
