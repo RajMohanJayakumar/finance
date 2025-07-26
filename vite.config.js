@@ -7,5 +7,27 @@ export default defineConfig({
   base: '/', // Homepage
   server: {
     host: '0.0.0.0',
+    // Handle SPA routing during development
+    historyApiFallback: {
+      rewrites: [
+        { from: /^\/calculators\/.*$/, to: '/index.html' },
+        { from: /^\/games\/.*$/, to: '/index.html' },
+        { from: /^\/calculator\/.*$/, to: '/index.html' },
+      ]
+    }
+  },
+  build: {
+    // Ensure proper asset handling
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          vendor: ['react', 'react-dom'],
+          charts: ['recharts'],
+          motion: ['framer-motion'],
+          icons: ['lucide-react']
+        }
+      }
+    }
   }
 })

@@ -186,8 +186,9 @@ const staggerContainer = {
 export default function App() {
   // Function to detect calculator from URL parameters
   const detectCalculatorFromURL = () => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const pathname = window.location.pathname
+    try {
+      const urlParams = new URLSearchParams(window.location.search)
+      const pathname = window.location.pathname
 
     // First, check for new main menu format: /games?in=finance-quest or /calculators?in=emi
     const inParam = urlParams.get('in')
@@ -296,6 +297,11 @@ export default function App() {
     }
 
     return null
+    } catch (error) {
+      console.warn('Error detecting calculator from URL:', error)
+      // Fallback to default
+      return { mainTab: 'loans', subTab: 'emi' }
+    }
   }
 
   const detectedCalculator = detectCalculatorFromURL()
