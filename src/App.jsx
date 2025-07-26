@@ -186,16 +186,39 @@ export default function App() {
   // Function to detect calculator from URL parameters
   const detectCalculatorFromURL = () => {
     const urlParams = new URLSearchParams(window.location.search)
-    const paramKeys = Array.from(urlParams.keys())
+    const pathname = window.location.pathname
 
-    // First, check for new format: ?category=games&in=finance-quest
-    const categoryParam = urlParams.get('category')
+    // First, check for new main menu format: /games?in=finance-quest or /calculators?in=emi
     const inParam = urlParams.get('in')
+    if (pathname && inParam) {
+      const pathSegment = pathname.replace('/', '')
+      if (pathSegment === 'games') {
+        return { mainTab: 'games', subTab: inParam }
+      } else if (pathSegment === 'calculators') {
+        // Map calculator to appropriate category
+        const calculatorCategoryMap = {
+          'emi': 'loans', 'mortgage': 'loans', 'personal-loan': 'loans',
+          'fd': 'savings', 'rd': 'savings', 'ppf': 'savings',
+          'sip': 'mutual_funds', 'swp': 'mutual_funds', 'cagr': 'mutual_funds',
+          'income-tax': 'tax', 'capital-gains': 'tax',
+          'nps': 'retirement', 'epf': 'retirement', 'gratuity': 'retirement',
+          'budget-planner': 'personal_finance', 'savings-goal': 'personal_finance', 'stock-average': 'personal_finance', 'net-worth': 'personal_finance',
+          'bill-split': 'lifestyle', 'tip': 'lifestyle', 'subscription': 'lifestyle', 'daily-interest': 'lifestyle', 'monthly-expense': 'lifestyle', 'upi-spending': 'lifestyle', 'grocery-budget': 'lifestyle', 'commute-cost': 'lifestyle', 'wfh-savings': 'lifestyle', 'habit-cost': 'lifestyle',
+          'freelancer-tax': 'business',
+          'discount': 'general', 'fuel-cost': 'general', 'compound-interest': 'general', 'simple-interest': 'general', 'inflation': 'general'
+        }
+        const category = calculatorCategoryMap[inParam] || 'general'
+        return { mainTab: category, subTab: inParam }
+      }
+    }
+
+    // Second, check for legacy format: ?category=games&in=finance-quest
+    const categoryParam = urlParams.get('category')
     if (categoryParam && inParam) {
       return { mainTab: categoryParam, subTab: inParam }
     }
 
-    // Second, check for explicit calculator parameter (legacy format)
+    // Third, check for explicit calculator parameter (legacy format)
     const calculatorParam = urlParams.get('calculator')
     if (calculatorParam) {
       // Map calculator names to tab info
@@ -262,6 +285,7 @@ export default function App() {
     }
 
     // Find matching calculator by parameter prefix
+    const paramKeys = Array.from(urlParams.keys())
     for (const paramKey of paramKeys) {
       for (const [prefix, calculator] of Object.entries(calculatorMap)) {
         if (paramKey.startsWith(prefix)) {
@@ -290,7 +314,23 @@ export default function App() {
   })
   const [comparisonData, setComparisonData] = useState([])
 
+  // Handle route changes for breadcrumb navigation
+  useEffect(() => {
+    const handlePopState = () => {
+      // Force re-detection when user navigates via breadcrumbs or browser back/forward
+      const newDetectedCalculator = detectCalculatorFromURL()
+      if (newDetectedCalculator) {
+        setActiveMainTab(newDetectedCalculator.mainTab)
+        setActiveSubTabs(prev => ({
+          ...prev,
+          [newDetectedCalculator.mainTab]: newDetectedCalculator.subTab
+        }))
+      }
+    }
 
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
 
   const updateCalculatorInURL = useCallback((calculatorId) => {
     const url = new URL(window.location)
@@ -307,15 +347,18 @@ export default function App() {
     // Clear all existing calculator-specific input parameters
     const keysToRemove = []
     for (const key of url.searchParams.keys()) {
-      if (key.includes('_') || key === 'shared' || key === 'calculator') {
+      if (key.includes('_') || key === 'shared' || key === 'calculator' || key === 'category') {
         keysToRemove.push(key)
       }
     }
     keysToRemove.forEach(key => url.searchParams.delete(key))
 
-    // Set the new format: ?category=games&in=finance-quest
-    if (categoryKey) {
-      url.searchParams.set('category', categoryKey)
+    // Set the new main menu format: /games?in=finance-quest or /calculators?in=emi
+    if (categoryKey === 'games') {
+      url.pathname = '/games'
+      url.searchParams.set('in', calculatorId)
+    } else {
+      url.pathname = '/calculators'
       url.searchParams.set('in', calculatorId)
     }
 
@@ -326,16 +369,18 @@ export default function App() {
   // Set calculator parameter in URL on initial load if not present
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    const categoryParam = urlParams.get('category')
+    const pathname = window.location.pathname
     const inParam = urlParams.get('in')
+    const categoryParam = urlParams.get('category')
     const calculatorParam = urlParams.get('calculator') // Legacy support
 
-    if (!categoryParam && !inParam && !calculatorParam) {
+    // Check if we're on root path without proper routing
+    if (pathname === '/' && !inParam && !categoryParam && !calculatorParam) {
       // Set default calculator parameter using new format
       const currentCalculatorId = activeSubTabs[activeMainTab]
       updateCalculatorInURL(currentCalculatorId)
     }
-  }, [updateCalculatorInURL, activeMainTab, activeSubTabs]) // Only depend on the callback
+  }, [updateCalculatorInURL, activeMainTab, activeSubTabs])
   const [showComparison, setShowComparison] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 

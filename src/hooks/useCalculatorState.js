@@ -106,55 +106,54 @@ export const useCalculatorState = (prefix, defaultInputs = {}) => {
 }
 
 /**
- * Generate shareable URL for calculator results using new format
+ * Generate shareable URL for calculator results using new main menu format
  */
 export const generateCalculatorShareURL = (calculatorType, inputs, results) => {
-  const baseURL = window.location.origin + window.location.pathname
+  const baseURL = window.location.origin
   const params = new URLSearchParams()
 
-  // Map calculator types to categories
+  // Map calculator types to main menu paths
   const calculatorCategoryMap = {
-    'emi': 'loans',
-    'mortgage': 'loans',
-    'personal-loan': 'loans',
-    'fd': 'savings',
-    'rd': 'savings',
-    'ppf': 'savings',
-    'sip': 'mutual_funds',
-    'swp': 'mutual_funds',
-    'cagr': 'mutual_funds',
-    'income-tax': 'tax',
-    'capital-gains': 'tax',
-    'nps': 'retirement',
-    'epf': 'retirement',
-    'gratuity': 'retirement',
-    'budget-planner': 'personal_finance',
-    'savings-goal': 'personal_finance',
-    'stock-average': 'personal_finance',
-    'net-worth': 'personal_finance',
-    'bill-split': 'lifestyle',
-    'tip': 'lifestyle',
-    'subscription': 'lifestyle',
-    'daily-interest': 'lifestyle',
-    'monthly-expense': 'lifestyle',
-    'upi-spending': 'lifestyle',
-    'grocery-budget': 'lifestyle',
-    'commute-cost': 'lifestyle',
-    'wfh-savings': 'lifestyle',
-    'habit-cost': 'lifestyle',
-    'freelancer-tax': 'business',
-    'discount': 'general',
-    'fuel-cost': 'general',
-    'compound-interest': 'general',
-    'simple-interest': 'general',
-    'inflation': 'general',
+    'emi': 'calculators',
+    'mortgage': 'calculators',
+    'personal-loan': 'calculators',
+    'fd': 'calculators',
+    'rd': 'calculators',
+    'ppf': 'calculators',
+    'sip': 'calculators',
+    'swp': 'calculators',
+    'cagr': 'calculators',
+    'income-tax': 'calculators',
+    'capital-gains': 'calculators',
+    'nps': 'calculators',
+    'epf': 'calculators',
+    'gratuity': 'calculators',
+    'budget-planner': 'calculators',
+    'savings-goal': 'calculators',
+    'stock-average': 'calculators',
+    'net-worth': 'calculators',
+    'bill-split': 'calculators',
+    'tip': 'calculators',
+    'subscription': 'calculators',
+    'daily-interest': 'calculators',
+    'monthly-expense': 'calculators',
+    'upi-spending': 'calculators',
+    'grocery-budget': 'calculators',
+    'commute-cost': 'calculators',
+    'wfh-savings': 'calculators',
+    'habit-cost': 'calculators',
+    'freelancer-tax': 'calculators',
+    'discount': 'calculators',
+    'fuel-cost': 'calculators',
+    'compound-interest': 'calculators',
+    'simple-interest': 'calculators',
+    'inflation': 'calculators',
     'finance-quest': 'games'
   }
 
-  const category = calculatorCategoryMap[calculatorType] || 'general'
+  const mainMenu = calculatorCategoryMap[calculatorType] || 'calculators'
 
-  // Use new URL format: ?category=games&in=finance-quest
-  params.set('category', category)
+  // Use new main menu format: /games?in=finance-quest or /calculators?in=emi
   params.set('in', calculatorType)
 
   // Add input parameters
@@ -164,5 +163,5 @@ export const generateCalculatorShareURL = (calculatorType, inputs, results) => {
     }
   })
 
-  return `${baseURL}?${params.toString()}`
+  return `${baseURL}/${mainMenu}?${params.toString()}`
 }

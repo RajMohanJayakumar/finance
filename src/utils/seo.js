@@ -6,7 +6,7 @@ export const calculatorSEOData = {
     title: "EMI Calculator - Calculate Loan EMI & Repayment Schedule | FinClamp",
     description: "Calculate your loan EMI with our free EMI calculator. Get detailed amortization schedule, total interest, and compare different loan options. Easy to use and accurate.",
     keywords: "EMI calculator, loan calculator, home loan EMI, personal loan EMI, car loan calculator, equated monthly installment",
-    canonical: "/?category=loans&in=emi",
+    canonical: "/calculators?in=emi",
     structuredData: {
       "@type": "WebApplication",
       "name": "EMI Calculator",
@@ -24,7 +24,7 @@ export const calculatorSEOData = {
     title: "Mortgage Calculator - Home Loan EMI Calculator | FinClamp",
     description: "Calculate your home loan EMI, total interest, and monthly payments with our advanced mortgage calculator. Compare different loan terms and interest rates.",
     keywords: "mortgage calculator, home loan calculator, housing loan EMI, property loan calculator, mortgage payment",
-    canonical: "/?category=loans&in=mortgage",
+    canonical: "/calculators?in=mortgage",
     structuredData: {
       "@type": "WebApplication",
       "name": "Mortgage Calculator",
@@ -36,7 +36,7 @@ export const calculatorSEOData = {
     title: "Personal Loan Calculator - Calculate EMI & Interest | FinClamp",
     description: "Calculate personal loan EMI, total interest, and repayment schedule. Compare different personal loan options and find the best rates.",
     keywords: "personal loan calculator, personal loan EMI, unsecured loan calculator, instant loan calculator",
-    canonical: "/?category=loans&in=personal-loan",
+    canonical: "/calculators?in=personal-loan",
     structuredData: {
       "@type": "WebApplication",
       "name": "Personal Loan Calculator",
@@ -482,13 +482,13 @@ export const generateBreadcrumbData = (calculatorId) => {
         "@type": "ListItem",
         "position": 2,
         "name": categoryName,
-        "item": `${baseURL}/?category=${category}`
+        "item": `${baseURL}/${calculatorId === 'finance-quest' ? 'games' : 'calculators'}`
       },
       {
         "@type": "ListItem",
         "position": 3,
         "name": seoData.title.split(' - ')[0],
-        "item": `${baseURL}/?category=${category}&in=${calculatorId}`
+        "item": `${baseURL}/${calculatorId === 'finance-quest' ? 'games' : 'calculators'}?in=${calculatorId}`
       }
     ]
   }
