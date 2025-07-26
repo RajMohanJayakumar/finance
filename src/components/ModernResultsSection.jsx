@@ -50,7 +50,7 @@ const ModernResultsSection = ({
             {onShare && (
               <button
                 onClick={onShare}
-                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors`}
+                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors cursor-pointer`}
               >
                 <Share2 className="w-4 h-4" />
                 Share
@@ -59,7 +59,7 @@ const ModernResultsSection = ({
             {onAddToComparison && (
               <button
                 onClick={onAddToComparison}
-                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors`}
+                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors cursor-pointer`}
               >
                 <Plus className="w-4 h-4" />
                 Compare
@@ -68,7 +68,7 @@ const ModernResultsSection = ({
             {onDownload && (
               <button
                 onClick={onDownload}
-                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors`}
+                className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors cursor-pointer`}
               >
                 <Download className="w-4 h-4" />
                 Download

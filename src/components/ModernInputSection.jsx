@@ -41,7 +41,7 @@ const ModernInputSection = ({
         {onReset && (
           <button
             onClick={onReset}
-            className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors`}
+            className={`flex items-center gap-2 px-3 py-2 text-sm text-${categoryColor}-600 hover:text-${categoryColor}-700 hover:bg-${categoryColor}-50 rounded-lg transition-colors cursor-pointer`}
           >
             <RotateCcw className="w-4 h-4" />
             Reset
@@ -159,7 +159,7 @@ const ModernButtonGroup = ({
           <button
             key={option.value}
             onClick={() => onChange(option.value)}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer ${
               value === option.value
                 ? `bg-${categoryColor}-600 text-white`
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
