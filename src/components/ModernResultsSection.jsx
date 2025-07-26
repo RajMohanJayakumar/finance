@@ -2,6 +2,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { TrendingUp, Share2, Plus, Download } from 'lucide-react'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useViewMode } from '../contexts/ViewModeContext'
 
 const ModernResultsSection = ({ 
   title = "Results", 
@@ -16,6 +17,7 @@ const ModernResultsSection = ({
   children
 }) => {
   const { formatCurrency } = useCurrency()
+  const { isMobile } = useViewMode()
 
   const fadeInUp = {
     initial: { opacity: 0, x: 20 },
@@ -23,11 +25,16 @@ const ModernResultsSection = ({
     transition: { duration: 0.5, delay: 0.2 }
   }
 
+  // Responsive styling based on view mode
+  const responsivePadding = isMobile ? 'p-3' : 'p-6'
+  const responsiveRounding = isMobile ? 'rounded-lg' : 'rounded-xl'
+  const responsiveShadow = isMobile ? 'shadow-md' : 'shadow-lg'
+
   const hasResults = results && Object.keys(results).length > 0
 
   return (
-    <motion.div 
-      className={`bg-white rounded-xl shadow-lg p-6 ${className}`}
+    <motion.div
+      className={`bg-white ${responsiveRounding} ${responsiveShadow} ${responsivePadding} ${className}`}
       {...fadeInUp}
     >
       <div className="flex items-center justify-between mb-6">

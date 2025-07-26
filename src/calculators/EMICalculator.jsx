@@ -4,6 +4,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
 import { Calculator, Home, TrendingUp } from 'lucide-react'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useViewMode } from '../contexts/ViewModeContext'
 import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
 
 import PDFExport from '../components/PDFExport'
@@ -13,6 +14,7 @@ import ModernResultsSection, { ModernResultGrid, ModernSummaryCard } from '../co
 export default function EMICalculator({ onAddToComparison, categoryColor = 'blue' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
+  const { isMobile, viewMode } = useViewMode()
 
 
 
@@ -27,6 +29,7 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
   // State management with URL synchronization
   const {
     inputs,
+    setInputs,
     results,
     setResults,
     handleInputChange,
@@ -138,18 +141,34 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
     transition: { duration: 0.5 }
   }
 
+  // Layout configuration based on view mode
+  const layoutSpacing = isMobile ? 'space-y-4' : 'space-y-8'
+  const gridClass = isMobile ? 'grid-cols-1 gap-4' : 'grid-cols-1 lg:grid-cols-2 gap-8'
+  const containerPadding = isMobile ? 'p-4' : 'p-6'
+
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-8">
+    <div className={`max-w-7xl mx-auto ${containerPadding} ${layoutSpacing}`}>
+      {/* View Mode Indicator */}
+      <div className="text-center mb-4">
+        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+          isMobile
+            ? 'bg-purple-100 text-purple-800'
+            : 'bg-blue-100 text-blue-800'
+        }`}>
+          📱 {viewMode === 'mobile' ? 'Mobile View' : 'Desktop View'}
+        </span>
+      </div>
+
       {/* Header */}
       <motion.div className="text-center" {...fadeInUp}>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
-          <Home className="w-8 h-8 text-blue-600" />
+        <h1 className={`${isMobile ? 'text-2xl' : 'text-3xl'} font-bold text-gray-900 mb-2 flex items-center justify-center gap-3`}>
+          <Home className={`${isMobile ? 'w-6 h-6' : 'w-8 h-8'} text-blue-600`} />
           EMI Calculator
         </h1>
         <p className="text-gray-600">Calculate your loan EMI and repayment schedule</p>
       </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className={`grid ${gridClass}`}>
         {/* Input Section */}
         <ModernInputSection
           title="Loan Details"
@@ -213,12 +232,28 @@ export default function EMICalculator({ onAddToComparison, categoryColor = 'blue
               {[5, 10, 15, 20].map((years) => (
                 <button
                   key={years}
-                  onClick={() => {
-                    handleInputChange('loanTenure', years.toString())
-                    handleInputChange('tenureType', 'years')
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault()
+
+                    // Update both values at once to avoid race conditions
+                    const newInputs = {
+                      ...inputs,
+                      loanTenure: years.toString(),
+                      tenureType: 'years'
+                    }
+
+                    // Use setInputs directly to update both at once
+                    setInputs(newInputs)
+
+                    // Also update URL
+                    const url = new URL(window.location)
+                    url.searchParams.set('emi_loanTenure', years.toString())
+                    url.searchParams.set('emi_tenureType', 'years')
+                    window.history.replaceState({}, '', url.toString())
                   }}
                   className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    inputs.loanTenure === years.toString() && inputs.tenureType === 'years'
+                    parseInt(inputs.loanTenure) === years && inputs.tenureType === 'years'
                       ? 'bg-blue-600 text-white'
                       : 'bg-white text-gray-700 hover:bg-blue-50 border border-gray-200'
                   }`}

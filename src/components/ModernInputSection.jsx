@@ -20,21 +20,23 @@ const ModernInputSection = ({
     transition: { duration: 0.5, delay: 0.1 }
   }
 
-  // Responsive padding based on view mode
-  const responsivePadding = isMobile ? 'p-4' : 'p-6'
-  const responsiveSpacing = isMobile ? 'space-y-4' : 'space-y-6'
+  // Responsive styling based on view mode
+  const responsivePadding = isMobile ? 'p-3' : 'p-6'
+  const responsiveSpacing = isMobile ? 'space-y-3' : 'space-y-6'
+  const responsiveRounding = isMobile ? 'rounded-lg' : 'rounded-xl'
+  const responsiveShadow = isMobile ? 'shadow-md' : 'shadow-lg'
 
   return (
     <motion.div
-      className={`bg-white rounded-xl shadow-lg ${responsivePadding} ${className}`}
+      className={`bg-white ${responsiveRounding} ${responsiveShadow} ${responsivePadding} ${className}`}
       {...fadeInUp}
     >
-      <div className="flex items-center justify-between mb-6">
+      <div className={`flex items-center justify-between ${isMobile ? 'mb-4' : 'mb-6'}`}>
         <div className="flex items-center gap-3">
-          <div className={`p-2 bg-${categoryColor}-100 rounded-lg`}>
-            <IconComponent className={`w-6 h-6 text-${categoryColor}-600`} />
+          <div className={`${isMobile ? 'p-1.5' : 'p-2'} bg-${categoryColor}-100 rounded-lg`}>
+            <IconComponent className={`${isMobile ? 'w-5 h-5' : 'w-6 h-6'} text-${categoryColor}-600`} />
           </div>
-          <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+          <h2 className={`${isMobile ? 'text-lg' : 'text-xl'} font-bold text-gray-900`}>{title}</h2>
         </div>
         {onReset && (
           <button
