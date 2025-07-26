@@ -188,7 +188,14 @@ export default function App() {
     const urlParams = new URLSearchParams(window.location.search)
     const paramKeys = Array.from(urlParams.keys())
 
-    // First, check for explicit calculator parameter
+    // First, check for new format: ?category=games&in=finance-quest
+    const categoryParam = urlParams.get('category')
+    const inParam = urlParams.get('in')
+    if (categoryParam && inParam) {
+      return { mainTab: categoryParam, subTab: inParam }
+    }
+
+    // Second, check for explicit calculator parameter (legacy format)
     const calculatorParam = urlParams.get('calculator')
     if (calculatorParam) {
       // Map calculator names to tab info
@@ -288,17 +295,29 @@ export default function App() {
   const updateCalculatorInURL = useCallback((calculatorId) => {
     const url = new URL(window.location)
 
-    // Clear all existing calculator-specific input parameters (but keep calculator param)
+    // Find which category this calculator belongs to
+    let categoryKey = null
+    for (const [key, category] of Object.entries(calculatorData)) {
+      if (category.calculators.some(calc => calc.id === calculatorId)) {
+        categoryKey = key
+        break
+      }
+    }
+
+    // Clear all existing calculator-specific input parameters
     const keysToRemove = []
     for (const key of url.searchParams.keys()) {
-      if (key.includes('_') || key === 'shared') {
+      if (key.includes('_') || key === 'shared' || key === 'calculator') {
         keysToRemove.push(key)
       }
     }
     keysToRemove.forEach(key => url.searchParams.delete(key))
 
-    // Set the calculator parameter
-    url.searchParams.set('calculator', calculatorId)
+    // Set the new format: ?category=games&in=finance-quest
+    if (categoryKey) {
+      url.searchParams.set('category', categoryKey)
+      url.searchParams.set('in', calculatorId)
+    }
 
     // Update URL without page reload
     window.history.replaceState({}, '', url.toString())
@@ -307,14 +326,16 @@ export default function App() {
   // Set calculator parameter in URL on initial load if not present
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search)
-    const calculatorParam = urlParams.get('calculator')
+    const categoryParam = urlParams.get('category')
+    const inParam = urlParams.get('in')
+    const calculatorParam = urlParams.get('calculator') // Legacy support
 
-    if (!calculatorParam) {
-      // Set default calculator parameter
+    if (!categoryParam && !inParam && !calculatorParam) {
+      // Set default calculator parameter using new format
       const currentCalculatorId = activeSubTabs[activeMainTab]
       updateCalculatorInURL(currentCalculatorId)
     }
-  }, [updateCalculatorInURL]) // Only depend on the callback
+  }, [updateCalculatorInURL, activeMainTab, activeSubTabs]) // Only depend on the callback
   const [showComparison, setShowComparison] = useState(false)
   const [deferredPrompt, setDeferredPrompt] = useState(null)
 

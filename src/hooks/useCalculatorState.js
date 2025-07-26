@@ -106,21 +106,63 @@ export const useCalculatorState = (prefix, defaultInputs = {}) => {
 }
 
 /**
- * Generate shareable URL for calculator results
+ * Generate shareable URL for calculator results using new format
  */
 export const generateCalculatorShareURL = (calculatorType, inputs, results) => {
   const baseURL = window.location.origin + window.location.pathname
   const params = new URLSearchParams()
-  
-  // Add calculator type
-  params.set('calculator', calculatorType)
-  
+
+  // Map calculator types to categories
+  const calculatorCategoryMap = {
+    'emi': 'loans',
+    'mortgage': 'loans',
+    'personal-loan': 'loans',
+    'fd': 'savings',
+    'rd': 'savings',
+    'ppf': 'savings',
+    'sip': 'mutual_funds',
+    'swp': 'mutual_funds',
+    'cagr': 'mutual_funds',
+    'income-tax': 'tax',
+    'capital-gains': 'tax',
+    'nps': 'retirement',
+    'epf': 'retirement',
+    'gratuity': 'retirement',
+    'budget-planner': 'personal_finance',
+    'savings-goal': 'personal_finance',
+    'stock-average': 'personal_finance',
+    'net-worth': 'personal_finance',
+    'bill-split': 'lifestyle',
+    'tip': 'lifestyle',
+    'subscription': 'lifestyle',
+    'daily-interest': 'lifestyle',
+    'monthly-expense': 'lifestyle',
+    'upi-spending': 'lifestyle',
+    'grocery-budget': 'lifestyle',
+    'commute-cost': 'lifestyle',
+    'wfh-savings': 'lifestyle',
+    'habit-cost': 'lifestyle',
+    'freelancer-tax': 'business',
+    'discount': 'general',
+    'fuel-cost': 'general',
+    'compound-interest': 'general',
+    'simple-interest': 'general',
+    'inflation': 'general',
+    'finance-quest': 'games'
+  }
+
+  const category = calculatorCategoryMap[calculatorType] || 'general'
+
+  // Use new URL format: ?category=games&in=finance-quest
+  params.set('category', category)
+  params.set('in', calculatorType)
+
   // Add input parameters
   Object.entries(inputs).forEach(([key, value]) => {
     if (value && value !== '' && value !== '0') {
       params.set(`${calculatorType}_${key}`, value)
     }
   })
-  
+
   return `${baseURL}?${params.toString()}`
 }

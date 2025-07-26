@@ -239,7 +239,7 @@ const FinanceGame = () => {
           
           <motion.button
             onClick={startGame}
-            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-full text-xl shadow-lg transform transition-all duration-200"
+            className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-4 px-8 rounded-full text-xl shadow-lg transform transition-all duration-200 cursor-pointer"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -310,14 +310,14 @@ const FinanceGame = () => {
                       disabled={selectedAnswer !== null}
                       className={`p-4 rounded-xl text-lg font-semibold transition-all duration-300 ${
                         selectedAnswer === null
-                          ? 'bg-white/20 hover:bg-white/30 text-white hover:scale-105'
+                          ? 'bg-white/20 hover:bg-white/30 text-white hover:scale-105 cursor-pointer'
                           : selectedAnswer === index
                           ? index === currentQuestion.correct
-                            ? 'bg-green-500 text-white'
-                            : 'bg-red-500 text-white'
+                            ? 'bg-green-500 text-white cursor-default'
+                            : 'bg-red-500 text-white cursor-default'
                           : index === currentQuestion.correct
-                          ? 'bg-green-500 text-white'
-                          : 'bg-white/10 text-gray-400'
+                          ? 'bg-green-500 text-white cursor-default'
+                          : 'bg-white/10 text-gray-400 cursor-default'
                       }`}
                       whileHover={selectedAnswer === null ? { scale: 1.02 } : {}}
                       whileTap={selectedAnswer === null ? { scale: 0.98 } : {}}
@@ -389,7 +389,7 @@ const FinanceGame = () => {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <motion.button
               onClick={startGame}
-              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-full"
+              className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold py-3 px-6 rounded-full cursor-pointer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -397,7 +397,7 @@ const FinanceGame = () => {
             </motion.button>
             <motion.button
               onClick={() => setGameState('menu')}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-full"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-bold py-3 px-6 rounded-full cursor-pointer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
