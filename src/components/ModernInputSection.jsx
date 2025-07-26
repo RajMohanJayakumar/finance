@@ -92,7 +92,7 @@ const ModernInputField = ({
           type={type === 'currency' ? 'number' : type}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full ${displayPrefix ? 'pl-8' : 'pl-4'} ${suffix ? 'pr-8' : 'pr-4'} py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-${categoryColor}-500 focus:border-transparent transition-colors`}
+          className={`w-full ${displayPrefix ? 'pl-8' : 'pl-4'} ${suffix ? 'pr-8' : 'pr-4'} py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-${categoryColor}-500 focus:border-transparent`}
           placeholder={placeholder}
           min={min}
           max={max}

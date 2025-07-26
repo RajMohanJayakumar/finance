@@ -135,7 +135,7 @@ const SavingsGoalCalculator = ({ categoryColor = 'emerald' }) => {
                   type="number"
                   value={inputs.goalAmount}
                   onChange={(e) => handleInputChange('goalAmount', e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="100000"
                 />
               </div>
@@ -154,7 +154,7 @@ const SavingsGoalCalculator = ({ categoryColor = 'emerald' }) => {
                   type="number"
                   value={inputs.currentSavings}
                   onChange={(e) => handleInputChange('currentSavings', e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
                   placeholder="25000"
                 />
               </div>
@@ -170,7 +170,7 @@ const SavingsGoalCalculator = ({ categoryColor = 'emerald' }) => {
                 value={inputs.targetDate}
                 onChange={(e) => handleInputChange('targetDate', e.target.value)}
                 min={getMinDate()}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
+                className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-emerald-500 focus:border-transparent"
               />
             </div>
 

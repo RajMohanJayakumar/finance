@@ -182,7 +182,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                   type="number"
                   value={billDetails.totalBill}
                   onChange={(e) => handleBillChange('totalBill', e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="1000"
                 />
               </div>
@@ -198,7 +198,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
               <div className="flex bg-gray-100 rounded-lg p-1 mb-3">
                 <button
                   onClick={() => handleBillChange('tipMode', 'amount')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                     billDetails.tipMode === 'amount'
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
@@ -208,7 +208,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                 </button>
                 <button
                   onClick={() => handleBillChange('tipMode', 'percent')}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors ${
+                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                     billDetails.tipMode === 'percent'
                       ? 'bg-blue-600 text-white shadow-sm'
                       : 'text-gray-600 hover:text-gray-900'
@@ -228,7 +228,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                     type="number"
                     value={billDetails.tipAmount}
                     onChange={(e) => handleBillChange('tipAmount', e.target.value)}
-                    className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     placeholder="50"
                     min="0"
                     step="0.01"
@@ -241,7 +241,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                       type="number"
                       value={billDetails.tipPercent}
                       onChange={(e) => handleBillChange('tipPercent', e.target.value)}
-                      className="w-full pl-4 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full pl-4 pr-8 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       placeholder="15"
                       min="0"
                       max="100"
@@ -255,7 +255,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                       <button
                         key={percent}
                         onClick={() => handleBillChange('tipPercent', percent.toString())}
-                        className={`px-3 py-1 rounded text-sm transition-colors ${
+                        className={`px-3 py-1 rounded text-sm transition-colors cursor-pointer ${
                           billDetails.tipPercent === percent.toString()
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -278,7 +278,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                 type="number"
                 value={billDetails.numberOfPeople}
                 onChange={(e) => handleBillChange('numberOfPeople', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="2"
                 min="1"
               />
@@ -291,7 +291,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
               <h3 className="text-lg font-semibold text-gray-900">People</h3>
               <button
                 onClick={addPerson}
-                className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
                 Add Person
@@ -311,7 +311,7 @@ const BillSplitCalculator = ({ categoryColor = 'blue' }) => {
                     {people.length > 1 && (
                       <button
                         onClick={() => removePerson(person.id)}
-                        className="ml-2 text-red-500 hover:text-red-700"
+                        className="ml-2 text-red-500 hover:text-red-700 cursor-pointer"
                       >
                         <Minus className="w-4 h-4" />
                       </button>

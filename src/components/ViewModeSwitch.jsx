@@ -23,7 +23,7 @@ const ViewModeSwitch = ({ className = "" }) => {
         {/* Auto Detect Button */}
         <button
           onClick={enableAutoDetect}
-          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
             isAutoDetect
               ? 'bg-green-100 text-green-700 border border-green-200'
               : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -40,7 +40,7 @@ const ViewModeSwitch = ({ className = "" }) => {
         {/* Desktop Button */}
         <button
           onClick={() => setSpecificViewMode('desktop')}
-          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
             viewMode === 'desktop' && !isAutoDetect
               ? 'bg-blue-100 text-blue-700 border border-blue-200'
               : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'
@@ -54,7 +54,7 @@ const ViewModeSwitch = ({ className = "" }) => {
         {/* Mobile Button */}
         <button
           onClick={() => setSpecificViewMode('mobile')}
-          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
             viewMode === 'mobile' && !isAutoDetect
               ? 'bg-purple-100 text-purple-700 border border-purple-200'
               : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50'

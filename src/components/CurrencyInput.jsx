@@ -86,7 +86,7 @@ const CurrencyInput = ({
           step={step}
           min={min}
           max={max}
-          className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none"
+          className="w-full px-3 py-3 sm:px-4 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text"
           style={{
             borderColor: isFocused ? focusColor : '#E5E7EB',
             backgroundColor: '#FFFFFF',

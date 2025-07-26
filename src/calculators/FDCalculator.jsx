@@ -2,19 +2,21 @@
 import { useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { Calculator, TrendingUp } from 'lucide-react'
 import { useComparison } from '../contexts/ComparisonContext'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useViewMode } from '../contexts/ViewModeContext'
 import { useCalculatorState, generateCalculatorShareURL } from '../hooks/useCalculatorState'
+
 import PDFExport from '../components/PDFExport'
-import CurrencyInput from '../components/CurrencyInput'
-import NumberInput from '../components/NumberInput'
-import PercentageInput from '../components/PercentageInput'
-import CalculatorDropdown from '../components/CalculatorDropdown'
-import CalculatorLayout, { InputSection, ResultsSection, ResultCard, GradientResultCard } from '../components/CalculatorLayout'
+import ModernInputSection, { ModernInputField, ModernSelectField } from '../components/ModernInputSection'
+import ModernResultsSection, { ModernResultGrid, ModernSummaryCard } from '../components/ModernResultsSection'
+import BreakdownSection from '../components/BreakdownSection'
 
 export default function FDCalculator({ onAddToComparison, categoryColor = 'green' }) {
   const { addToComparison } = useComparison()
   const { formatCurrency } = useCurrency()
+  const { isMobile } = useViewMode()
 
   const defaultInputs = {
     principal: '',
@@ -123,141 +125,131 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
     { name: 'Interest', value: results.totalInterest, color: '#34D399' }
   ] : []
 
+  // Responsive grid class
+  const gridClass = isMobile ? 'grid-cols-1' : 'grid-cols-1 lg:grid-cols-2'
+
   return (
-    <CalculatorLayout
-      title="FD Calculator"
-      description="Calculate your Fixed Deposit maturity amount and returns"
-      icon="🏦"
-    >
-      {/* Input Section */}
-      <InputSection title="FD Details" icon="💰" onReset={resetCalculator}>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <CurrencyInput
+    <div className="max-w-7xl mx-auto p-6 space-y-8">
+      {/* Header */}
+      <motion.div
+        className="text-center"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <h1 className="text-3xl font-bold text-gray-900 mb-2 flex items-center justify-center gap-3">
+          <span className="text-4xl">🏦</span>
+          FD Calculator
+        </h1>
+        <p className="text-gray-600">Calculate your Fixed Deposit maturity amount and returns</p>
+      </motion.div>
+
+      <div className={`grid ${gridClass}`}>
+        {/* Input Section */}
+        <ModernInputSection
+          title="FD Details"
+          icon={Calculator}
+          onReset={resetCalculator}
+          categoryColor="green"
+        >
+          <ModernInputField
             label="Principal Amount"
             value={inputs.principal}
             onChange={(value) => handleInputChange('principal', value)}
+            type="currency"
             placeholder="Enter principal amount"
-            icon="💰"
-            focusColor="#10B981"
+            min="0"
+            categoryColor="green"
           />
 
-          <PercentageInput
+          <ModernInputField
             label="Interest Rate"
             value={inputs.interestRate}
             onChange={(value) => handleInputChange('interestRate', value)}
+            type="number"
             placeholder="Enter interest rate"
-            icon="📈"
+            suffix="%"
+            min="0"
+            max="50"
+            step="0.1"
+            categoryColor="green"
           />
 
-          <NumberInput
+          <ModernInputField
             label="Time Period"
             value={inputs.timePeriod}
             onChange={(value) => handleInputChange('timePeriod', value)}
+            type="number"
             placeholder="Enter time period"
-            icon="⏰"
             suffix="years"
-            min={0.5}
-            max={50}
-            step={0.5}
-            showControls={true}
+            min="0.5"
+            max="50"
+            step="0.5"
+            categoryColor="green"
           />
 
-          <CalculatorDropdown
-            customConfig={{
-              label: "Compounding Frequency",
-              icon: "🔄",
-              options: [
-                { value: '1', label: 'Annually', icon: '📅' },
-                { value: '2', label: 'Semi-annually', icon: '📅' },
-                { value: '4', label: 'Quarterly', icon: '📅' },
-                { value: '12', label: 'Monthly', icon: '📅' },
-                { value: '365', label: 'Daily', icon: '📅' }
-              ]
-            }}
+          <ModernSelectField
+            label="Compounding Frequency"
             value={inputs.compoundingFrequency}
             onChange={(value) => handleInputChange('compoundingFrequency', value)}
-            category="savings"
-            placeholder="Select compounding frequency"
+            options={[
+              { value: '1', label: 'Annually' },
+              { value: '2', label: 'Semi-annually' },
+              { value: '4', label: 'Quarterly' },
+              { value: '12', label: 'Monthly' },
+              { value: '365', label: 'Daily' }
+            ]}
+            categoryColor="green"
           />
-        </div>
-      </InputSection>
+        </ModernInputSection>
 
-      {/* Results Section */}
-      <ResultsSection
-        title="Results"
-        icon="📊"
-        results={results}
-        onShare={shareCalculation}
-        onAddToComparison={handleAddToComparison}
-        emptyStateMessage="Enter FD details to see calculation"
-      >
-        {/* Main Result */}
-        <div className="mb-8">
-          <GradientResultCard
+        {/* Results Section */}
+        <ModernResultsSection
+          title="Results"
+          icon={TrendingUp}
+          results={results}
+          onShare={shareCalculation}
+          onAddToComparison={handleAddToComparison}
+          categoryColor="green"
+          emptyStateMessage="Enter FD details to see calculation"
+        >
+          {/* Main Result */}
+          <ModernSummaryCard
             title="Maturity Amount"
-            value={formatCurrency(results?.maturityAmount)}
-            gradient="from-green-500 to-emerald-500"
-            icon="💰"
-          />
-        </div>
-
-        {/* Key Metrics - 2 per row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <ResultCard
-            title="Principal Amount"
-            value={formatCurrency(results?.principal)}
-            description="Initial amount deposited in FD"
-            icon="💵"
+            items={[
+              { label: 'Total Amount', value: results?.maturityAmount, type: 'currency' }
+            ]}
+            categoryColor="green"
+            className="mb-6"
           />
 
-          <ResultCard
-            title="Total Interest Earned"
-            value={formatCurrency(results?.totalInterest)}
-            description="Interest earned over the investment period"
-            icon="📈"
+          {/* Key Metrics */}
+          <ModernResultGrid
+            results={[
+              { label: 'Principal Amount', value: results?.principal, type: 'currency' },
+              { label: 'Total Interest Earned', value: results?.totalInterest, type: 'currency' },
+              { label: 'Investment Duration', value: `${results?.timePeriod} years`, type: 'text' },
+              { label: 'Effective Annual Rate', value: results?.effectiveRate?.toFixed(2), type: 'percentage' }
+            ]}
+            categoryColor="green"
           />
 
-          <ResultCard
-            title="Investment Duration"
-            value={`${results?.timePeriod} years`}
-            description="Time period for your FD investment"
-            icon="⏰"
-          />
-
-          <ResultCard
-            title="Effective Annual Rate"
-            value={`${results?.effectiveRate?.toFixed(2)}%`}
-            description={`With ${getCompoundingLabel(inputs.compoundingFrequency)} compounding`}
-            icon="🎯"
-          />
-        </div>
-
-        {/* Comparison Chart */}
-        {results && chartData.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="mt-8 bg-white rounded-xl shadow-lg p-6"
-          >
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <span className="mr-2">📊</span>
-              Principal vs Interest Breakdown
-            </h3>
-            <div className="h-64">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={chartData}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis tickFormatter={(value) => formatCurrency(value, true)} />
-                  <Tooltip formatter={(value) => formatCurrency(value)} />
-                  <Bar dataKey="value" fill="#10B981" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          </motion.div>
-        )}
-      </ResultsSection>
+          {/* FD Breakdown Chart */}
+          {results && chartData.length > 0 && (
+            <BreakdownSection
+              title="Principal vs Interest Breakdown"
+              data={chartData.map(item => ({
+                name: item.name,
+                value: item.value,
+                color: item.name === 'Principal' ? '#10B981' : '#34D399'
+              }))}
+              summaryCards={[]}
+              chartType="bar"
+              categoryColor="green"
+            />
+          )}
+        </ModernResultsSection>
+      </div>
 
       {/* PDF Export */}
       {results && (
@@ -267,6 +259,6 @@ export default function FDCalculator({ onAddToComparison, categoryColor = 'green
           results={results}
         />
       )}
-    </CalculatorLayout>
+    </div>
   )
 }

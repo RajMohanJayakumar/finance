@@ -157,7 +157,7 @@ const FuelCostCalculator = ({ categoryColor = 'orange' }) => {
                   type="number"
                   value={inputs.fuelPrice}
                   onChange={(e) => handleInputChange('fuelPrice', e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                   placeholder="100"
                   step="0.01"
                 />
@@ -173,7 +173,7 @@ const FuelCostCalculator = ({ categoryColor = 'orange' }) => {
                 type="number"
                 value={inputs.mileage}
                 onChange={(e) => handleInputChange('mileage', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                className="w-full px-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-orange-500 focus:border-transparent"
                 placeholder="15"
                 step="0.1"
               />

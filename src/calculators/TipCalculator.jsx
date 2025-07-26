@@ -116,7 +116,7 @@ const TipCalculator = ({ categoryColor = 'green' }) => {
                   type="number"
                   value={inputs.billAmount}
                   onChange={(e) => handleInputChange('billAmount', e.target.value)}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                  className="w-full pl-8 pr-4 py-3 sm:py-4 text-base sm:text-lg font-semibold border-2 rounded-xl transition-all duration-300 focus:outline-none cursor-text focus:ring-2 focus:ring-green-500 focus:border-transparent"
                   placeholder="100"
                   step="0.01"
                 />
@@ -133,7 +133,7 @@ const TipCalculator = ({ categoryColor = 'green' }) => {
                   <button
                     key={key}
                     onClick={() => handleServiceQualityChange(key)}
-                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all ${
+                    className={`flex items-center justify-between p-3 rounded-lg border-2 transition-all cursor-pointer ${
                       inputs.serviceQuality === key
                         ? `border-${quality.color}-500 bg-${quality.color}-50`
                         : 'border-gray-200 hover:border-gray-300'
