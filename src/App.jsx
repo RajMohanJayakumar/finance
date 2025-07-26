@@ -54,6 +54,7 @@ import SEOContent from './components/SEOContent'
 // Context
 import { ComparisonProvider, useComparison } from './contexts/ComparisonContext'
 import { CurrencyProvider } from './contexts/CurrencyContext'
+import { ViewModeProvider } from './contexts/ViewModeContext'
 
 // SEO Hook
 import { useSEO } from './hooks/useSEO'
@@ -462,12 +463,13 @@ export default function App() {
   return (
     <CurrencyProvider>
       <ComparisonProvider>
-        <div className="min-h-screen bg-gray-50">
-          {/* SEO Components */}
-          <SEOEnhancer calculatorId={currentCalculatorId} />
-          <SEOAnalytics calculatorId={currentCalculatorId} />
+        <ViewModeProvider>
+          <div className="min-h-screen bg-gray-50">
+            {/* SEO Components */}
+            <SEOEnhancer calculatorId={currentCalculatorId} />
+            <SEOAnalytics calculatorId={currentCalculatorId} />
 
-          <Header />
+            <Header />
 
         <motion.div
           className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-8"
@@ -632,21 +634,22 @@ export default function App() {
             </motion.button>
           )}
         </motion.div>
-      </div>
 
-      {/* Comparison Panel */}
-      <AnimatePresence>
-        {showComparison && (
-          <ComparisonPanel
-            data={comparisonData}
-            onRemove={removeFromComparison}
-            onClose={() => setShowComparison(false)}
-          />
-        )}
-      </AnimatePresence>
+        {/* Comparison Panel */}
+        <AnimatePresence>
+          {showComparison && (
+            <ComparisonPanel
+              data={comparisonData}
+              onRemove={removeFromComparison}
+              onClose={() => setShowComparison(false)}
+            />
+          )}
+        </AnimatePresence>
 
         {/* Floating Comparison Button */}
         <FloatingComparisonButton />
+          </div>
+        </ViewModeProvider>
       </ComparisonProvider>
     </CurrencyProvider>
   )

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import CurrencySelector from './CurrencySelector'
+import SimpleViewModeToggle from './SimpleViewModeToggle'
 
 export default function Header() {
   const [isScrolled, setIsScrolled] = useState(false)
@@ -66,6 +67,9 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center space-x-3">
+            {/* View Mode Toggle */}
+            <SimpleViewModeToggle />
+
             {/* Currency Selector */}
             <CurrencySelector />
 

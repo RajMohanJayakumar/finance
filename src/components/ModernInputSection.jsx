@@ -2,24 +2,31 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Calculator, RotateCcw } from 'lucide-react'
 import { useCurrency } from '../contexts/CurrencyContext'
+import { useViewMode } from '../contexts/ViewModeContext'
 
-const ModernInputSection = ({ 
-  title = "Input Details", 
-  icon: IconComponent = Calculator, 
-  children, 
+const ModernInputSection = ({
+  title = "Input Details",
+  icon: IconComponent = Calculator,
+  children,
   onReset,
   categoryColor = 'blue',
   className = ""
 }) => {
+  const { viewMode, isMobile } = useViewMode()
+
   const fadeInUp = {
     initial: { opacity: 0, x: -20 },
     animate: { opacity: 1, x: 0 },
     transition: { duration: 0.5, delay: 0.1 }
   }
 
+  // Responsive padding based on view mode
+  const responsivePadding = isMobile ? 'p-4' : 'p-6'
+  const responsiveSpacing = isMobile ? 'space-y-4' : 'space-y-6'
+
   return (
-    <motion.div 
-      className={`bg-white rounded-xl shadow-lg p-6 ${className}`}
+    <motion.div
+      className={`bg-white rounded-xl shadow-lg ${responsivePadding} ${className}`}
       {...fadeInUp}
     >
       <div className="flex items-center justify-between mb-6">
@@ -40,7 +47,7 @@ const ModernInputSection = ({
         )}
       </div>
 
-      <div className="space-y-6">
+      <div className={responsiveSpacing}>
         {children}
       </div>
     </motion.div>
